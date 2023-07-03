@@ -1,7 +1,7 @@
 #+TITLE: Fr33macs, my Nix flake Emacs config
 #+AUTHOR: fr33zing
 #+PROPERTY: header-args :tangle yes
-#+OPTIONS: num:nil H:5 toc:3
+#+OPTIONS: num:nil H:5 toc:2
 #+EXPORT_FILE_NAME: index.html
 
 * About

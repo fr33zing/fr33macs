@@ -6,7 +6,7 @@
 
 * About
 
-This is my Emacs configuration.
+This is my Emacs configuration. *If you want to try it for yourself, [[*Try it yourself][click here]].*
 
 ** Tangling
 
@@ -47,6 +47,29 @@ e.g.:
 These tags are not parsed. They are only used to indicate to the
 reader that code in the same scope may be spread across multiple src
 blocks.
+
+* Try it yourself
+** Warning
+
+Back up your ~.emacs.d~ directory if you already have a configuration
+you care about. I don't /think/ that this will affect it, but back it
+up anyway just to be safe.
+
+** Instructions
+
+If you don't have Nix installed, [[https://nixos.org/download.html][click here]].
+
+If you have the experimental features [[https://nixos.wiki/wiki/Nix_command][nix-command]] and [[https://nixos.wiki/wiki/Flakes][flakes]] enabled:
+
+#+BEGIN_SRC shell :tangle no
+nix run github:fr33zing/fr33macs
+#+END_SRC
+
+If you don't have them enabled but you want to enable them, [[https://nixos.wiki/wiki/Flakes#Enable_flakes][click here]].
+
+#+BEGIN_SRC shell :tangle no
+nix --experimental-features 'nix-command flakes' run github:fr33zing/fr33macs
+#+END_SRC
 
 * Basic setup
 

@@ -2,6 +2,7 @@
 #+AUTHOR: fr33zing
 #+PROPERTY: header-args :tangle yes
 #+OPTIONS: num:nil H:5 toc:3
+#+EXPORT_FILE_NAME: index.html
 
 * About
 

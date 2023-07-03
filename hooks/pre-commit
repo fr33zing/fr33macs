@@ -5,7 +5,7 @@ echo "--- RUNNING PRE-COMMIT HOOK ---"
 echo "Creating virtual display"
 Xvfb :99 -screen 0 1024x768x16 &
 
-echo "Exporting config.org to config.html"
+echo "Exporting config.org to index.html"
 nix run . -- \
   --display :99 \
   --visit ./config.org \
@@ -14,7 +14,7 @@ nix run . -- \
 echo "Removing virtual display"
 kill $!
 
-echo "Staging config.html"
-git add config.html
+echo "Staging index.html"
+git add index.html
 
 echo "--- PRE-COMMIT HOOK FINISHED ---"

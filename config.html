@@ -1,0 +1,1712 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<!-- 2023-07-02 Sun 19:42 -->
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Fr33macs, my Nix flake Emacs config</title>
+<meta name="author" content="fr33zing" />
+<meta name="generator" content="Org Mode" />
+<style>
+  #content { max-width: 60em; margin: auto; }
+  .title  { text-align: center;
+             margin-bottom: .2em; }
+  .subtitle { text-align: center;
+              font-size: medium;
+              font-weight: bold;
+              margin-top:0; }
+  .todo   { font-family: monospace; color: red; }
+  .done   { font-family: monospace; color: green; }
+  .priority { font-family: monospace; color: orange; }
+  .tag    { background-color: #eee; font-family: monospace;
+            padding: 2px; font-size: 80%; font-weight: normal; }
+  .timestamp { color: #bebebe; }
+  .timestamp-kwd { color: #5f9ea0; }
+  .org-right  { margin-left: auto; margin-right: 0px;  text-align: right; }
+  .org-left   { margin-left: 0px;  margin-right: auto; text-align: left; }
+  .org-center { margin-left: auto; margin-right: auto; text-align: center; }
+  .underline { text-decoration: underline; }
+  #postamble p, #preamble p { font-size: 90%; margin: .2em; }
+  p.verse { margin-left: 3%; }
+  pre {
+    border: 1px solid #e6e6e6;
+    border-radius: 3px;
+    background-color: #f2f2f2;
+    padding: 8pt;
+    font-family: monospace;
+    overflow: auto;
+    margin: 1.2em;
+  }
+  pre.src {
+    position: relative;
+    overflow: auto;
+  }
+  pre.src:before {
+    display: none;
+    position: absolute;
+    top: -8px;
+    right: 12px;
+    padding: 3px;
+    color: #555;
+    background-color: #f2f2f299;
+  }
+  pre.src:hover:before { display: inline; margin-top: 14px;}
+  /* Languages per Org manual */
+  pre.src-asymptote:before { content: 'Asymptote'; }
+  pre.src-awk:before { content: 'Awk'; }
+  pre.src-authinfo::before { content: 'Authinfo'; }
+  pre.src-C:before { content: 'C'; }
+  /* pre.src-C++ doesn't work in CSS */
+  pre.src-clojure:before { content: 'Clojure'; }
+  pre.src-css:before { content: 'CSS'; }
+  pre.src-D:before { content: 'D'; }
+  pre.src-ditaa:before { content: 'ditaa'; }
+  pre.src-dot:before { content: 'Graphviz'; }
+  pre.src-calc:before { content: 'Emacs Calc'; }
+  pre.src-emacs-lisp:before { content: 'Emacs Lisp'; }
+  pre.src-fortran:before { content: 'Fortran'; }
+  pre.src-gnuplot:before { content: 'gnuplot'; }
+  pre.src-haskell:before { content: 'Haskell'; }
+  pre.src-hledger:before { content: 'hledger'; }
+  pre.src-java:before { content: 'Java'; }
+  pre.src-js:before { content: 'Javascript'; }
+  pre.src-latex:before { content: 'LaTeX'; }
+  pre.src-ledger:before { content: 'Ledger'; }
+  pre.src-lisp:before { content: 'Lisp'; }
+  pre.src-lilypond:before { content: 'Lilypond'; }
+  pre.src-lua:before { content: 'Lua'; }
+  pre.src-matlab:before { content: 'MATLAB'; }
+  pre.src-mscgen:before { content: 'Mscgen'; }
+  pre.src-ocaml:before { content: 'Objective Caml'; }
+  pre.src-octave:before { content: 'Octave'; }
+  pre.src-org:before { content: 'Org mode'; }
+  pre.src-oz:before { content: 'OZ'; }
+  pre.src-plantuml:before { content: 'Plantuml'; }
+  pre.src-processing:before { content: 'Processing.js'; }
+  pre.src-python:before { content: 'Python'; }
+  pre.src-R:before { content: 'R'; }
+  pre.src-ruby:before { content: 'Ruby'; }
+  pre.src-sass:before { content: 'Sass'; }
+  pre.src-scheme:before { content: 'Scheme'; }
+  pre.src-screen:before { content: 'Gnu Screen'; }
+  pre.src-sed:before { content: 'Sed'; }
+  pre.src-sh:before { content: 'shell'; }
+  pre.src-sql:before { content: 'SQL'; }
+  pre.src-sqlite:before { content: 'SQLite'; }
+  /* additional languages in org.el's org-babel-load-languages alist */
+  pre.src-forth:before { content: 'Forth'; }
+  pre.src-io:before { content: 'IO'; }
+  pre.src-J:before { content: 'J'; }
+  pre.src-makefile:before { content: 'Makefile'; }
+  pre.src-maxima:before { content: 'Maxima'; }
+  pre.src-perl:before { content: 'Perl'; }
+  pre.src-picolisp:before { content: 'Pico Lisp'; }
+  pre.src-scala:before { content: 'Scala'; }
+  pre.src-shell:before { content: 'Shell Script'; }
+  pre.src-ebnf2ps:before { content: 'ebfn2ps'; }
+  /* additional language identifiers per "defun org-babel-execute"
+       in ob-*.el */
+  pre.src-cpp:before  { content: 'C++'; }
+  pre.src-abc:before  { content: 'ABC'; }
+  pre.src-coq:before  { content: 'Coq'; }
+  pre.src-groovy:before  { content: 'Groovy'; }
+  /* additional language identifiers from org-babel-shell-names in
+     ob-shell.el: ob-shell is the only babel language using a lambda to put
+     the execution function name together. */
+  pre.src-bash:before  { content: 'bash'; }
+  pre.src-csh:before  { content: 'csh'; }
+  pre.src-ash:before  { content: 'ash'; }
+  pre.src-dash:before  { content: 'dash'; }
+  pre.src-ksh:before  { content: 'ksh'; }
+  pre.src-mksh:before  { content: 'mksh'; }
+  pre.src-posh:before  { content: 'posh'; }
+  /* Additional Emacs modes also supported by the LaTeX listings package */
+  pre.src-ada:before { content: 'Ada'; }
+  pre.src-asm:before { content: 'Assembler'; }
+  pre.src-caml:before { content: 'Caml'; }
+  pre.src-delphi:before { content: 'Delphi'; }
+  pre.src-html:before { content: 'HTML'; }
+  pre.src-idl:before { content: 'IDL'; }
+  pre.src-mercury:before { content: 'Mercury'; }
+  pre.src-metapost:before { content: 'MetaPost'; }
+  pre.src-modula-2:before { content: 'Modula-2'; }
+  pre.src-pascal:before { content: 'Pascal'; }
+  pre.src-ps:before { content: 'PostScript'; }
+  pre.src-prolog:before { content: 'Prolog'; }
+  pre.src-simula:before { content: 'Simula'; }
+  pre.src-tcl:before { content: 'tcl'; }
+  pre.src-tex:before { content: 'TeX'; }
+  pre.src-plain-tex:before { content: 'Plain TeX'; }
+  pre.src-verilog:before { content: 'Verilog'; }
+  pre.src-vhdl:before { content: 'VHDL'; }
+  pre.src-xml:before { content: 'XML'; }
+  pre.src-nxml:before { content: 'XML'; }
+  /* add a generic configuration mode; LaTeX export needs an additional
+     (add-to-list 'org-latex-listings-langs '(conf " ")) in .emacs */
+  pre.src-conf:before { content: 'Configuration File'; }
+
+  table { border-collapse:collapse; }
+  caption.t-above { caption-side: top; }
+  caption.t-bottom { caption-side: bottom; }
+  td, th { vertical-align:top;  }
+  th.org-right  { text-align: center;  }
+  th.org-left   { text-align: center;   }
+  th.org-center { text-align: center; }
+  td.org-right  { text-align: right;  }
+  td.org-left   { text-align: left;   }
+  td.org-center { text-align: center; }
+  dt { font-weight: bold; }
+  .footpara { display: inline; }
+  .footdef  { margin-bottom: 1em; }
+  .figure { padding: 1em; }
+  .figure p { text-align: center; }
+  .equation-container {
+    display: table;
+    text-align: center;
+    width: 100%;
+  }
+  .equation {
+    vertical-align: middle;
+  }
+  .equation-label {
+    display: table-cell;
+    text-align: right;
+    vertical-align: middle;
+  }
+  .inlinetask {
+    padding: 10px;
+    border: 2px solid gray;
+    margin: 10px;
+    background: #ffffcc;
+  }
+  #org-div-home-and-up
+   { text-align: right; font-size: 70%; white-space: nowrap; }
+  textarea { overflow-x: auto; }
+  .linenr { font-size: smaller }
+  .code-highlighted { background-color: #ffff00; }
+  .org-info-js_info-navigation { border-style: none; }
+  #org-info-js_console-label
+    { font-size: 10px; font-weight: bold; white-space: nowrap; }
+  .org-info-js_search-highlight
+    { background-color: #ffff00; color: #000000; font-weight: bold; }
+  .org-svg { }
+</style>
+<style>body{font-family:Verdana,sans-serif;background:#24273a;color:#cad3f5;line-height:1.5;overflow-x:hidden}#content{max-width:60em}h1,h2,h3,h4,h5{margin-top:0;margin-bottom:1.5rem;font-family:Iosevka Comfy,Iosevka,Fira Code,DejaVu Sans Mono,monospace}h1:not(h1)::before,h2:not(h1)::before,h3:not(h1)::before,h4:not(h1)::before,h5:not(h1)::before{content:"* "}.outline-1,.outline-2,.outline-3,.outline-4,.outline-5{margin:1.5rem 0 0 2rem}.outline-1+div,.outline-2+div,.outline-3+div,.outline-4+div,.outline-5+div{margin-top:3rem}.outline-1 ul,.outline-2 ul,.outline-3 ul,.outline-4 ul,.outline-5 ul{color:unset}.outline-1,.outline-2{margin-left:0}h1{color:#7dc4e4;font-size:2em}h2{color:#ed8796;font-size:1.75em}h3{color:#f5a97f;font-size:1.5em}h4{color:#eed49f;font-size:1.25em}h5{color:#a6da95;font-size:1em}#preamble *,#postamble *{font-family:Iosevka Comfy,Iosevka,Fira Code,DejaVu Sans Mono,monospace;margin:0 !important;text-align:center}.author{color:#8bd5ca;font-size:1.25em !important}#postamble{margin-top:5em;color:#5b6078}pre,code{font-family:Iosevka Comfy,Iosevka,Fira Code,DejaVu Sans Mono,monospace;background:#1e2030;border:0;border-radius:0}pre{margin:1.2em 0}pre.src::before{padding:0.05em 0.3em;background:#181926;color:#6e738d}code{padding:0.05em 0.3em;color:#a6da95}a{color:#8aadf4}ul{font-family:Iosevka Comfy,Iosevka,Fira Code,DejaVu Sans Mono,monospace;list-style-type:"* ";padding-left:1.05em}#table-of-contents a{color:unset;text-decoration:none}#table-of-contents a:hover{text-decoration:underline}#table-of-contents h2{color:#7dc4e4}#table-of-contents h2::before{content:""}ul{color:#ed8796}ul ul{color:#f5a97f}ul ul ul{color:#eed49f}ul ul ul ul{color:#a6da95}ul ul ul ul ul{color:#7dc4e4}ul ul ul ul ul ul{color:#b7bdf8}ul ul ul ul ul ul ul{color:#c6a0f6}@media screen and (min-width: 90em){#table-of-contents{width:18em;padding-right:4em;position:fixed;transform:translateX(-100%)}}@media screen and (max-width: 108em){#preamble,#postamble,#content{position:relative;left:9em}}
+/*# sourceMappingURL=c3a1j1d9ar0knvrq8qkqdby8pnrny5px-convert-scss.map */
+</style>
+</head>
+<body>
+<div id="preamble" class="status">
+<h1 class="title">Fr33macs, my Nix flake Emacs config</h1>
+<p class="author">by fr33zing</p>
+</div>
+<div id="content" class="content">
+<div id="table-of-contents" role="doc-toc">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents" role="doc-toc">
+<ul>
+<li><a href="#org3ca6d87">About</a>
+<ul>
+<li><a href="#org0be8e9e">Tangling</a></li>
+<li><a href="#org5ad5687">Substitution</a></li>
+<li><a href="#orgd0d2089">Tags in comments</a></li>
+</ul>
+</li>
+<li><a href="#org176ed20">Basic setup</a></li>
+<li><a href="#org3f88a8c">Theme</a>
+<ul>
+<li><a href="#org0066f6f">Variable definitions</a></li>
+<li><a href="#org2b2d18c">Customization</a></li>
+</ul>
+</li>
+<li><a href="#org3c9df6e">Libraries</a>
+<ul>
+<li><a href="#org8b29caf">Dash</a></li>
+<li><a href="#org65b99e9">Map</a></li>
+<li><a href="#orgd6b7857">Subr-x</a></li>
+</ul>
+</li>
+<li><a href="#org22fe342">My library</a>
+<ul>
+<li><a href="#org7e28c1d">Advice</a></li>
+<li><a href="#org79e1fa7">Timing</a></li>
+<li><a href="#orgbbdfca9">Windows</a></li>
+</ul>
+</li>
+<li><a href="#org93ebf76">Backups</a></li>
+<li><a href="#org7cc7824">Key bindings</a>
+<ul>
+<li><a href="#org17f40b7">Hydras</a>
+<ul>
+<li><a href="#orgf4d51bd">File</a></li>
+<li><a href="#orgb5618fc">Buffer</a></li>
+<li><a href="#org33113f4">Window</a></li>
+<li><a href="#orgcbff4ee">Leader key</a></li>
+</ul>
+</li>
+<li><a href="#org4b8125c">General</a></li>
+<li><a href="#org6a560c0">Which-key</a></li>
+</ul>
+</li>
+<li><a href="#org3a67eec">Evil</a></li>
+<li><a href="#org7fd4ce1">Minibuffer</a>
+<ul>
+<li><a href="#orgb7a897c">Vertico</a></li>
+<li><a href="#orgaf48fb4">Marginalia</a></li>
+</ul>
+</li>
+<li><a href="#orgad50be4">WIP Mode line</a></li>
+<li><a href="#org8f50d3d">Motion</a>
+<ul>
+<li><a href="#orgb38aae0">Avy</a></li>
+<li><a href="#orgb64d7cc">Nav-flash</a></li>
+</ul>
+</li>
+<li><a href="#orgb6acf7d">WIP Version control</a>
+<ul>
+<li><a href="#org5a50ef0">Magit</a></li>
+</ul>
+</li>
+<li><a href="#org5d9083f"><span class="todo TODO">TODO</span> Search</a></li>
+<li><a href="#org84d948f">Misc. packages</a>
+<ul>
+<li><a href="#org1c0cce6">Try</a></li>
+<li><a href="#orgc2a0bf3">Switch-window</a></li>
+<li><a href="#orgdf90c4c">Solaire mode</a></li>
+<li><a href="#orgcbb3f67">Bufler</a></li>
+<li><a href="#org98faa69">WIP SVG tag mode</a>
+<ul>
+<li><a href="#org86432c8"><span class="todo TODO">TODO</span> Add progress bar, tags, priority</a></li>
+</ul>
+</li>
+<li><a href="#orgf4ba130">Format-all</a></li>
+</ul>
+</li>
+<li><a href="#org0250191">Major Modes</a>
+<ul>
+<li><a href="#orga968f8e">WIP English</a></li>
+<li><a href="#org610594d">Emacs Lisp</a></li>
+<li><a href="#orgf1f6fe1">Org</a>
+<ul>
+<li><a href="#org8ee6add">WIP Hydra</a></li>
+</ul>
+</li>
+<li><a href="#orgbc0b554">Nix</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-org3ca6d87" class="outline-2">
+<h2 id="org3ca6d87">About</h2>
+<div class="outline-text-2" id="text-org3ca6d87">
+<p>
+This is my Emacs configuration.
+</p>
+</div>
+
+<div id="outline-container-org0be8e9e" class="outline-3">
+<h3 id="org0be8e9e">Tangling</h3>
+<div class="outline-text-3" id="text-org0be8e9e">
+<p>
+This file is not tangled using <code>org-babel-table</code>. Instead, it's
+tangled using a bare-bones implementation in <a href="util/tangle.py"><code>util/tangle.py</code></a>, and
+thus no fancy tangle features are supported. The <code>header-args</code>
+property at the top of the file is not even parsed, it's only there to
+maintain compatibility with other tangle implementations.
+</p>
+</div>
+</div>
+
+<div id="outline-container-org5ad5687" class="outline-3">
+<h3 id="org5ad5687">Substitution</h3>
+<div class="outline-text-3" id="text-org5ad5687">
+<p>
+The function <code>getnix</code> is used to get a variable from the Nix flake,
+sort of like <code>getenv</code> but not exactly. It isn't actually a function
+that exists. Instead, <a href="util/substitute.py"><code>util/substitute.py</code></a> is used to substitute all
+instances of <code>(getnix "variableName")</code> with the appropriate Elisp
+literal.
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgd0d2089" class="outline-3">
+<h3 id="orgd0d2089">Tags in comments</h3>
+<div class="outline-text-3" id="text-orgd0d2089">
+<p>
+While reading this document you may see what look to be XML tags,
+e.g.:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #c6a0f6;">defun</span> <span style="color: #8aadf4;">something-spanning-multiple-src-blocks</span> ()
+  (beginning-of-the-defun))
+<span style="color: #6e738d;">;; </span><span style="color: #6e738d;">&lt;defun&gt;</span>
+</pre>
+</div>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">  (middle-of-the-defun)
+</pre>
+</div>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">  (end-of-the-defun)) <span style="color: #6e738d;">; </span><span style="color: #6e738d;">&lt;-- closes the defun</span>
+<span style="color: #6e738d;">;; </span><span style="color: #6e738d;">&lt;/defun&gt;</span>
+</pre>
+</div>
+
+<p>
+These tags are not parsed. They are only used to indicate to the
+reader that code in the same scope may be spread across multiple src
+blocks.
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org176ed20" class="outline-2">
+<h2 id="org176ed20">Basic setup</h2>
+<div class="outline-text-2" id="text-org176ed20">
+<p>
+Disable unwanted UI elements and startup messages.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(menu-bar-mode -1)
+(tool-bar-mode -1)
+(scroll-bar-mode -1)
+(<span style="color: #c6a0f6;">setq</span> inhibit-startup-message t
+      use-dialog-box nil)
+</pre>
+</div>
+
+<p>
+Enable some things which should probably be default.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #c6a0f6;">setq</span> require-final-newline t)
+(<span style="color: #c6a0f6;">setq</span> frame-inhibit-implied-resize t)
+(global-hl-line-mode)
+</pre>
+</div>
+
+<p>
+Enable relative line numbers globally.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #c6a0f6;">setq</span> display-line-numbers-type <span style="color: #c6a0f6;">'</span><span style="color: #f5a97f;">relative</span>)
+(global-display-line-numbers-mode)
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org3f88a8c" class="outline-2">
+<h2 id="org3f88a8c">Theme</h2>
+<div class="outline-text-2" id="text-org3f88a8c">
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(add-to-list <span style="color: #c6a0f6;">'</span><span style="color: #f5a97f;">custom-theme-load-path</span> (getnix <span style="color: #a6da95;">"themeDir"</span>))
+(load-theme <span style="color: #c6a0f6;">'</span><span style="color: #f5a97f;">catppuccin</span> t)
+(<span style="color: #c6a0f6;">setq</span> catppuccin-flavor (getnix <span style="color: #a6da95;">"themeVariant"</span>))
+(catppuccin-reload)
+</pre>
+</div>
+</div>
+
+<div id="outline-container-org0066f6f" class="outline-3">
+<h3 id="org0066f6f">Variable definitions</h3>
+<div class="outline-text-3" id="text-org0066f6f">
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #c6a0f6;">defvar</span> <span style="color: #cad3f5;">my:cursor-color</span> (catppuccin-get-color <span style="color: #c6a0f6;">'</span><span style="color: #f5a97f;">sapphire</span>)
+  <span style="color: #6e738d;">"Default cursor color."</span>)
+
+(<span style="color: #c6a0f6;">defvar</span> <span style="color: #cad3f5;">my:switch-window-cursor-color</span> (catppuccin-get-color <span style="color: #c6a0f6;">'</span><span style="color: #f5a97f;">red</span>)
+  <span style="color: #6e738d;">"Cursor color when switching windows."</span>)
+
+(<span style="color: #c6a0f6;">defvar</span> <span style="color: #cad3f5;">my:code-color</span> (catppuccin-get-color <span style="color: #c6a0f6;">'</span><span style="color: #f5a97f;">text</span>)
+  <span style="color: #6e738d;">"Default color for text that is considered code."</span>)
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org2b2d18c" class="outline-3">
+<h3 id="org2b2d18c">Customization</h3>
+<div class="outline-text-3" id="text-org2b2d18c">
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(set-face-attribute <span style="color: #c6a0f6;">'</span><span style="color: #f5a97f;">default</span> t <span style="color: #ed8796;">:font</span> (getnix <span style="color: #a6da95;">"font"</span>))
+
+(set-cursor-color my:cursor-color)
+(set-face-attribute <span style="color: #c6a0f6;">'</span><span style="color: #f5a97f;">region</span> nil
+                    <span style="color: #ed8796;">:background</span> (catppuccin-get-color <span style="color: #c6a0f6;">'</span><span style="color: #f5a97f;">surface2</span>))
+</pre>
+</div>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org3c9df6e" class="outline-2">
+<h2 id="org3c9df6e">Libraries</h2>
+<div class="outline-text-2" id="text-org3c9df6e">
+</div>
+<div id="outline-container-org8b29caf" class="outline-3">
+<h3 id="org8b29caf">Dash</h3>
+<div class="outline-text-3" id="text-org8b29caf">
+<p>
+Dash is a library for dealing with lists.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #c6a0f6;">use-package</span> <span style="color: #f5a97f;">dash</span> <span style="color: #ed8796;">:ensure</span> t)
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org65b99e9" class="outline-3">
+<h3 id="org65b99e9">Map</h3>
+<div class="outline-text-3" id="text-org65b99e9">
+<p>
+Map provides generic map-manipulation functions that work on alists,
+plists, hash-tables, and arrays.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #c6a0f6;">use-package</span> <span style="color: #f5a97f;">map</span>)
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgd6b7857" class="outline-3">
+<h3 id="orgd6b7857">Subr-x</h3>
+<div class="outline-text-3" id="text-orgd6b7857">
+<p>
+Less commonly used functions that complement basic APIs.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #c6a0f6;">use-package</span> <span style="color: #f5a97f;">subr-x</span>)
+</pre>
+</div>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org22fe342" class="outline-2">
+<h2 id="org22fe342">My library</h2>
+<div class="outline-text-2" id="text-org22fe342">
+<p>
+<b>Notice</b>: Not all functions are defined in this section. There are
+some less general / more context-specific functions that are scattered
+around with no particular rhyme or reason.
+</p>
+</div>
+
+<div id="outline-container-org7e28c1d" class="outline-3">
+<h3 id="org7e28c1d">Advice</h3>
+<div class="outline-text-3" id="text-org7e28c1d">
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #c6a0f6;">defun</span> <span style="color: #8aadf4;">my:advice:be-quiet</span> (orig-fun <span style="color: #eed49f;">&amp;rest</span> args)
+  <span style="color: #6e738d;">"Advice function: Suppress messages in ORIG-FUN.</span>
+
+<img src="data:image/svg;base64,PHN2ZyB3aWR0aD0iODEiIGhlaWdodD0iMjIuMCIgdmVyc2lvbj0iMS4xIiB4bWxucz0iaHR0cDov
+L3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5
+L3hsaW5rIj4gPHJlY3Qgd2lkdGg9IjgxIiBoZWlnaHQ9IjIyLjAiIHg9IjAuMCIgeT0iMC4wIiBy
+eD0iNS41IiBmaWxsPSIjOGFhZGY0Ij48L3JlY3Q+IDx0ZXh0IHk9IjE3IiB4PSI0LjAiIGZpbGw9
+IiMyNDI3M2EiIGZvbnQtc2l6ZT0iMTciIGZvbnQtd2VpZ2h0PSI4MDAiIGZvbnQtZmFtaWx5PSJJ
+b3NldmthIj4gRXhhbXBsZTo8L3RleHQ+PC9zdmc+" alt="Example:" />
+
+<span style="color: #6e738d;">(advice-add 'svg-tag-mode-on :around #'my:advice:be-quiet)"</span>
+  (<span style="color: #c6a0f6;">let</span> ((inhibit-message t)
+        (message-log-max nil))
+    (apply orig-fun args)))
+</pre>
+</div>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #c6a0f6;">defun</span> <span style="color: #8aadf4;">my:advice:nav-flash-show</span> (<span style="color: #eed49f;">&amp;rest</span> _)
+  <span style="color: #6e738d;">"Advice function: Call `</span><span style="color: #f5a97f;">nav-flash-show</span><span style="color: #6e738d;">' after a command.</span>
+
+<img src="data:image/svg;base64,PHN2ZyB3aWR0aD0iODEiIGhlaWdodD0iMjIuMCIgdmVyc2lvbj0iMS4xIiB4bWxucz0iaHR0cDov
+L3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5
+L3hsaW5rIj4gPHJlY3Qgd2lkdGg9IjgxIiBoZWlnaHQ9IjIyLjAiIHg9IjAuMCIgeT0iMC4wIiBy
+eD0iNS41IiBmaWxsPSIjOGFhZGY0Ij48L3JlY3Q+IDx0ZXh0IHk9IjE3IiB4PSI0LjAiIGZpbGw9
+IiMyNDI3M2EiIGZvbnQtc2l6ZT0iMTciIGZvbnQtd2VpZ2h0PSI4MDAiIGZvbnQtZmFtaWx5PSJJ
+b3NldmthIj4gRXhhbXBsZTo8L3RleHQ+PC9zdmc+" alt="Example:" />
+
+<span style="color: #6e738d;">(advice-add 'avy-goto-char :after #'my:advice:nav-flash-show)"</span>
+  (nav-flash-show))
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org79e1fa7" class="outline-3">
+<h3 id="org79e1fa7">Timing</h3>
+<div class="outline-text-3" id="text-org79e1fa7">
+<ul class="org-ul">
+<li>TODO Add <code>debounce-eval-immediately</code></li>
+</ul>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #c6a0f6;">setq</span> my:debounce-timers (make-hash-table <span style="color: #ed8796;">:test</span> <span style="color: #c6a0f6;">'</span><span style="color: #f5a97f;">equal</span>))
+(<span style="color: #c6a0f6;">defun</span> <span style="color: #8aadf4;">my:debounce</span> (name secs form)
+  <span style="color: #6e738d;">"Begin a timer for SECS seconds named NAME to delay the evaluation</span>
+<span style="color: #6e738d;">of FORM, typically to prevent something expensive from running</span>
+<span style="color: #6e738d;">too frequently. If a pending debounce timer exists with the same</span>
+<span style="color: #6e738d;">NAME it is cancelled and replaced.</span>
+
+<img src="data:image/svg;base64,PHN2ZyB3aWR0aD0iODEiIGhlaWdodD0iMjIuMCIgdmVyc2lvbj0iMS4xIiB4bWxucz0iaHR0cDov
+L3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5
+L3hsaW5rIj4gPHJlY3Qgd2lkdGg9IjgxIiBoZWlnaHQ9IjIyLjAiIHg9IjAuMCIgeT0iMC4wIiBy
+eD0iNS41IiBmaWxsPSIjOGFhZGY0Ij48L3JlY3Q+IDx0ZXh0IHk9IjE3IiB4PSI0LjAiIGZpbGw9
+IiMyNDI3M2EiIGZvbnQtc2l6ZT0iMTciIGZvbnQtd2VpZ2h0PSI4MDAiIGZvbnQtZmFtaWx5PSJJ
+b3NldmthIj4gRXhhbXBsZTo8L3RleHQ+PC9zdmc+" alt="Example:" />
+
+<span style="color: #6e738d;">(my:debounce \"print-it\" 0.5 '(print \"it\"))"</span>
+  (<span style="color: #c6a0f6;">if-let</span> ((old-timer (map-elt my:debounce-timers name)))
+          (cancel-timer old-timer))
+  (<span style="color: #c6a0f6;">let*</span> ((new-timer-fn <span style="color: #c6a0f6;">`</span>(<span style="color: #c6a0f6;">progn</span>
+          (<span style="color: #c6a0f6;">setq</span> my:debounce-timers (map-delete my:debounce-timers ,name))
+          (eval ,form)))
+         (new-timer (run-with-timer secs nil <span style="color: #c6a0f6;">'</span><span style="color: #f5a97f;">eval</span> new-timer-fn)))
+        (map-put! my:debounce-timers name new-timer)))
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgbbdfca9" class="outline-3">
+<h3 id="orgbbdfca9">Windows</h3>
+<div class="outline-text-3" id="text-orgbbdfca9">
+<p>
+This function was adapted from <a href="https://stackoverflow.com/questions/1832597">a StackOverflow answer</a> by <a href="https://stackoverflow.com/users/1762276/zhro">Zhro</a>.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #c6a0f6;">defun</span> <span style="color: #8aadf4;">my:delete-window-maybe-kill-buffer</span> (<span style="color: #eed49f;">&amp;optional</span> window)
+  <span style="color: #6e738d;">"Delete the window.</span>
+<span style="color: #6e738d;">If WINDOW is nil, delete the current window.</span>
+<span style="color: #6e738d;">If no other window shows its buffer, kill the buffer too."</span>
+  (<span style="color: #c6a0f6;">interactive</span>)
+  (<span style="color: #c6a0f6;">let</span> ((buf (window-buffer window)))
+    (<span style="color: #c6a0f6;">if</span> (&gt; (length (window-list)) 1)
+        (delete-window window)
+      (<span style="color: #c6a0f6;">unless</span> (get-buffer-window buf <span style="color: #c6a0f6;">'</span><span style="color: #f5a97f;">visible</span>) (kill-buffer buf))
+      (kill-buffer buf))))
+</pre>
+</div>
+
+<p>
+It's irritating to need to switch to a temporary window to close
+it. These functions are used to make closing temporary windows more
+convenient.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #c6a0f6;">defun</span> <span style="color: #8aadf4;">my:temporary-window-p</span> (<span style="color: #eed49f;">&amp;optional</span> window)
+  <span style="color: #6e738d;">"Decide if the window is temporary.</span>
+<span style="color: #6e738d;">If WINDOW is nil, use the current window."</span>
+  (<span style="color: #c6a0f6;">let</span> ((buffer (window-buffer window)))
+    (<span style="color: #c6a0f6;">with-current-buffer</span> buffer
+      (not (<span style="color: #c6a0f6;">or</span> (buffer-file-name buffer)
+               (-contains? my:not-temporary-major-modes major-mode)
+               (<span style="color: #c6a0f6;">--some</span> (-contains? my:not-temporary-minor-modes it)
+                       local-minor-modes))))))
+
+(<span style="color: #c6a0f6;">defun</span> <span style="color: #8aadf4;">my:delete-window</span> (window)
+  <span style="color: #6e738d;">"Delete WINDOW or abort if WINDOW is a minibuffer."</span>
+ (<span style="color: #c6a0f6;">if</span> (window-minibuffer-p window)
+     (abort-recursive-edit)
+     (my:delete-window-maybe-kill-buffer window)))
+
+(<span style="color: #c6a0f6;">defun</span> <span style="color: #8aadf4;">my:next-temporary-window</span> ()
+  <span style="color: #6e738d;">"Attempt to find a minibuffer first. If no minibuffer is found,</span>
+<span style="color: #6e738d;">then starting at the current window, find the next temporary</span>
+<span style="color: #6e738d;">window."</span>
+  (<span style="color: #c6a0f6;">interactive</span>)
+  (<span style="color: #c6a0f6;">if-let</span> ((minibuffer (active-minibuffer-window)))
+    minibuffer
+    (-first <span style="color: #c6a0f6;">#'</span><span style="color: #f5a97f;">my:temporary-window-p</span> (window-list))))
+
+(<span style="color: #c6a0f6;">defun</span> <span style="color: #8aadf4;">my:delete-next-temporary-window</span> ()
+  <span style="color: #6e738d;">"Starting at the current window, find the next temporary window</span>
+<span style="color: #6e738d;">and delete it."</span>
+  (<span style="color: #c6a0f6;">interactive</span>)
+  (<span style="color: #c6a0f6;">if-let</span> ((window (my:next-temporary-window)))
+    (my:delete-window window)))
+</pre>
+</div>
+
+<p>
+When a window's major or minor mode matches any in these lists, that
+window will never be considered temporary.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #c6a0f6;">setq</span> my:not-temporary-major-modes
+  <span style="color: #c6a0f6;">'</span>(lisp-interaction-mode))
+
+(<span style="color: #c6a0f6;">setq</span> my:not-temporary-minor-modes
+  <span style="color: #c6a0f6;">'</span>(org-src-mode))
+</pre>
+</div>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org93ebf76" class="outline-2">
+<h2 id="org93ebf76">Backups</h2>
+<div class="outline-text-2" id="text-org93ebf76">
+<p>
+Prevent clobbering symlinks.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #c6a0f6;">setq</span> backup-by-copying t)
+</pre>
+</div>
+
+<p>
+Use versioned backups.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #c6a0f6;">setq</span> version-control t)
+</pre>
+</div>
+
+<p>
+Prevent backup files from being littered all over the place.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #c6a0f6;">setq</span> backup-directory-alist
+      <span style="color: #c6a0f6;">'</span>((<span style="color: #a6da95;">"."</span> . <span style="color: #a6da95;">"~/.emacs-backups/"</span>)))
+</pre>
+</div>
+
+<p>
+Delete excess backup versions silently.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #c6a0f6;">setq</span> delete-old-versions t  
+      kept-new-versions 6
+      kept-old-versions 2)
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org7cc7824" class="outline-2">
+<h2 id="org7cc7824">Key bindings</h2>
+<div class="outline-text-2" id="text-org7cc7824">
+</div>
+<div id="outline-container-org17f40b7" class="outline-3">
+<h3 id="org17f40b7">Hydras</h3>
+<div class="outline-text-3" id="text-org17f40b7">
+<p>
+Hydra is used to create action menus. I've chosen to use hydras as the
+foundation for my custom keybind scheme to improve discoverability and
+reduce cognitive load.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #c6a0f6;">use-package</span> <span style="color: #f5a97f;">pretty-hydra</span>
+  <span style="color: #ed8796;">:ensure</span> t
+  <span style="color: #ed8796;">:config</span>
+  <span style="color: #6e738d;">;; </span><span style="color: #6e738d;">&lt;config&gt;</span>
+</pre>
+</div>
+
+<p>
+<b>Notice</b>: Not all hydras are defined in this section. Other sections
+that define hydra(s):
+</p>
+
+<ul class="org-ul">
+<li><a href="#orgb38aae0">Motion &gt; Avy</a></li>
+<li><a href="#orgf1f6fe1">Languages &gt; Org</a></li>
+</ul>
+</div>
+
+<div id="outline-container-orgf4d51bd" class="outline-4">
+<h4 id="orgf4d51bd">File</h4>
+<div class="outline-text-4" id="text-orgf4d51bd">
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">  (<span style="color: #c6a0f6;">pretty-hydra-define</span> hydra:file
+    (<span style="color: #ed8796;">:exit</span> t <span style="color: #ed8796;">:idle</span> 0.25)
+    (<span style="color: #a6da95;">"Switch"</span>
+     ((<span style="color: #a6da95;">"f"</span> find-file <span style="color: #a6da95;">"Find file"</span>))))
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgb5618fc" class="outline-4">
+<h4 id="orgb5618fc">Buffer</h4>
+<div class="outline-text-4" id="text-orgb5618fc">
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">  (<span style="color: #c6a0f6;">defalias</span> <span style="color: #c6a0f6;">'</span><span style="color: #8aadf4;">evil-switch-to-windows-last-buffer</span> <span style="color: #c6a0f6;">'</span><span style="color: #f5a97f;">last-buffer</span>)
+  (<span style="color: #c6a0f6;">pretty-hydra-define</span> hydra:buffer
+    (<span style="color: #ed8796;">:exit</span> t <span style="color: #ed8796;">:idle</span> 0.25)
+    (<span style="color: #a6da95;">"Switch"</span>
+     ((<span style="color: #a6da95;">"b"</span> bufler-switch-buffer <span style="color: #a6da95;">"Quick switch"</span>)
+      (<span style="color: #a6da95;">"i"</span> bufler-list          <span style="color: #a6da95;">"List buffers"</span>)
+      (<span style="color: #a6da95;">"]"</span> next-buffer          <span style="color: #a6da95;">"Next buffer"</span>     <span style="color: #ed8796;">:exit</span> nil)
+      (<span style="color: #a6da95;">"["</span> previous-buffer      <span style="color: #a6da95;">"Previous buffer"</span> <span style="color: #ed8796;">:exit</span> nil)
+      (<span style="color: #a6da95;">"l"</span> last-buffer          <span style="color: #a6da95;">"Last buffer"</span>))
+     <span style="color: #a6da95;">"Actions"</span>
+     ((<span style="color: #a6da95;">"s"</span> save-buffer         <span style="color: #a6da95;">"Save buffer"</span>)
+      (<span style="color: #a6da95;">"k"</span> kill-current-buffer <span style="color: #a6da95;">"Kill buffer"</span>)
+      (<span style="color: #a6da95;">"K"</span> kill-buffer         <span style="color: #a6da95;">"Kill other buffer"</span>)
+      (<span style="color: #a6da95;">"r"</span> revert-buffer       <span style="color: #a6da95;">"Revert current buffer"</span>)
+      (<span style="color: #a6da95;">"R"</span> rename-buffer       <span style="color: #a6da95;">"Rename current buffer"</span>))))
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org33113f4" class="outline-4">
+<h4 id="org33113f4">Window</h4>
+<div class="outline-text-4" id="text-org33113f4">
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">  (<span style="color: #c6a0f6;">pretty-hydra-define</span> hydra:window
+    (<span style="color: #ed8796;">:exit</span> t <span style="color: #ed8796;">:idle</span> 0.25) 
+    (<span style="color: #a6da95;">"Switch"</span>
+     ((<span style="color: #a6da95;">"w"</span> my:switch-window <span style="color: #a6da95;">"Quick switch"</span>))
+     <span style="color: #a6da95;">"Actions"</span>
+     ((<span style="color: #a6da95;">"k"</span> delete-window             <span style="color: #a6da95;">"Kill window"</span>)
+      (<span style="color: #a6da95;">"K"</span> switch-window-then-delete <span style="color: #a6da95;">"Kill other window"</span>)
+      (<span style="color: #a6da95;">"s"</span> evil-window-new           <span style="color: #a6da95;">"Split window horizontally"</span>)
+      (<span style="color: #a6da95;">"v"</span> evil-window-vnew          <span style="color: #a6da95;">"Split window vertically"</span>))))
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgcbff4ee" class="outline-4">
+<h4 id="orgcbff4ee">Leader key</h4>
+<div class="outline-text-4" id="text-orgcbff4ee">
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">  (<span style="color: #c6a0f6;">pretty-hydra-define</span> hydra:leader
+    (<span style="color: #ed8796;">:exit</span> t <span style="color: #ed8796;">:idle</span> 0.25)
+    (<span style="color: #a6da95;">"Hydra"</span>
+     ((<span style="color: #a6da95;">"f"</span> hydra:file/body   <span style="color: #a6da95;">"File"</span>)
+      (<span style="color: #a6da95;">"b"</span> hydra:buffer/body <span style="color: #a6da95;">"Buffer"</span>)
+      (<span style="color: #a6da95;">"w"</span> hydra:window/body <span style="color: #a6da95;">"Window"</span>)
+      (<span style="color: #a6da95;">"a"</span> hydra:avy/body    <span style="color: #a6da95;">"Avy"</span>)
+      (<span style="color: #a6da95;">"o"</span> hydra:org/body    <span style="color: #a6da95;">"Org"</span>))
+     <span style="color: #a6da95;">"Shortcut"</span>
+     ((<span style="color: #a6da95;">"s"</span> save-buffer            <span style="color: #a6da95;">"Save buffer"</span>)
+      (<span style="color: #a6da95;">"q"</span> save-buffer-kill-emacs <span style="color: #a6da95;">"Quit"</span>)))))
+<span style="color: #6e738d;">;; </span><span style="color: #6e738d;">&lt;/config&gt;</span>
+</pre>
+</div>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org4b8125c" class="outline-3">
+<h3 id="org4b8125c">General</h3>
+<div class="outline-text-3" id="text-org4b8125c">
+<p>
+General provides a convenient way to bind keys.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #c6a0f6;">use-package</span> <span style="color: #f5a97f;">general</span>
+  <span style="color: #ed8796;">:ensure</span> t
+  <span style="color: #ed8796;">:init</span>
+  (<span style="color: #c6a0f6;">setq</span> general-override-states
+        <span style="color: #c6a0f6;">'</span>(insert emacs hybrid normal visual motion operator replace))
+  <span style="color: #ed8796;">:config</span>
+  <span style="color: #6e738d;">;; </span><span style="color: #6e738d;">&lt;config&gt;</span>
+</pre>
+</div>
+
+<p>
+Use escape to close temporary windows.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">  (general-define-key
+    <span style="color: #ed8796;">:keymaps</span> <span style="color: #c6a0f6;">'</span><span style="color: #f5a97f;">minibuffer-mode-map</span>
+    (kbd <span style="color: #a6da95;">"&lt;escape&gt;"</span>) <span style="color: #c6a0f6;">'</span><span style="color: #f5a97f;">abort-minibuffers</span>)
+
+  (general-define-key
+    <span style="color: #ed8796;">:states</span> <span style="color: #c6a0f6;">'</span>(normal)
+    <span style="color: #ed8796;">:keymaps</span> <span style="color: #c6a0f6;">'</span><span style="color: #f5a97f;">override</span>
+    (kbd <span style="color: #a6da95;">"&lt;escape&gt;"</span>) <span style="color: #c6a0f6;">'</span><span style="color: #f5a97f;">my:delete-next-temporary-window</span>)
+</pre>
+</div>
+
+<p>
+Use spacebar to open the <a href="#orgcbff4ee">Leader key hydra</a>.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">  (general-define-key
+    <span style="color: #ed8796;">:states</span> <span style="color: #c6a0f6;">'</span>(normal visual motion)
+    <span style="color: #ed8796;">:keymaps</span> <span style="color: #c6a0f6;">'</span><span style="color: #f5a97f;">override</span>
+    <span style="color: #a6da95;">"SPC"</span> <span style="color: #c6a0f6;">'</span><span style="color: #f5a97f;">hydra:leader/body</span>))
+<span style="color: #6e738d;">;; </span><span style="color: #6e738d;">&lt;/config&gt;</span>
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org6a560c0" class="outline-3">
+<h3 id="org6a560c0">Which-key</h3>
+<div class="outline-text-3" id="text-org6a560c0">
+<p>
+Which-key shows all the possible completions of a partially-input
+keybind.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #c6a0f6;">use-package</span> <span style="color: #f5a97f;">which-key</span>
+  <span style="color: #ed8796;">:ensure</span> t
+  <span style="color: #ed8796;">:config</span>
+  (which-key-mode))
+</pre>
+</div>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org3a67eec" class="outline-2">
+<h2 id="org3a67eec">Evil</h2>
+<div class="outline-text-2" id="text-org3a67eec">
+<p>
+Evil (extensible vi layer) emulates the main features of Vim.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #c6a0f6;">use-package</span> <span style="color: #f5a97f;">evil</span>
+  <span style="color: #ed8796;">:ensure</span> t
+  <span style="color: #ed8796;">:init</span>
+  (<span style="color: #c6a0f6;">setq</span> evil-want-keybinding nil
+        evil-want-C-u-scroll t
+        evil-undo-system <span style="color: #c6a0f6;">'</span><span style="color: #f5a97f;">undo-redo</span>)
+  <span style="color: #ed8796;">:config</span>
+  (evil-mode 1))
+</pre>
+</div>
+
+<p>
+Evil collection is a collection of Evil bindings for the parts of
+Emacs that Evil does not cover properly by default.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #c6a0f6;">use-package</span> <span style="color: #f5a97f;">evil-collection</span>
+  <span style="color: #ed8796;">:ensure</span> t
+  <span style="color: #ed8796;">:after</span> evil
+  <span style="color: #ed8796;">:custom</span>
+  (evil-collection-want-unimpaired-p nil)
+  <span style="color: #ed8796;">:init</span>
+  (evil-collection-init))
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org7fd4ce1" class="outline-2">
+<h2 id="org7fd4ce1">Minibuffer</h2>
+<div class="outline-text-2" id="text-org7fd4ce1">
+</div>
+<div id="outline-container-orgb7a897c" class="outline-3">
+<h3 id="orgb7a897c">Vertico</h3>
+<div class="outline-text-3" id="text-orgb7a897c">
+<p>
+Vertico is a minibuffer completion interface.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #c6a0f6;">use-package</span> <span style="color: #f5a97f;">vertico</span>
+  <span style="color: #ed8796;">:ensure</span> t
+  <span style="color: #ed8796;">:init</span>
+  (vertico-mode)
+  <span style="color: #ed8796;">:config</span>
+  (<span style="color: #c6a0f6;">setq</span> vertico-cycle t)
+  <span style="color: #ed8796;">:bind</span> (<span style="color: #ed8796;">:map</span> vertico-map
+         (<span style="color: #a6da95;">"C-j"</span> . vertico-next)
+         (<span style="color: #a6da95;">"C-k"</span> . vertico-previous)
+         (<span style="color: #a6da95;">"TAB"</span> . vertico-insert)))
+</pre>
+</div>
+
+<p>
+Use the <code>orderless</code> completion style.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #c6a0f6;">use-package</span> <span style="color: #f5a97f;">orderless</span>
+  <span style="color: #ed8796;">:ensure</span> t
+  <span style="color: #ed8796;">:init</span>
+  (<span style="color: #c6a0f6;">setq</span> completion-styles <span style="color: #c6a0f6;">'</span>(orderless basic)
+        completion-category-defaults nil
+        completion-category-overrides <span style="color: #c6a0f6;">'</span>((file (styles partial-completion)))))
+</pre>
+</div>
+
+<p>
+Persist history over Emacs restarts. Vertico sorts by history
+position.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #c6a0f6;">use-package</span> <span style="color: #f5a97f;">savehist</span>
+  <span style="color: #ed8796;">:init</span>
+  (savehist-mode))
+</pre>
+</div>
+
+<p>
+Do not allow the cursor in the minibuffer prompt.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #c6a0f6;">use-package</span> <span style="color: #f5a97f;">emacs</span>
+  <span style="color: #ed8796;">:init</span>
+  (<span style="color: #c6a0f6;">setq</span> minibuffer-prompt-properties
+        <span style="color: #c6a0f6;">'</span>(read-only t cursor-intangible t face minibuffer-prompt))
+  (add-hook <span style="color: #c6a0f6;">'</span><span style="color: #f5a97f;">minibuffer-setup-hook</span> <span style="color: #c6a0f6;">#'</span><span style="color: #f5a97f;">cursor-intangible-mode</span>)
+  <span style="color: #6e738d;">;; </span><span style="color: #6e738d;">&lt;init&gt;</span>
+</pre>
+</div>
+
+<p>
+Hide commands in M-x which do not work in the current mode. Vertico
+commands are hidden in normal buffers.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">  (<span style="color: #c6a0f6;">setq</span> read-extended-command-predicate
+        <span style="color: #c6a0f6;">#'</span><span style="color: #f5a97f;">command-completion-default-include-p</span>))
+<span style="color: #6e738d;">;; </span><span style="color: #6e738d;">&lt;/init&gt;</span>
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgaf48fb4" class="outline-3">
+<h3 id="orgaf48fb4">Marginalia</h3>
+<div class="outline-text-3" id="text-orgaf48fb4">
+<p>
+Marginalia adds helpful information to entries in Vertico. For
+example, if you type <code>M-x</code>, Vertico will open a list of usable
+commands. Marginalia will add each command's description next to it.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #c6a0f6;">use-package</span> <span style="color: #f5a97f;">marginalia</span>
+  <span style="color: #ed8796;">:ensure</span> t
+  <span style="color: #ed8796;">:init</span>
+  (marginalia-mode))
+</pre>
+</div>
+</div>
+</div>
+</div>
+<div id="outline-container-orgad50be4" class="outline-2">
+<h2 id="orgad50be4">WIP Mode line</h2>
+<div class="outline-text-2" id="text-orgad50be4">
+<p>
+Warning: Not tangled
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(set-face-attribute <span style="color: #c6a0f6;">'</span><span style="color: #f5a97f;">mode-line</span> nil <span style="color: #ed8796;">:height</span> 1.0)
+
+(<span style="color: #c6a0f6;">defun</span> <span style="color: #8aadf4;">my:mode-line-major-mode</span> ()
+  (propertize <span style="color: #a6da95;">"-%m-"</span> <span style="color: #c6a0f6;">'</span><span style="color: #f5a97f;">face</span> <span style="color: #c6a0f6;">'</span>(<span style="color: #ed8796;">:foreground</span> <span style="color: #a6da95;">"red"</span>)))
+
+(<span style="color: #c6a0f6;">setq-default</span> mode-line-format <span style="color: #c6a0f6;">'</span>(
+    (<span style="color: #ed8796;">:eval</span> (my:mode-line-major-mode))
+))
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org8f50d3d" class="outline-2">
+<h2 id="org8f50d3d">Motion</h2>
+<div class="outline-text-2" id="text-org8f50d3d">
+</div>
+<div id="outline-container-orgb38aae0" class="outline-3">
+<h3 id="orgb38aae0">Avy</h3>
+<div class="outline-text-3" id="text-orgb38aae0">
+<p>
+Avy is a convenient tool to jump around and perform some actions based
+on a short filter.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #c6a0f6;">use-package</span> <span style="color: #f5a97f;">avy</span>
+  <span style="color: #ed8796;">:ensure</span> t
+  <span style="color: #ed8796;">:after</span> evil
+  <span style="color: #ed8796;">:config</span>
+  (<span style="color: #c6a0f6;">setq</span> avy-timeout-seconds 0.375)
+  (advice-add <span style="color: #c6a0f6;">'</span><span style="color: #f5a97f;">avy-process</span> <span style="color: #ed8796;">:after</span> <span style="color: #c6a0f6;">#'</span><span style="color: #f5a97f;">my:advice:nav-flash-show</span>))
+
+(<span style="color: #c6a0f6;">pretty-hydra-define</span> hydra:avy
+  (<span style="color: #ed8796;">:exit</span> t <span style="color: #ed8796;">:idle</span> 0.25) 
+  (<span style="color: #a6da95;">"Filter"</span>
+   ((<span style="color: #a6da95;">"a"</span> avy-goto-char-timer           <span style="color: #a6da95;">"Char(s) with timer"</span>)
+    (<span style="color: #a6da95;">"c"</span> avy-goto-char-in-line         <span style="color: #a6da95;">"Char in line"</span>)
+    (<span style="color: #a6da95;">"w"</span> avy-goto-word-1               <span style="color: #a6da95;">"Word by first char"</span>)
+    (<span style="color: #a6da95;">"s"</span> avy-goto-symbol-1             <span style="color: #a6da95;">"Symbol by first char"</span>)
+    (<span style="color: #a6da95;">"h"</span> avy-org-goto-heading-timer    <span style="color: #a6da95;">"Org heading with timer"</span>))
+   <span style="color: #a6da95;">"Repeat"</span>
+   ((<span style="color: #a6da95;">";"</span> avy-next                      <span style="color: #a6da95;">"Next match"</span>     <span style="color: #ed8796;">:exit</span> nil)
+    (<span style="color: #a6da95;">","</span> avy-previous                  <span style="color: #a6da95;">"Previous match"</span> <span style="color: #ed8796;">:exit</span> nil)
+    (<span style="color: #a6da95;">"p"</span> avy-pop-mark                  <span style="color: #a6da95;">"Pop mark"</span>       <span style="color: #ed8796;">:exit</span> nil))
+   <span style="color: #a6da95;">"Actions"</span>
+   ((<span style="color: #a6da95;">"y"</span> avy-copy-line                 <span style="color: #a6da95;">"Copy line"</span>)
+    (<span style="color: #a6da95;">"Y"</span> avy-copy-region               <span style="color: #a6da95;">"Copy region"</span>)
+    (<span style="color: #a6da95;">"m"</span> avy-move-line                 <span style="color: #a6da95;">"Move line"</span>)
+    (<span style="color: #a6da95;">"M"</span> avy-move-region               <span style="color: #a6da95;">"Move region"</span>)
+    (<span style="color: #a6da95;">"d"</span> avy-kill-ring-save-whole-line <span style="color: #a6da95;">"Delete line"</span>)
+    (<span style="color: #a6da95;">"D"</span> avy-kill-ring-save-region     <span style="color: #a6da95;">"Delete region"</span>))))
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgb64d7cc" class="outline-3">
+<h3 id="orgb64d7cc">Nav-flash</h3>
+<div class="outline-text-3" id="text-orgb64d7cc">
+<p>
+Nav-flash makes it easier to track the cursor across large movements
+by flashing the current line.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #c6a0f6;">use-package</span> <span style="color: #f5a97f;">nav-flash</span>
+  <span style="color: #ed8796;">:ensure</span> t
+  <span style="color: #ed8796;">:config</span>
+  (<span style="color: #c6a0f6;">setq</span> nav-flash-delay 0.125)
+  (set-face-attribute <span style="color: #c6a0f6;">'</span><span style="color: #f5a97f;">nav-flash-face</span> nil
+    <span style="color: #ed8796;">:background</span> (face-attribute <span style="color: #c6a0f6;">'</span><span style="color: #f5a97f;">cursor</span> <span style="color: #ed8796;">:background</span>)
+    <span style="color: #ed8796;">:foreground</span> (face-attribute <span style="color: #c6a0f6;">'</span><span style="color: #f5a97f;">default</span> <span style="color: #ed8796;">:background</span>))
+
+    (<span style="color: #c6a0f6;">--map</span> (advice-add it <span style="color: #ed8796;">:after</span> <span style="color: #c6a0f6;">#'</span><span style="color: #f5a97f;">my:advice:nav-flash-show</span>) <span style="color: #c6a0f6;">'</span>(
+      evil-scroll-up
+      evil-scroll-down)))
+</pre>
+</div>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgb6acf7d" class="outline-2">
+<h2 id="orgb6acf7d">WIP Version control</h2>
+<div class="outline-text-2" id="text-orgb6acf7d">
+</div>
+<div id="outline-container-org5a50ef0" class="outline-3">
+<h3 id="org5a50ef0">Magit</h3>
+<div class="outline-text-3" id="text-org5a50ef0">
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #c6a0f6;">use-package</span> <span style="color: #f5a97f;">magit</span>
+  <span style="color: #ed8796;">:ensure</span> t)
+</pre>
+</div>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org5d9083f" class="outline-2">
+<h2 id="org5d9083f"><span class="todo TODO">TODO</span> Search</h2>
+</div>
+<div id="outline-container-org84d948f" class="outline-2">
+<h2 id="org84d948f">Misc. packages</h2>
+<div class="outline-text-2" id="text-org84d948f">
+</div>
+<div id="outline-container-org1c0cce6" class="outline-3">
+<h3 id="org1c0cce6">Try</h3>
+<div class="outline-text-3" id="text-org1c0cce6">
+<p>
+Try allows you to try Emacs packages without installing them.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #c6a0f6;">use-package</span> <span style="color: #f5a97f;">try</span> <span style="color: #ed8796;">:ensure</span> t)
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgc2a0bf3" class="outline-3">
+<h3 id="orgc2a0bf3">Switch-window</h3>
+<div class="outline-text-3" id="text-orgc2a0bf3">
+<p>
+Switch-window provides a nice way to choose which window to switch to
+when there are more than two windows. When a switch-window command is
+used, a number character appears in the corner of each window. Typing
+one of the characters then switches focus to that window.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #c6a0f6;">use-package</span> <span style="color: #f5a97f;">switch-window</span>
+  <span style="color: #ed8796;">:ensure</span> t
+  <span style="color: #ed8796;">:init</span>
+  <span style="color: #ed8796;">:config</span>
+  (<span style="color: #c6a0f6;">defun</span> <span style="color: #8aadf4;">my:switch-window</span> ()
+    <span style="color: #6e738d;">"Switch window and change cursor color."</span>
+    (<span style="color: #c6a0f6;">interactive</span>)
+    (set-cursor-color my:switch-window-cursor-color)
+    (switch-window))
+  (<span style="color: #c6a0f6;">defun</span> <span style="color: #8aadf4;">my:switch-window-finish-hook</span> ()
+    (set-cursor-color my:cursor-color))
+  (add-hook <span style="color: #c6a0f6;">'</span><span style="color: #f5a97f;">switch-window-finish-hook</span> <span style="color: #c6a0f6;">#'</span><span style="color: #f5a97f;">my:switch-window-finish-hook</span>)
+
+  (<span style="color: #c6a0f6;">setq</span> switch-window-input-style <span style="color: #c6a0f6;">'</span><span style="color: #f5a97f;">minibuffer</span>)
+  (set-face-attribute <span style="color: #c6a0f6;">'</span><span style="color: #f5a97f;">switch-window-label</span> nil <span style="color: #ed8796;">:height</span> 5.0))
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgdf90c4c" class="outline-3">
+<h3 id="orgdf90c4c">Solaire mode</h3>
+<div class="outline-text-3" id="text-orgdf90c4c">
+<p>
+Solaire mode helps to visually distinguish "real" buffers (code
+buffers) from "unreal" buffers (popups, sidebars, log buffers,
+terminals, etc) by giving the latter a different background.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #c6a0f6;">use-package</span> <span style="color: #f5a97f;">solaire-mode</span>
+  <span style="color: #ed8796;">:ensure</span> t
+  <span style="color: #ed8796;">:after</span> general
+  <span style="color: #ed8796;">:config</span>
+  (solaire-global-mode +1))
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgcbb3f67" class="outline-3">
+<h3 id="orgcbb3f67">Bufler</h3>
+<div class="outline-text-3" id="text-orgcbb3f67">
+<p>
+Bufler is an ibuffer alternative.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #c6a0f6;">use-package</span> <span style="color: #f5a97f;">bufler</span>
+  <span style="color: #ed8796;">:ensure</span> t
+  <span style="color: #ed8796;">:after</span> evil
+  <span style="color: #ed8796;">:config</span>
+  (<span style="color: #c6a0f6;">evil-define-key</span> <span style="color: #c6a0f6;">'</span><span style="color: #f5a97f;">motion</span> bufler-list-mode-map
+    (kbd <span style="color: #a6da95;">"RET"</span>) <span style="color: #c6a0f6;">'</span><span style="color: #f5a97f;">bufler-list-buffer-switch</span>
+    (kbd <span style="color: #a6da95;">"SPC"</span>) <span style="color: #c6a0f6;">'</span><span style="color: #f5a97f;">bufler-list-buffer-peek</span>
+    (kbd <span style="color: #a6da95;">"C-s"</span>) <span style="color: #c6a0f6;">'</span><span style="color: #f5a97f;">bufler-list-buffer-save</span>
+    <span style="color: #a6da95;">"d"</span> <span style="color: #c6a0f6;">'</span><span style="color: #f5a97f;">bufler-list-buffer-kill</span>
+    <span style="color: #a6da95;">"x"</span> <span style="color: #c6a0f6;">'</span><span style="color: #f5a97f;">bufler-list-buffer-kill</span>))
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org98faa69" class="outline-3">
+<h3 id="org98faa69">WIP SVG tag mode</h3>
+<div class="outline-text-3" id="text-org98faa69">
+<p>
+SVG tag mode replaces keywords or regular expression with SVG tags. It
+can be used as an extra-fancy alternative to <code>hl-todo</code>.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #c6a0f6;">use-package</span> <span style="color: #f5a97f;">svg-tag-mode</span>
+  <span style="color: #ed8796;">:ensure</span> t
+  <span style="color: #ed8796;">:config</span>
+  <span style="color: #6e738d;">;; </span><span style="color: #6e738d;">&lt;config&gt;</span>
+</pre>
+</div>
+
+<p>
+Define some simple SVG tags. The regular expressions are case
+sensitive, so there's going to be some redundant patterns.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">  (<span style="color: #c6a0f6;">defconst</span> <span style="color: #cad3f5;">my:svg-tags</span> <span style="color: #c6a0f6;">'</span>(
+    (<span style="color: #a6da95;">"<img src="data:image/svg;base64,PHN2ZyB3aWR0aD0iNDUiIGhlaWdodD0iMjIuMCIgdmVyc2lvbj0iMS4xIiB4bWxucz0iaHR0cDov
+L3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5
+L3hsaW5rIj4gPHJlY3Qgd2lkdGg9IjQ1IiBoZWlnaHQ9IjIyLjAiIHg9IjAuMCIgeT0iMC4wIiBy
+eD0iNS41IiBmaWxsPSIjN2RjNGU0Ij48L3JlY3Q+IDx0ZXh0IHk9IjE3IiB4PSI0LjAiIGZpbGw9
+IiMyNDI3M2EiIGZvbnQtc2l6ZT0iMTciIGZvbnQtd2VpZ2h0PSI4MDAiIGZvbnQtZmFtaWx5PSJJ
+b3NldmthIj4gVE9ETzwvdGV4dD48L3N2Zz4=" alt="TODO" />"</span> . sapphire)               <span style="color: #6e738d;">; <img src="data:image/svg;base64,PHN2ZyB3aWR0aD0iNDUiIGhlaWdodD0iMjIuMCIgdmVyc2lvbj0iMS4xIiB4bWxucz0iaHR0cDov
+L3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5
+L3hsaW5rIj4gPHJlY3Qgd2lkdGg9IjQ1IiBoZWlnaHQ9IjIyLjAiIHg9IjAuMCIgeT0iMC4wIiBy
+eD0iNS41IiBmaWxsPSIjN2RjNGU0Ij48L3JlY3Q+IDx0ZXh0IHk9IjE3IiB4PSI0LjAiIGZpbGw9
+IiMyNDI3M2EiIGZvbnQtc2l6ZT0iMTciIGZvbnQtd2VpZ2h0PSI4MDAiIGZvbnQtZmFtaWx5PSJJ
+b3NldmthIj4gVE9ETzwvdGV4dD48L3N2Zz4=" alt="TODO" /></span><span style="color: #6e738d;"> </span>
+    (<span style="color: #a6da95;">"<img src="data:image/svg;base64,PHN2ZyB3aWR0aD0iMzYiIGhlaWdodD0iMjIuMCIgdmVyc2lvbj0iMS4xIiB4bWxucz0iaHR0cDov
+L3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5
+L3hsaW5rIj4gPHJlY3Qgd2lkdGg9IjM2IiBoZWlnaHQ9IjIyLjAiIHg9IjAuMCIgeT0iMC4wIiBy
+eD0iNS41IiBmaWxsPSIjOGJkNWNhIj48L3JlY3Q+IDx0ZXh0IHk9IjE3IiB4PSI0LjAiIGZpbGw9
+IiMyNDI3M2EiIGZvbnQtc2l6ZT0iMTciIGZvbnQtd2VpZ2h0PSI4MDAiIGZvbnQtZmFtaWx5PSJJ
+b3NldmthIj4gV0lQPC90ZXh0Pjwvc3ZnPg==" alt="WIP" />"</span> . teal)                    <span style="color: #6e738d;">; <img src="data:image/svg;base64,PHN2ZyB3aWR0aD0iMzYiIGhlaWdodD0iMjIuMCIgdmVyc2lvbj0iMS4xIiB4bWxucz0iaHR0cDov
+L3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5
+L3hsaW5rIj4gPHJlY3Qgd2lkdGg9IjM2IiBoZWlnaHQ9IjIyLjAiIHg9IjAuMCIgeT0iMC4wIiBy
+eD0iNS41IiBmaWxsPSIjOGJkNWNhIj48L3JlY3Q+IDx0ZXh0IHk9IjE3IiB4PSI0LjAiIGZpbGw9
+IiMyNDI3M2EiIGZvbnQtc2l6ZT0iMTciIGZvbnQtd2VpZ2h0PSI4MDAiIGZvbnQtZmFtaWx5PSJJ
+b3NldmthIj4gV0lQPC90ZXh0Pjwvc3ZnPg==" alt="WIP" /></span>
+    (<span style="color: #a6da95;">"<img src="data:image/svg;base64,PHN2ZyB3aWR0aD0iNDUiIGhlaWdodD0iMjIuMCIgdmVyc2lvbj0iMS4xIiB4bWxucz0iaHR0cDov
+L3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5
+L3hsaW5rIj4gPHJlY3Qgd2lkdGg9IjQ1IiBoZWlnaHQ9IjIyLjAiIHg9IjAuMCIgeT0iMC4wIiBy
+eD0iNS41IiBmaWxsPSIjYTZkYTk1Ij48L3JlY3Q+IDx0ZXh0IHk9IjE3IiB4PSI0LjAiIGZpbGw9
+IiMyNDI3M2EiIGZvbnQtc2l6ZT0iMTciIGZvbnQtd2VpZ2h0PSI4MDAiIGZvbnQtZmFtaWx5PSJJ
+b3NldmthIj4gRE9ORTwvdGV4dD48L3N2Zz4=" alt="DONE" />"</span> . green)                  <span style="color: #6e738d;">; <img src="data:image/svg;base64,PHN2ZyB3aWR0aD0iNDUiIGhlaWdodD0iMjIuMCIgdmVyc2lvbj0iMS4xIiB4bWxucz0iaHR0cDov
+L3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5
+L3hsaW5rIj4gPHJlY3Qgd2lkdGg9IjQ1IiBoZWlnaHQ9IjIyLjAiIHg9IjAuMCIgeT0iMC4wIiBy
+eD0iNS41IiBmaWxsPSIjYTZkYTk1Ij48L3JlY3Q+IDx0ZXh0IHk9IjE3IiB4PSI0LjAiIGZpbGw9
+IiMyNDI3M2EiIGZvbnQtc2l6ZT0iMTciIGZvbnQtd2VpZ2h0PSI4MDAiIGZvbnQtZmFtaWx5PSJJ
+b3NldmthIj4gRE9ORTwvdGV4dD48L3N2Zz4=" alt="DONE" /></span>
+    (<span style="color: #a6da95;">"<img src="data:image/svg;base64,PHN2ZyB3aWR0aD0iNDUiIGhlaWdodD0iMjIuMCIgdmVyc2lvbj0iMS4xIiB4bWxucz0iaHR0cDov
+L3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5
+L3hsaW5rIj4gPHJlY3Qgd2lkdGg9IjQ1IiBoZWlnaHQ9IjIyLjAiIHg9IjAuMCIgeT0iMC4wIiBy
+eD0iNS41IiBmaWxsPSIjZWQ4Nzk2Ij48L3JlY3Q+IDx0ZXh0IHk9IjE3IiB4PSI0LjAiIGZpbGw9
+IiMyNDI3M2EiIGZvbnQtc2l6ZT0iMTciIGZvbnQtd2VpZ2h0PSI4MDAiIGZvbnQtZmFtaWx5PSJJ
+b3NldmthIj4gVEVNUDwvdGV4dD48L3N2Zz4=" alt="TEMP" />"</span> . red)                    <span style="color: #6e738d;">; <img src="data:image/svg;base64,PHN2ZyB3aWR0aD0iNDUiIGhlaWdodD0iMjIuMCIgdmVyc2lvbj0iMS4xIiB4bWxucz0iaHR0cDov
+L3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5
+L3hsaW5rIj4gPHJlY3Qgd2lkdGg9IjQ1IiBoZWlnaHQ9IjIyLjAiIHg9IjAuMCIgeT0iMC4wIiBy
+eD0iNS41IiBmaWxsPSIjZWQ4Nzk2Ij48L3JlY3Q+IDx0ZXh0IHk9IjE3IiB4PSI0LjAiIGZpbGw9
+IiMyNDI3M2EiIGZvbnQtc2l6ZT0iMTciIGZvbnQtd2VpZ2h0PSI4MDAiIGZvbnQtZmFtaWx5PSJJ
+b3NldmthIj4gVEVNUDwvdGV4dD48L3N2Zz4=" alt="TEMP" /></span>
+    (<span style="color: #a6da95;">"</span><span style="color: #ff00ff;">\\</span><span style="color: #ff00ff;">(<img src="data:image/svg;base64,PHN2ZyB3aWR0aD0iODEiIGhlaWdodD0iMjIuMCIgdmVyc2lvbj0iMS4xIiB4bWxucz0iaHR0cDov
+L3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5
+L3hsaW5rIj4gPHJlY3Qgd2lkdGg9IjgxIiBoZWlnaHQ9IjIyLjAiIHg9IjAuMCIgeT0iMC4wIiBy
+eD0iNS41IiBmaWxsPSIjOGFhZGY0Ij48L3JlY3Q+IDx0ZXh0IHk9IjE3IiB4PSI0LjAiIGZpbGw9
+IiMyNDI3M2EiIGZvbnQtc2l6ZT0iMTciIGZvbnQtd2VpZ2h0PSI4MDAiIGZvbnQtZmFtaWx5PSJJ
+b3NldmthIj4gRXhhbXBsZTo8L3RleHQ+PC9zdmc+" alt="Example:" /></span><span style="color: #a6da95;">?</span><span style="color: #ff00ff;">\\</span><span style="color: #ff00ff;">)</span><span style="color: #a6da95;">"</span> . blue)        <span style="color: #6e738d;">; <img src="data:image/svg;base64,PHN2ZyB3aWR0aD0iNzIiIGhlaWdodD0iMjIuMCIgdmVyc2lvbj0iMS4xIiB4bWxucz0iaHR0cDov
+L3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5
+L3hsaW5rIj4gPHJlY3Qgd2lkdGg9IjcyIiBoZWlnaHQ9IjIyLjAiIHg9IjAuMCIgeT0iMC4wIiBy
+eD0iNS41IiBmaWxsPSIjOGFhZGY0Ij48L3JlY3Q+IDx0ZXh0IHk9IjE3IiB4PSI0LjAiIGZpbGw9
+IiMyNDI3M2EiIGZvbnQtc2l6ZT0iMTciIGZvbnQtd2VpZ2h0PSI4MDAiIGZvbnQtZmFtaWx5PSJJ
+b3NldmthIj4gRXhhbXBsZTwvdGV4dD48L3N2Zz4=" alt="Example" /></span><span style="color: #6e738d;"> <img src="data:image/svg;base64,PHN2ZyB3aWR0aD0iODEiIGhlaWdodD0iMjIuMCIgdmVyc2lvbj0iMS4xIiB4bWxucz0iaHR0cDov
+L3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5
+L3hsaW5rIj4gPHJlY3Qgd2lkdGg9IjgxIiBoZWlnaHQ9IjIyLjAiIHg9IjAuMCIgeT0iMC4wIiBy
+eD0iNS41IiBmaWxsPSIjOGFhZGY0Ij48L3JlY3Q+IDx0ZXh0IHk9IjE3IiB4PSI0LjAiIGZpbGw9
+IiMyNDI3M2EiIGZvbnQtc2l6ZT0iMTciIGZvbnQtd2VpZ2h0PSI4MDAiIGZvbnQtZmFtaWx5PSJJ
+b3NldmthIj4gRXhhbXBsZTo8L3RleHQ+PC9zdmc+" alt="Example:" /></span>
+    (<span style="color: #a6da95;">"</span><span style="color: #ff00ff;">\\</span><span style="color: #ff00ff;">(<img src="data:image/svg;base64,PHN2ZyB3aWR0aD0iNTQiIGhlaWdodD0iMjIuMCIgdmVyc2lvbj0iMS4xIiB4bWxucz0iaHR0cDov
+L3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5
+L3hsaW5rIj4gPHJlY3Qgd2lkdGg9IjU0IiBoZWlnaHQ9IjIyLjAiIHg9IjAuMCIgeT0iMC4wIiBy
+eD0iNS41IiBmaWxsPSIjYzZhMGY2Ij48L3JlY3Q+IDx0ZXh0IHk9IjE3IiB4PSI0LjAiIGZpbGw9
+IiMyNDI3M2EiIGZvbnQtc2l6ZT0iMTciIGZvbnQtd2VpZ2h0PSI4MDAiIGZvbnQtZmFtaWx5PSJJ
+b3NldmthIj4gSEFDSzo8L3RleHQ+PC9zdmc+" alt="HACK:" /></span><span style="color: #a6da95;">?</span><span style="color: #ff00ff;">\\</span><span style="color: #ff00ff;">)</span><span style="color: #a6da95;">"</span> . mauve)          <span style="color: #6e738d;">; <img src="data:image/svg;base64,PHN2ZyB3aWR0aD0iNDUiIGhlaWdodD0iMjIuMCIgdmVyc2lvbj0iMS4xIiB4bWxucz0iaHR0cDov
+L3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5
+L3hsaW5rIj4gPHJlY3Qgd2lkdGg9IjQ1IiBoZWlnaHQ9IjIyLjAiIHg9IjAuMCIgeT0iMC4wIiBy
+eD0iNS41IiBmaWxsPSIjYzZhMGY2Ij48L3JlY3Q+IDx0ZXh0IHk9IjE3IiB4PSI0LjAiIGZpbGw9
+IiMyNDI3M2EiIGZvbnQtc2l6ZT0iMTciIGZvbnQtd2VpZ2h0PSI4MDAiIGZvbnQtZmFtaWx5PSJJ
+b3NldmthIj4gSEFDSzwvdGV4dD48L3N2Zz4=" alt="HACK" /></span><span style="color: #6e738d;"> <img src="data:image/svg;base64,PHN2ZyB3aWR0aD0iNTQiIGhlaWdodD0iMjIuMCIgdmVyc2lvbj0iMS4xIiB4bWxucz0iaHR0cDov
+L3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5
+L3hsaW5rIj4gPHJlY3Qgd2lkdGg9IjU0IiBoZWlnaHQ9IjIyLjAiIHg9IjAuMCIgeT0iMC4wIiBy
+eD0iNS41IiBmaWxsPSIjYzZhMGY2Ij48L3JlY3Q+IDx0ZXh0IHk9IjE3IiB4PSI0LjAiIGZpbGw9
+IiMyNDI3M2EiIGZvbnQtc2l6ZT0iMTciIGZvbnQtd2VpZ2h0PSI4MDAiIGZvbnQtZmFtaWx5PSJJ
+b3NldmthIj4gSEFDSzo8L3RleHQ+PC9zdmc+" alt="HACK:" /></span>
+    (<span style="color: #a6da95;">"</span><span style="color: #ff00ff;">\\</span><span style="color: #ff00ff;">(<img src="data:image/svg;base64,PHN2ZyB3aWR0aD0iNTQiIGhlaWdodD0iMjIuMCIgdmVyc2lvbj0iMS4xIiB4bWxucz0iaHR0cDov
+L3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5
+L3hsaW5rIj4gPHJlY3Qgd2lkdGg9IjU0IiBoZWlnaHQ9IjIyLjAiIHg9IjAuMCIgeT0iMC4wIiBy
+eD0iNS41IiBmaWxsPSIjYzZhMGY2Ij48L3JlY3Q+IDx0ZXh0IHk9IjE3IiB4PSI0LjAiIGZpbGw9
+IiMyNDI3M2EiIGZvbnQtc2l6ZT0iMTciIGZvbnQtd2VpZ2h0PSI4MDAiIGZvbnQtZmFtaWx5PSJJ
+b3NldmthIj4gSGFjazo8L3RleHQ+PC9zdmc+" alt="Hack:" /></span><span style="color: #a6da95;">?</span><span style="color: #ff00ff;">\\</span><span style="color: #ff00ff;">)</span><span style="color: #a6da95;">"</span> . mauve)          <span style="color: #6e738d;">; <img src="data:image/svg;base64,PHN2ZyB3aWR0aD0iNDUiIGhlaWdodD0iMjIuMCIgdmVyc2lvbj0iMS4xIiB4bWxucz0iaHR0cDov
+L3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5
+L3hsaW5rIj4gPHJlY3Qgd2lkdGg9IjQ1IiBoZWlnaHQ9IjIyLjAiIHg9IjAuMCIgeT0iMC4wIiBy
+eD0iNS41IiBmaWxsPSIjYzZhMGY2Ij48L3JlY3Q+IDx0ZXh0IHk9IjE3IiB4PSI0LjAiIGZpbGw9
+IiMyNDI3M2EiIGZvbnQtc2l6ZT0iMTciIGZvbnQtd2VpZ2h0PSI4MDAiIGZvbnQtZmFtaWx5PSJJ
+b3NldmthIj4gSGFjazwvdGV4dD48L3N2Zz4=" alt="Hack" /></span><span style="color: #6e738d;"> <img src="data:image/svg;base64,PHN2ZyB3aWR0aD0iNTQiIGhlaWdodD0iMjIuMCIgdmVyc2lvbj0iMS4xIiB4bWxucz0iaHR0cDov
+L3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5
+L3hsaW5rIj4gPHJlY3Qgd2lkdGg9IjU0IiBoZWlnaHQ9IjIyLjAiIHg9IjAuMCIgeT0iMC4wIiBy
+eD0iNS41IiBmaWxsPSIjYzZhMGY2Ij48L3JlY3Q+IDx0ZXh0IHk9IjE3IiB4PSI0LjAiIGZpbGw9
+IiMyNDI3M2EiIGZvbnQtc2l6ZT0iMTciIGZvbnQtd2VpZ2h0PSI4MDAiIGZvbnQtZmFtaWx5PSJJ
+b3NldmthIj4gSGFjazo8L3RleHQ+PC9zdmc+" alt="Hack:" /></span>
+    (<span style="color: #a6da95;">"</span><span style="color: #ff00ff;">\\</span><span style="color: #ff00ff;">(<img src="data:image/svg;base64,PHN2ZyB3aWR0aD0iOTAiIGhlaWdodD0iMjIuMCIgdmVyc2lvbj0iMS4xIiB4bWxucz0iaHR0cDov
+L3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5
+L3hsaW5rIj4gPHJlY3Qgd2lkdGg9IjkwIiBoZWlnaHQ9IjIyLjAiIHg9IjAuMCIgeT0iMC4wIiBy
+eD0iNS41IiBmaWxsPSIjZjVhOTdmIj48L3JlY3Q+IDx0ZXh0IHk9IjE3IiB4PSI0LjAiIGZpbGw9
+IiMyNDI3M2EiIGZvbnQtc2l6ZT0iMTciIGZvbnQtd2VpZ2h0PSI4MDAiIGZvbnQtZmFtaWx5PSJJ
+b3NldmthIj4gSU1QT1JUQU5UPC90ZXh0Pjwvc3ZnPg==" alt="IMPORTANT" /></span><span style="color: #a6da95;">[:!]?</span><span style="color: #ff00ff;">\\</span><span style="color: #ff00ff;">)</span><span style="color: #a6da95;">"</span> . peach)  <span style="color: #6e738d;">; <img src="data:image/svg;base64,PHN2ZyB3aWR0aD0iOTAiIGhlaWdodD0iMjIuMCIgdmVyc2lvbj0iMS4xIiB4bWxucz0iaHR0cDov
+L3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5
+L3hsaW5rIj4gPHJlY3Qgd2lkdGg9IjkwIiBoZWlnaHQ9IjIyLjAiIHg9IjAuMCIgeT0iMC4wIiBy
+eD0iNS41IiBmaWxsPSIjZjVhOTdmIj48L3JlY3Q+IDx0ZXh0IHk9IjE3IiB4PSI0LjAiIGZpbGw9
+IiMyNDI3M2EiIGZvbnQtc2l6ZT0iMTciIGZvbnQtd2VpZ2h0PSI4MDAiIGZvbnQtZmFtaWx5PSJJ
+b3NldmthIj4gSU1QT1JUQU5UPC90ZXh0Pjwvc3ZnPg==" alt="IMPORTANT" /></span><span style="color: #6e738d;"> <img src="data:image/svg;base64,PHN2ZyB3aWR0aD0iOTkiIGhlaWdodD0iMjIuMCIgdmVyc2lvbj0iMS4xIiB4bWxucz0iaHR0cDov
+L3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5
+L3hsaW5rIj4gPHJlY3Qgd2lkdGg9Ijk5IiBoZWlnaHQ9IjIyLjAiIHg9IjAuMCIgeT0iMC4wIiBy
+eD0iNS41IiBmaWxsPSIjZjVhOTdmIj48L3JlY3Q+IDx0ZXh0IHk9IjE3IiB4PSI0LjAiIGZpbGw9
+IiMyNDI3M2EiIGZvbnQtc2l6ZT0iMTciIGZvbnQtd2VpZ2h0PSI4MDAiIGZvbnQtZmFtaWx5PSJJ
+b3NldmthIj4gSU1QT1JUQU5UITwvdGV4dD48L3N2Zz4=" alt="IMPORTANT!" /> <img src="data:image/svg;base64,PHN2ZyB3aWR0aD0iOTkiIGhlaWdodD0iMjIuMCIgdmVyc2lvbj0iMS4xIiB4bWxucz0iaHR0cDov
+L3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5
+L3hsaW5rIj4gPHJlY3Qgd2lkdGg9Ijk5IiBoZWlnaHQ9IjIyLjAiIHg9IjAuMCIgeT0iMC4wIiBy
+eD0iNS41IiBmaWxsPSIjZjVhOTdmIj48L3JlY3Q+IDx0ZXh0IHk9IjE3IiB4PSI0LjAiIGZpbGw9
+IiMyNDI3M2EiIGZvbnQtc2l6ZT0iMTciIGZvbnQtd2VpZ2h0PSI4MDAiIGZvbnQtZmFtaWx5PSJJ
+b3NldmthIj4gSU1QT1JUQU5UOjwvdGV4dD48L3N2Zz4=" alt="IMPORTANT:" /></span>
+    (<span style="color: #a6da95;">"</span><span style="color: #ff00ff;">\\</span><span style="color: #ff00ff;">(<img src="data:image/svg;base64,PHN2ZyB3aWR0aD0iOTAiIGhlaWdodD0iMjIuMCIgdmVyc2lvbj0iMS4xIiB4bWxucz0iaHR0cDov
+L3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5
+L3hsaW5rIj4gPHJlY3Qgd2lkdGg9IjkwIiBoZWlnaHQ9IjIyLjAiIHg9IjAuMCIgeT0iMC4wIiBy
+eD0iNS41IiBmaWxsPSIjZjVhOTdmIj48L3JlY3Q+IDx0ZXh0IHk9IjE3IiB4PSI0LjAiIGZpbGw9
+IiMyNDI3M2EiIGZvbnQtc2l6ZT0iMTciIGZvbnQtd2VpZ2h0PSI4MDAiIGZvbnQtZmFtaWx5PSJJ
+b3NldmthIj4gSW1wb3J0YW50PC90ZXh0Pjwvc3ZnPg==" alt="Important" /></span><span style="color: #a6da95;">[:!]?</span><span style="color: #ff00ff;">\\</span><span style="color: #ff00ff;">)</span><span style="color: #a6da95;">"</span> . peach)  <span style="color: #6e738d;">; <img src="data:image/svg;base64,PHN2ZyB3aWR0aD0iOTAiIGhlaWdodD0iMjIuMCIgdmVyc2lvbj0iMS4xIiB4bWxucz0iaHR0cDov
+L3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5
+L3hsaW5rIj4gPHJlY3Qgd2lkdGg9IjkwIiBoZWlnaHQ9IjIyLjAiIHg9IjAuMCIgeT0iMC4wIiBy
+eD0iNS41IiBmaWxsPSIjZjVhOTdmIj48L3JlY3Q+IDx0ZXh0IHk9IjE3IiB4PSI0LjAiIGZpbGw9
+IiMyNDI3M2EiIGZvbnQtc2l6ZT0iMTciIGZvbnQtd2VpZ2h0PSI4MDAiIGZvbnQtZmFtaWx5PSJJ
+b3NldmthIj4gSW1wb3J0YW50PC90ZXh0Pjwvc3ZnPg==" alt="Important" /></span><span style="color: #6e738d;"> <img src="data:image/svg;base64,PHN2ZyB3aWR0aD0iOTkiIGhlaWdodD0iMjIuMCIgdmVyc2lvbj0iMS4xIiB4bWxucz0iaHR0cDov
+L3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5
+L3hsaW5rIj4gPHJlY3Qgd2lkdGg9Ijk5IiBoZWlnaHQ9IjIyLjAiIHg9IjAuMCIgeT0iMC4wIiBy
+eD0iNS41IiBmaWxsPSIjZjVhOTdmIj48L3JlY3Q+IDx0ZXh0IHk9IjE3IiB4PSI0LjAiIGZpbGw9
+IiMyNDI3M2EiIGZvbnQtc2l6ZT0iMTciIGZvbnQtd2VpZ2h0PSI4MDAiIGZvbnQtZmFtaWx5PSJJ
+b3NldmthIj4gSW1wb3J0YW50ITwvdGV4dD48L3N2Zz4=" alt="Important!" /> <img src="data:image/svg;base64,PHN2ZyB3aWR0aD0iOTkiIGhlaWdodD0iMjIuMCIgdmVyc2lvbj0iMS4xIiB4bWxucz0iaHR0cDov
+L3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5
+L3hsaW5rIj4gPHJlY3Qgd2lkdGg9Ijk5IiBoZWlnaHQ9IjIyLjAiIHg9IjAuMCIgeT0iMC4wIiBy
+eD0iNS41IiBmaWxsPSIjZjVhOTdmIj48L3JlY3Q+IDx0ZXh0IHk9IjE3IiB4PSI0LjAiIGZpbGw9
+IiMyNDI3M2EiIGZvbnQtc2l6ZT0iMTciIGZvbnQtd2VpZ2h0PSI4MDAiIGZvbnQtZmFtaWx5PSJJ
+b3NldmthIj4gSW1wb3J0YW50OjwvdGV4dD48L3N2Zz4=" alt="Important:" /></span>
+    (<span style="color: #a6da95;">"<img src="data:image/svg;base64,PHN2ZyB3aWR0aD0iNDUiIGhlaWdodD0iMjIuMCIgdmVyc2lvbj0iMS4xIiB4bWxucz0iaHR0cDov
+L3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5
+L3hsaW5rIj4gPHJlY3Qgd2lkdGg9IjQ1IiBoZWlnaHQ9IjIyLjAiIHg9IjAuMCIgeT0iMC4wIiBy
+eD0iNS41IiBmaWxsPSIjZWVkNDlmIj48L3JlY3Q+IDx0ZXh0IHk9IjE3IiB4PSI0LjAiIGZpbGw9
+IiMyNDI3M2EiIGZvbnQtc2l6ZT0iMTciIGZvbnQtd2VpZ2h0PSI4MDAiIGZvbnQtZmFtaWx5PSJJ
+b3NldmthIj4gV0FSTjwvdGV4dD48L3N2Zz4=" alt="WARN" />"</span> . yellow)                 <span style="color: #6e738d;">; <img src="data:image/svg;base64,PHN2ZyB3aWR0aD0iNDUiIGhlaWdodD0iMjIuMCIgdmVyc2lvbj0iMS4xIiB4bWxucz0iaHR0cDov
+L3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5
+L3hsaW5rIj4gPHJlY3Qgd2lkdGg9IjQ1IiBoZWlnaHQ9IjIyLjAiIHg9IjAuMCIgeT0iMC4wIiBy
+eD0iNS41IiBmaWxsPSIjZWVkNDlmIj48L3JlY3Q+IDx0ZXh0IHk9IjE3IiB4PSI0LjAiIGZpbGw9
+IiMyNDI3M2EiIGZvbnQtc2l6ZT0iMTciIGZvbnQtd2VpZ2h0PSI4MDAiIGZvbnQtZmFtaWx5PSJJ
+b3NldmthIj4gV0FSTjwvdGV4dD48L3N2Zz4=" alt="WARN" /></span>
+    (<span style="color: #a6da95;">"</span><span style="color: #ff00ff;">\\</span><span style="color: #ff00ff;">(<img src="data:image/svg;base64,PHN2ZyB3aWR0aD0iNzIiIGhlaWdodD0iMjIuMCIgdmVyc2lvbj0iMS4xIiB4bWxucz0iaHR0cDov
+L3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5
+L3hsaW5rIj4gPHJlY3Qgd2lkdGg9IjcyIiBoZWlnaHQ9IjIyLjAiIHg9IjAuMCIgeT0iMC4wIiBy
+eD0iNS41IiBmaWxsPSIjZWVkNDlmIj48L3JlY3Q+IDx0ZXh0IHk9IjE3IiB4PSI0LjAiIGZpbGw9
+IiMyNDI3M2EiIGZvbnQtc2l6ZT0iMTciIGZvbnQtd2VpZ2h0PSI4MDAiIGZvbnQtZmFtaWx5PSJJ
+b3NldmthIj4gV2FybmluZzwvdGV4dD48L3N2Zz4=" alt="Warning" /></span><span style="color: #a6da95;">[:!]?</span><span style="color: #ff00ff;">\\</span><span style="color: #ff00ff;">)</span><span style="color: #a6da95;">"</span> . yellow))) <span style="color: #6e738d;">; <img src="data:image/svg;base64,PHN2ZyB3aWR0aD0iNzIiIGhlaWdodD0iMjIuMCIgdmVyc2lvbj0iMS4xIiB4bWxucz0iaHR0cDov
+L3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5
+L3hsaW5rIj4gPHJlY3Qgd2lkdGg9IjcyIiBoZWlnaHQ9IjIyLjAiIHg9IjAuMCIgeT0iMC4wIiBy
+eD0iNS41IiBmaWxsPSIjZWVkNDlmIj48L3JlY3Q+IDx0ZXh0IHk9IjE3IiB4PSI0LjAiIGZpbGw9
+IiMyNDI3M2EiIGZvbnQtc2l6ZT0iMTciIGZvbnQtd2VpZ2h0PSI4MDAiIGZvbnQtZmFtaWx5PSJJ
+b3NldmthIj4gV2FybmluZzwvdGV4dD48L3N2Zz4=" alt="Warning" /></span><span style="color: #6e738d;"> <img src="data:image/svg;base64,PHN2ZyB3aWR0aD0iODEiIGhlaWdodD0iMjIuMCIgdmVyc2lvbj0iMS4xIiB4bWxucz0iaHR0cDov
+L3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5
+L3hsaW5rIj4gPHJlY3Qgd2lkdGg9IjgxIiBoZWlnaHQ9IjIyLjAiIHg9IjAuMCIgeT0iMC4wIiBy
+eD0iNS41IiBmaWxsPSIjZWVkNDlmIj48L3JlY3Q+IDx0ZXh0IHk9IjE3IiB4PSI0LjAiIGZpbGw9
+IiMyNDI3M2EiIGZvbnQtc2l6ZT0iMTciIGZvbnQtd2VpZ2h0PSI4MDAiIGZvbnQtZmFtaWx5PSJJ
+b3NldmthIj4gV2FybmluZyE8L3RleHQ+PC9zdmc+" alt="Warning!" /> <img src="data:image/svg;base64,PHN2ZyB3aWR0aD0iODEiIGhlaWdodD0iMjIuMCIgdmVyc2lvbj0iMS4xIiB4bWxucz0iaHR0cDov
+L3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5
+L3hsaW5rIj4gPHJlY3Qgd2lkdGg9IjgxIiBoZWlnaHQ9IjIyLjAiIHg9IjAuMCIgeT0iMC4wIiBy
+eD0iNS41IiBmaWxsPSIjZWVkNDlmIj48L3JlY3Q+IDx0ZXh0IHk9IjE3IiB4PSI0LjAiIGZpbGw9
+IiMyNDI3M2EiIGZvbnQtc2l6ZT0iMTciIGZvbnQtd2VpZ2h0PSI4MDAiIGZvbnQtZmFtaWx5PSJJ
+b3NldmthIj4gV2FybmluZzo8L3RleHQ+PC9zdmc+" alt="Warning:" /></span>
+</pre>
+</div>
+
+<p>
+Define the default style. It's necessary to use
+<code>(getnix "tagsFontFamily")</code> instead of <code>(getnix "fontFamily")</code> because my default
+font causes some strange kerning issues.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">  (<span style="color: #c6a0f6;">setq</span> svg-lib-style-default <span style="color: #c6a0f6;">`</span>(
+    <span style="color: #ed8796;">:background</span> ,(catppuccin-get-color <span style="color: #c6a0f6;">'</span><span style="color: #f5a97f;">text</span>)
+    <span style="color: #ed8796;">:foreground</span> ,(catppuccin-get-color <span style="color: #c6a0f6;">'</span><span style="color: #f5a97f;">base</span>)
+    <span style="color: #ed8796;">:font-family</span> (getnix <span style="color: #a6da95;">"tagsFontFamily"</span>)
+    <span style="color: #ed8796;">:font-size</span> (getnix <span style="color: #a6da95;">"fontSize"</span>)
+    <span style="color: #ed8796;">:font-weight</span> 800
+    <span style="color: #ed8796;">:padding</span> 1
+    <span style="color: #ed8796;">:margin</span> 0
+    <span style="color: #ed8796;">:stroke</span> 0
+    <span style="color: #ed8796;">:radius</span> 5.5
+    <span style="color: #ed8796;">:alignment</span> 0.5
+    <span style="color: #ed8796;">:width</span> 20
+    <span style="color: #ed8796;">:height</span> 1.0
+    <span style="color: #ed8796;">:scale</span> 1.0
+    <span style="color: #ed8796;">:ascent</span> center
+    <span style="color: #ed8796;">:collection</span> <span style="color: #a6da95;">"material"</span>))
+</pre>
+</div>
+
+<p>
+Create the tags by mapping the previously defined alist of patterns
+and color.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">  (<span style="color: #c6a0f6;">setq</span> svg-tag-tags (<span style="color: #c6a0f6;">--map</span>
+    <span style="color: #c6a0f6;">`</span>(,(car it) . ((<span style="color: #c6a0f6;">lambda</span> (tag) (svg-lib-tag tag svg-lib-style-default
+      <span style="color: #ed8796;">:background</span> ,(catppuccin-get-color (cdr it))))))
+    my:svg-tags))
+</pre>
+</div>
+
+<p>
+Add advice to suppress the constant "SVG tag mode on" messages.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">  (advice-add <span style="color: #c6a0f6;">'</span><span style="color: #f5a97f;">svg-tag-mode-on</span> <span style="color: #ed8796;">:around</span> <span style="color: #c6a0f6;">#'</span><span style="color: #f5a97f;">my:advice:be-quiet</span>)
+</pre>
+</div>
+
+<p>
+Finally, enable the SVG tags globally.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">  (global-svg-tag-mode))
+<span style="color: #6e738d;">;; </span><span style="color: #6e738d;">&lt;/config&gt;</span>
+</pre>
+</div>
+</div>
+
+<div id="outline-container-org86432c8" class="outline-4">
+<h4 id="org86432c8"><span class="todo TODO">TODO</span> Add progress bar, tags, priority</h4>
+<div class="outline-text-4" id="text-org86432c8">
+<p>
+<a href="https://github.com/rougier/svg-tag-mode/blob/main/examples/example-2.el">https://github.com/rougier/svg-tag-mode/blob/main/examples/example-2.el</a>
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgf4ba130" class="outline-3">
+<h3 id="orgf4ba130">Format-all</h3>
+<div class="outline-text-3" id="text-orgf4ba130">
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #c6a0f6;">use-package</span> <span style="color: #f5a97f;">format-all</span>
+  <span style="color: #ed8796;">:ensure</span> t
+  <span style="color: #ed8796;">:hook</span> (prog-mode . format-all-mode)
+  <span style="color: #ed8796;">:config</span>
+  (<span style="color: #c6a0f6;">setq</span> format-all-show-errors <span style="color: #c6a0f6;">'</span><span style="color: #f5a97f;">never</span>))
+</pre>
+</div>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org0250191" class="outline-2">
+<h2 id="org0250191">Major Modes</h2>
+<div class="outline-text-2" id="text-org0250191">
+</div>
+<div id="outline-container-orga968f8e" class="outline-3">
+<h3 id="orga968f8e">WIP English</h3>
+<div class="outline-text-3" id="text-orga968f8e">
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #c6a0f6;">use-package</span> <span style="color: #f5a97f;">langtool</span>
+  <span style="color: #ed8796;">:ensure</span> t
+  <span style="color: #ed8796;">:init</span>
+  (<span style="color: #c6a0f6;">setq</span> langtool-bin (executable-find <span style="color: #a6da95;">"languagetool-commandline"</span>))
+  <span style="color: #ed8796;">:config</span>
+  (add-hook <span style="color: #c6a0f6;">'</span><span style="color: #f5a97f;">langtool-error-exists-hook</span> <span style="color: #c6a0f6;">'</span><span style="color: #f5a97f;">my:remove-langtool-overlays</span>))
+
+(<span style="color: #c6a0f6;">setq</span> my:code-properties <span style="color: #c6a0f6;">'</span>(font-lock-fontified
+                           src-block))
+
+(<span style="color: #c6a0f6;">defun</span> <span style="color: #8aadf4;">my:has-code-property-p</span> (pos)
+  (<span style="color: #c6a0f6;">--any?</span> (get-text-property pos it) my:code-properties))
+
+(<span style="color: #c6a0f6;">defun</span> <span style="color: #8aadf4;">my:remove-langtool-overlays-p</span> (overlay)
+  (<span style="color: #c6a0f6;">let*</span> ((pos (overlay-start overlay))
+         (faces (get-text-property pos <span style="color: #c6a0f6;">'</span><span style="color: #f5a97f;">face</span>)))
+    (my:has-code-property-p pos)
+))
+
+(<span style="color: #c6a0f6;">defun</span> <span style="color: #8aadf4;">my:remove-langtool-overlays</span> ()
+  (-each (langtool--overlays-region (buffer-end -1) (buffer-end +1))
+    (<span style="color: #c6a0f6;">lambda</span> (overlay)
+      (<span style="color: #c6a0f6;">when</span> (my:remove-langtool-overlays-p overlay)
+        (delete-overlay overlay)))))
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org610594d" class="outline-3">
+<h3 id="org610594d">Emacs Lisp</h3>
+<div class="outline-text-3" id="text-org610594d">
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #c6a0f6;">use-package</span> <span style="color: #f5a97f;">elisp-def</span> <span style="color: #ed8796;">:ensure</span> t)
+
+(<span style="color: #c6a0f6;">use-package</span> <span style="color: #f5a97f;">highlight-quoted</span>
+  <span style="color: #ed8796;">:ensure</span> t
+  <span style="color: #ed8796;">:config</span>
+  (add-hook <span style="color: #c6a0f6;">'</span><span style="color: #f5a97f;">emacs-lisp-mode-hook</span> <span style="color: #c6a0f6;">'</span><span style="color: #f5a97f;">highlight-quoted-mode</span>))
+
+(<span style="color: #c6a0f6;">use-package</span> <span style="color: #f5a97f;">flycheck</span>
+  <span style="color: #ed8796;">:ensure</span> t
+  <span style="color: #ed8796;">:init</span> (global-flycheck-mode))
+
+<span style="color: #6e738d;">;;</span><span style="color: #6e738d;">(use-package parinfer-rust-mode</span>
+<span style="color: #6e738d;">;;  </span><span style="color: #6e738d;">:ensure t</span>
+<span style="color: #6e738d;">;;  </span><span style="color: #6e738d;">:hook emacs-lisp-mode</span>
+<span style="color: #6e738d;">;;  </span><span style="color: #6e738d;">:init</span>
+<span style="color: #6e738d;">;;  </span><span style="color: #6e738d;">(setq parinfer-rust-library (getnix "parinferRustLibrary")))</span>
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgf1f6fe1" class="outline-3">
+<h3 id="orgf1f6fe1">Org</h3>
+<div class="outline-text-3" id="text-orgf1f6fe1">
+<p>
+Org is like Markdown but a lot better.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #c6a0f6;">use-package</span> <span style="color: #f5a97f;">htmlize</span> <span style="color: #ed8796;">:ensure</span> t)
+(<span style="color: #c6a0f6;">use-package</span> <span style="color: #f5a97f;">org</span>
+  <span style="color: #ed8796;">:ensure</span> t
+  <span style="color: #ed8796;">:after</span> evil htmlize
+  <span style="color: #ed8796;">:config</span>
+  <span style="color: #6e738d;">;; </span><span style="color: #6e738d;">&lt;config&gt;</span>
+</pre>
+</div>
+
+<p>
+Append custom <code>css</code> to make exporting from <code>org</code> into <code>html</code> match our
+editor theme.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #c6a0f6;">setq</span> org-html-head
+    (concat <span style="color: #a6da95;">"&lt;style&gt;"</span> (getnix <span style="color: #a6da95;">"exportCSS"</span>) <span style="color: #a6da95;">"&lt;/style&gt;"</span>))
+</pre>
+</div>
+
+<p>
+Change the default appearance of org documents.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #c6a0f6;">setq</span> org-indent-mode-turns-on-hiding-stars nil
+      org-startup-indented t
+      org-startup-folded <span style="color: #c6a0f6;">'</span><span style="color: #f5a97f;">content</span>)
+
+(set-face-attribute <span style="color: #c6a0f6;">'</span><span style="color: #f5a97f;">org-block</span> nil
+  <span style="color: #ed8796;">:foreground</span> my:code-color))
+<span style="color: #6e738d;">;; </span><span style="color: #6e738d;">&lt;/config&gt;</span>
+</pre>
+</div>
+
+<p>
+Fix odd indentation behavior in src blocks.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #c6a0f6;">setq</span> org-src-preserve-indentation t
+      org-edit-src-content-indentation 0)
+</pre>
+</div>
+
+<p>
+Change the <code>html</code> export preamble and postamble.
+</p>
+
+<ul class="org-ul">
+<li>TODO Figure out how to hide the title for html exports only.</li>
+</ul>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #c6a0f6;">setq</span> org-export-with-title nil)
+(<span style="color: #c6a0f6;">setq</span> org-html-preamble-format
+      <span style="color: #c6a0f6;">'</span>((<span style="color: #a6da95;">"en"</span> <span style="color: #a6da95;">"&lt;h1 class=\"title\"&gt;%t&lt;/h1&gt;\n&lt;p class=\"author\"&gt;by %a&lt;/p&gt;"</span>)))
+
+(<span style="color: #c6a0f6;">setq</span> org-html-postamble t
+      org-html-postamble-format <span style="color: #c6a0f6;">'</span>((<span style="color: #a6da95;">"en"</span> <span style="color: #a6da95;">"&lt;p class=\"date\"&gt;Export time: %T&lt;/p&gt;"</span>)))
+</pre>
+</div>
+</div>
+
+<div id="outline-container-org8ee6add" class="outline-4">
+<h4 id="org8ee6add">WIP Hydra</h4>
+<div class="outline-text-4" id="text-org8ee6add">
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #c6a0f6;">defun</span> <span style="color: #8aadf4;">my:org-toggle-emphasis-markers</span> ()
+  <span style="color: #6e738d;">"Toggle emphasis markers [*/_=~+]"</span>
+  (<span style="color: #c6a0f6;">interactive</span>)
+  (<span style="color: #c6a0f6;">setq</span> org-hide-emphasis-markers (not org-hide-emphasis-markers)))
+
+(<span style="color: #c6a0f6;">pretty-hydra-define</span> hydra:org
+  (<span style="color: #ed8796;">:exit</span> t <span style="color: #ed8796;">:idle</span> 0.25) 
+  (<span style="color: #a6da95;">"Toggle"</span>
+   ((<span style="color: #a6da95;">"l"</span> org-toggle-link-display        <span style="color: #a6da95;">"Link display"</span>)
+    (<span style="color: #a6da95;">"E"</span> my:org-toggle-emphasis-markers <span style="color: #a6da95;">"Emphasis markers"</span>)
+    (<span style="color: #a6da95;">"c"</span> org-toggle-checkbox            <span style="color: #a6da95;">"Checkbox"</span>)
+    (<span style="color: #a6da95;">"i"</span> org-toggle-inline-images       <span style="color: #a6da95;">"Inline images"</span>)
+    (<span style="color: #a6da95;">"n"</span> org-toggle-narrow-to-subtree   <span style="color: #a6da95;">"Narrow to subtree"</span>)
+    (<span style="color: #a6da95;">"p"</span> org-toggle-pretty-entities     <span style="color: #a6da95;">"Pretty entities"</span>))
+   <span style="color: #a6da95;">"Insert"</span>
+   ((<span style="color: #a6da95;">"L"</span> org-insert-link             <span style="color: #a6da95;">"Link"</span>)
+    (<span style="color: #a6da95;">"s"</span> org-insert-store-link       <span style="color: #a6da95;">"(Store link to here)"</span>)
+    (<span style="color: #a6da95;">"S"</span> org-insert-last-stored-link <span style="color: #a6da95;">"Last stored link"</span>)
+    (<span style="color: #a6da95;">"t"</span> org-time-stamp              <span style="color: #a6da95;">"Timestamp"</span>)
+    (<span style="color: #a6da95;">"t"</span> org-insert-drawer           <span style="color: #a6da95;">"Drawer"</span>)
+    (<span style="color: #a6da95;">"T"</span> org-table-create            <span style="color: #a6da95;">"Table"</span>))
+   <span style="color: #a6da95;">"Table"</span>
+   ((<span style="color: #a6da95;">"a"</span> org-table-align         <span style="color: #a6da95;">"Align"</span>)
+    (<span style="color: #a6da95;">"R"</span> org-table-insert-row    <span style="color: #a6da95;">"Insert row"</span>    <span style="color: #ed8796;">:exit</span> nil)
+    (<span style="color: #a6da95;">"C"</span> org-table-insert-column <span style="color: #a6da95;">"Insert column"</span> <span style="color: #ed8796;">:exit</span> nil)
+    (<span style="color: #a6da95;">"k"</span> org-table-kill-row      <span style="color: #a6da95;">"Kill row"</span>)
+    (<span style="color: #a6da95;">"K"</span> org-table-kill-column   <span style="color: #a6da95;">"Kill column"</span>))
+   <span style="color: #a6da95;">"Hydra"</span>
+   ((<span style="color: #a6da95;">"e"</span> hydra:org-emphasize/body <span style="color: #a6da95;">"Emphasize"</span>))))
+
+(<span style="color: #c6a0f6;">pretty-hydra-define</span> hydra:org-emphasize
+  (<span style="color: #ed8796;">:exit</span> t <span style="color: #ed8796;">:idle</span> 0.25)
+  (<span style="color: #a6da95;">"Mnemonic"</span>
+   ((<span style="color: #a6da95;">"x"</span> (org-emphasize ?\s) <span style="color: #a6da95;">"Clear"</span>)
+    (<span style="color: #a6da95;">"b"</span> (org-emphasize ?*)  <span style="color: #a6da95;">"Bold"</span>)
+    (<span style="color: #a6da95;">"i"</span> (org-emphasize ?/)  <span style="color: #a6da95;">"Italic"</span>)
+    (<span style="color: #a6da95;">"u"</span> (org-emphasize ?_)  <span style="color: #a6da95;">"Underlined"</span>)
+    (<span style="color: #a6da95;">"v"</span> (org-emphasize ?=)  <span style="color: #a6da95;">"Verbatim"</span>)
+    (<span style="color: #a6da95;">"c"</span> (org-emphasize ?~)  <span style="color: #a6da95;">"Code"</span>)
+    (<span style="color: #a6da95;">"s"</span> (org-emphasize ?+)  <span style="color: #a6da95;">"Strike-through"</span>))
+   <span style="color: #a6da95;">"Literal"</span>
+   ((<span style="color: #a6da95;">"*"</span> (org-emphasize ?*)  <span style="color: #a6da95;">"Bold"</span>)
+    (<span style="color: #a6da95;">"/"</span> (org-emphasize ?/)  <span style="color: #a6da95;">"Italic"</span>)
+    (<span style="color: #a6da95;">"_"</span> (org-emphasize ?_)  <span style="color: #a6da95;">"Underlined"</span>)
+    (<span style="color: #a6da95;">"="</span> (org-emphasize ?=)  <span style="color: #a6da95;">"Verbatim"</span>)
+    (<span style="color: #a6da95;">"~"</span> (org-emphasize ?~)  <span style="color: #a6da95;">"Code"</span>)
+    (<span style="color: #a6da95;">"+"</span> (org-emphasize ?+)  <span style="color: #a6da95;">"Strike-through"</span>))))
+</pre>
+</div>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgbc0b554" class="outline-3">
+<h3 id="orgbc0b554">Nix</h3>
+<div class="outline-text-3" id="text-orgbc0b554">
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #c6a0f6;">use-package</span> <span style="color: #f5a97f;">nix-mode</span>
+  <span style="color: #ed8796;">:ensure</span> t
+  <span style="color: #ed8796;">:mode</span> <span style="color: #a6da95;">"\\.nix\\'"</span>
+  <span style="color: #ed8796;">:hook</span> (nix-mode . my:nix-mode-hook))
+
+(<span style="color: #c6a0f6;">defun</span> <span style="color: #8aadf4;">my:nix-mode-hook</span> ()
+  (<span style="color: #c6a0f6;">setq-local</span> format-all-formatters <span style="color: #c6a0f6;">'</span>((<span style="color: #a6da95;">"Nix"</span> nixfmt))))
+</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div id="postamble" class="status">
+<p class="date">Export time: 2023-07-02 Sun 19:42</p>
+</div>
+</body>
+</html>

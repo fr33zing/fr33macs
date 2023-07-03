@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+
+echo "--- RUNNING PRE-COMMIT HOOK ---"
+
+echo "Creating virtual display"
+Xvfb :99 -screen 0 1024x768x16 &
+
+echo "Exporting config.org to config.html"
+nix run . -- \
+  --display :99 \
+  --visit ./config.org \
+  --eval "(progn (org-html-export-to-html) (kill-emacs))"
+
+echo "Removing virtual display"
+kill $!
+
+echo "Staging config.html"
+git add config.html
+
+echo "--- PRE-COMMIT HOOK FINISHED ---"

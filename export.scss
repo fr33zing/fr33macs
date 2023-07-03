@@ -195,9 +195,11 @@ ul {
 @media screen and (min-width: $total-width + $toc-spacing * 2) {
     #table-of-contents {
         width: $toc-width;
-	    padding-right: $toc-spacing;
+        margin-right: $toc-spacing;
         position: fixed;
-        transform: translateX(-100%);
+        transform: translateX(calc(-100% - #{$toc-spacing}));
+        max-height: 90vh;
+        overflow: scroll;
     }
 }
 

@@ -132,12 +132,33 @@ a {
     color: $blue;
 }
 
-
 ul {
     font-family: $font-monospace;
     list-style-type: "* ";
     padding-left: 1.05em;
 }
+
+//
+// Keywords
+//
+
+.todo {
+    color: $base;
+    background: $text;
+    font-family: inherit;
+    font-size: inherit;
+    padding: 0.075em 0.2em 0 0.2em;
+    border-radius: 0.25em;
+    font-weight: bold;
+
+    &.TODO { background: $sapphire; }
+    &.WIP { background: $teal; }
+    &.DONE { background: $green; }
+}
+
+//
+// Table of contents
+//
 
 @mixin toc-color($depth) {
     ul {
@@ -169,7 +190,6 @@ ul {
 }
 
 @include toc-color(1);
-
 
 // Fix table of contents to left side when above a certain screen width
 @media screen and (min-width: $total-width + $toc-spacing * 2) {

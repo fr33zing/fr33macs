@@ -877,6 +877,9 @@ Change the ~html~ export preamble and postamble.
 
 (setq org-html-postamble t
       org-html-postamble-format '(("en" "<p class=\"date\">Export time: %T</p>")))
+
+(setq org-todo-keywords
+      '((sequence "TODO" "WIP" "|" "DONE")))
 #+END_SRC
 
 *** WIP Hydra

@@ -1,0 +1,189 @@
+// Catppuccin Macchiato
+// https://github.com/catppuccin/palette/blob/main/scss/_macchiato.scss
+$rosewater: #f4dbd6;
+$flamingo: #f0c6c6;
+$pink: #f5bde6;
+$mauve: #c6a0f6;
+$red: #ed8796;
+$maroon: #ee99a0;
+$peach: #f5a97f;
+$yellow: #eed49f;
+$green: #a6da95;
+$teal: #8bd5ca;
+$sky: #91d7e3;
+$sapphire: #7dc4e4;
+$blue: #8aadf4;
+$lavender: #b7bdf8;
+$text: #cad3f5;
+$subtext1: #b8c0e0;
+$subtext0: #a5adcb;
+$overlay2: #939ab7;
+$overlay1: #8087a2;
+$overlay0: #6e738d;
+$surface2: #5b6078;
+$surface1: #494d64;
+$surface0: #363a4f;
+$base: #24273a;
+$mantle: #1e2030;
+$crust: #181926;
+
+$font-sans: Verdana, sans-serif;
+$font-monospace: Iosevka Comfy, Iosevka, Fira Code, DejaVu Sans Mono, monospace;
+$indent: 2rem;
+$margin-above-heading: 3rem;
+$margin-below-heading: 1.5rem;
+$inline-monospace-padding: 0.05em 0.3em;
+$heading-colors: $sapphire $red $peach $yellow $green $sapphire $lavender $mauve;
+$heading-font-size-max: 2em;
+$heading-font-size-min: 1em;
+$heading-font-size-step: 0.25em;
+$content-width: 60em;
+$toc-width: 18em;
+$toc-spacing: 4em;
+$total-width: $content-width + $toc-width + $toc-spacing;
+
+body {
+    font-family: $font-sans;
+    background: $base;
+    color: $text;
+    line-height: 1.5;
+    overflow-x: hidden;
+}
+
+#content {
+    max-width: $content-width;
+}
+
+h1, h2, h3, h4, h5 {
+    margin-top: 0;
+    margin-bottom: $margin-below-heading;
+    font-family: $font-monospace;
+
+    &:not(h1)::before {
+        content: "* ";
+    }
+}
+
+.outline-1, .outline-2, .outline-3, .outline-4, .outline-5 {
+    margin: $margin-below-heading 0 0 $indent;
+
+    + div {
+        margin-top: $margin-above-heading;
+    }
+
+    ul {
+        color: unset;
+    }
+}
+
+.outline-1, .outline-2 {
+    margin-left: 0;
+}
+
+@for $i from 1 through 5 {
+    h#{$i} {
+        color: nth($heading-colors, $i);
+        font-size: max(
+            2em - $heading-font-size-step * ($i - 1),
+            $heading-font-size-min
+        );
+    }
+}
+
+#preamble *, #postamble * {
+    font-family: $font-monospace;
+    margin: 0 !important;
+    text-align: center;
+}
+
+.author {
+    color: $teal;
+    font-size: 1.25em !important;
+}
+
+#postamble {
+    margin-top: 5em;
+    color: $surface2;
+}
+
+pre, code {
+    font-family: $font-monospace;
+    background: $mantle;
+    border: 0;
+    border-radius: 0;
+}
+
+pre {
+    margin: 1.2em 0;
+
+    &.src::before {
+        padding: $inline-monospace-padding;
+        background: $crust;
+        color: $overlay0;
+    }
+}
+
+code {
+    padding: $inline-monospace-padding;
+    color: $green;
+}
+
+a {
+    color: $blue;
+}
+
+
+ul {
+    font-family: $font-monospace;
+    list-style-type: "* ";
+    padding-left: 1.05em;
+}
+
+@mixin toc-color($depth) {
+    ul {
+        color: nth($heading-colors, $depth + 1);
+
+        @if $depth < (length($heading-colors) - 1) {
+            @include toc-color($depth + 1);
+        }
+    }
+}
+
+#table-of-contents {
+    a {
+        color: unset;
+        text-decoration: none;
+
+        &:hover {
+            text-decoration: underline;
+        }
+    }
+
+    h2 {
+        color: nth($heading-colors, 1);
+
+        &::before {
+            content: "";
+        }
+    }
+}
+
+@include toc-color(1);
+
+
+// Fix table of contents to left side when above a certain screen width
+@media screen and (min-width: $total-width + $toc-spacing * 2) {
+    #table-of-contents {
+        width: $toc-width;
+	    padding-right: $toc-spacing;
+        position: fixed;
+        transform: translateX(-100%);
+    }
+}
+
+@media screen and (max-width: $total-width + $toc-width + $toc-spacing * 2) {
+    #preamble, #postamble, #content {
+        position: relative;
+        left: $toc-width / 2;
+    }
+}

@@ -1,0 +1,945 @@
+#+TITLE: Fr33macs, my Nix flake Emacs config
+#+AUTHOR: fr33zing
+#+PROPERTY: header-args :tangle yes
+#+OPTIONS: num:nil H:5 toc:3
+
+* About
+
+This is my Emacs configuration.
+
+** Tangling
+
+This file is not tangled using ~org-babel-table~. Instead, it's
+tangled using a bare-bones implementation in [[file:util/tangle.py][~util/tangle.py~]], and
+thus no fancy tangle features are supported. The ~header-args~
+property at the top of the file is not even parsed, it's only there to
+maintain compatibility with other tangle implementations.
+
+** Substitution
+
+The function ~getnix~ is used to get a variable from the Nix flake,
+sort of like ~getenv~ but not exactly. It isn't actually a function
+that exists. Instead, [[file:util/substitute.py][~util/substitute.py~]] is used to substitute all
+instances of ~(getnix "variableName")~ with the appropriate Elisp
+literal.
+
+** Tags in comments
+
+While reading this document you may see what look to be XML tags,
+e.g.:
+
+#+BEGIN_SRC emacs-lisp :tangle no
+(defun something-spanning-multiple-src-blocks ()
+  (beginning-of-the-defun))
+;; <defun>
+#+END_SRC
+
+#+BEGIN_SRC emacs-lisp :tangle no
+  (middle-of-the-defun)
+#+END_SRC
+
+#+BEGIN_SRC emacs-lisp :tangle no
+  (end-of-the-defun)) ; <-- closes the defun
+;; </defun>
+#+END_SRC
+
+These tags are not parsed. They are only used to indicate to the
+reader that code in the same scope may be spread across multiple src
+blocks.
+
+* Basic setup
+
+Disable unwanted UI elements and startup messages.
+
+#+BEGIN_SRC emacs-lisp
+(menu-bar-mode -1)
+(tool-bar-mode -1)
+(scroll-bar-mode -1)
+(setq inhibit-startup-message t
+      use-dialog-box nil)
+#+END_SRC
+
+Enable some things which should probably be default.
+
+#+BEGIN_SRC emacs-lisp
+(setq require-final-newline t)
+(setq frame-inhibit-implied-resize t)
+(global-hl-line-mode)
+#+END_SRC
+
+Enable relative line numbers globally.
+
+#+BEGIN_SRC emacs-lisp
+(setq display-line-numbers-type 'relative)
+(global-display-line-numbers-mode)
+#+END_SRC
+
+* Theme
+
+#+BEGIN_SRC emacs-lisp
+(add-to-list 'custom-theme-load-path (getnix "themeDir"))
+(load-theme 'catppuccin t)
+(setq catppuccin-flavor (getnix "themeVariant"))
+(catppuccin-reload)
+#+END_SRC
+
+** Variable definitions
+
+#+BEGIN_SRC emacs-lisp
+(defvar my:cursor-color (catppuccin-get-color 'sapphire)
+  "Default cursor color.")
+
+(defvar my:switch-window-cursor-color (catppuccin-get-color 'red)
+  "Cursor color when switching windows.")
+
+(defvar my:code-color (catppuccin-get-color 'text)
+  "Default color for text that is considered code.")
+#+END_SRC
+
+** Customization
+
+#+BEGIN_SRC emacs-lisp
+(set-face-attribute 'default t :font (getnix "font"))
+
+(set-cursor-color my:cursor-color)
+(set-face-attribute 'region nil
+                    :background (catppuccin-get-color 'surface2))
+#+END_SRC
+
+* Libraries
+** Dash
+
+Dash is a library for dealing with lists.
+
+#+BEGIN_SRC emacs-lisp
+(use-package dash :ensure t)
+#+END_SRC
+
+** Map
+
+Map provides generic map-manipulation functions that work on alists,
+plists, hash-tables, and arrays.
+
+#+BEGIN_SRC emacs-lisp
+(use-package map)
+#+END_SRC
+
+** Subr-x
+
+Less commonly used functions that complement basic APIs.
+
+#+BEGIN_SRC emacs-lisp
+(use-package subr-x)
+#+END_SRC
+
+* My library
+
+*Notice*: Not all functions are defined in this section. There are
+some less general / more context-specific functions that are scattered
+around with no particular rhyme or reason.
+
+# ** Formatting
+
+# #+BEGIN_SRC emacs-lisp
+# (defvar my:format-on-save t
+#   "Whether the buffer should be automatically formatted before
+# saving.")
+
+# (defvar my:mode-format-commands '()
+#   "Mappings from mode to command. Indicates which command to use for
+# formatting certain major modes.")
+
+# ; TODO update this doc string
+# (defun my:use-format-command (mode command)
+#   "Assign COMMAND to be used for formatting MODE buffers."
+#   (add-to-list 'my:mode-format-commands `(,mode . ,command))
+#   (add-to-list 'evil-goggles--commands
+#     '(command :face evil-goggles-change-face
+#               :switch evil-goggles-enable-change
+#               :advice evil-goggles--generic-blocking-advice)))
+
+# (defun my:format-command (mode)
+#   "Get the command to be used for formatting MODE buffers."
+#   (map-elt my:mode-format-commands mode))
+
+# (defun my:format-buffer (&optional buffer)
+#   "Format the BUFFER. If BUFFER is nil, format the current buffer."
+#   (let ((buffer* (or buffer (current-buffer))))
+#     (with-current-buffer buffer*
+#       (let ((command (my:format-command major-mode)))
+#         (when (and my:format-on-save command)
+#           (funcall command))))))
+# #+END_SRC
+
+** Advice
+
+#+BEGIN_SRC emacs-lisp
+(defun my:advice:be-quiet (orig-fun &rest args)
+  "Advice function: Suppress messages in ORIG-FUN.
+
+Example:
+
+(advice-add 'svg-tag-mode-on :around #'my:advice:be-quiet)"
+  (let ((inhibit-message t)
+        (message-log-max nil))
+    (apply orig-fun args)))
+#+END_SRC
+
+#+BEGIN_SRC emacs-lisp
+(defun my:advice:nav-flash-show (&rest _)
+  "Advice function: Call `nav-flash-show' after a command.
+
+Example:
+
+(advice-add 'avy-goto-char :after #'my:advice:nav-flash-show)"
+  (nav-flash-show))
+#+END_SRC
+
+** Timing
+
+- TODO Add ~debounce-eval-immediately~
+
+#+BEGIN_SRC emacs-lisp
+(setq my:debounce-timers (make-hash-table :test 'equal))
+(defun my:debounce (name secs form)
+  "Begin a timer for SECS seconds named NAME to delay the evaluation
+of FORM, typically to prevent something expensive from running
+too frequently. If a pending debounce timer exists with the same
+NAME it is cancelled and replaced.
+
+Example:
+
+(my:debounce \"print-it\" 0.5 '(print \"it\"))"
+  (if-let ((old-timer (map-elt my:debounce-timers name)))
+          (cancel-timer old-timer))
+  (let* ((new-timer-fn `(progn
+          (setq my:debounce-timers (map-delete my:debounce-timers ,name))
+          (eval ,form)))
+         (new-timer (run-with-timer secs nil 'eval new-timer-fn)))
+        (map-put! my:debounce-timers name new-timer)))
+#+END_SRC
+
+** Windows
+
+This function was adapted from [[https://stackoverflow.com/questions/1832597][a StackOverflow answer]] by [[https://stackoverflow.com/users/1762276/zhro][Zhro]].
+
+#+BEGIN_SRC emacs-lisp
+(defun my:delete-window-maybe-kill-buffer (&optional window)
+  "Delete the window.
+If WINDOW is nil, delete the current window.
+If no other window shows its buffer, kill the buffer too."
+  (interactive)
+  (let ((buf (window-buffer window)))
+    (if (> (length (window-list)) 1)
+        (delete-window window)
+      (unless (get-buffer-window buf 'visible) (kill-buffer buf))
+      (kill-buffer buf))))
+#+END_SRC
+
+It's irritating to need to switch to a temporary window to close
+it. These functions are used to make closing temporary windows more
+convenient.
+
+#+BEGIN_SRC emacs-lisp
+(defun my:temporary-window-p (&optional window)
+  "Decide if the window is temporary.
+If WINDOW is nil, use the current window."
+  (let ((buffer (window-buffer window)))
+    (with-current-buffer buffer
+      (not (or (buffer-file-name buffer)
+               (-contains? my:not-temporary-major-modes major-mode)
+               (--some (-contains? my:not-temporary-minor-modes it)
+                       local-minor-modes))))))
+
+(defun my:delete-window (window)
+  "Delete WINDOW or abort if WINDOW is a minibuffer."
+ (if (window-minibuffer-p window)
+     (abort-recursive-edit)
+     (my:delete-window-maybe-kill-buffer window)))
+
+(defun my:next-temporary-window ()
+  "Attempt to find a minibuffer first. If no minibuffer is found,
+then starting at the current window, find the next temporary
+window."
+  (interactive)
+  (if-let ((minibuffer (active-minibuffer-window)))
+    minibuffer
+    (-first #'my:temporary-window-p (window-list))))
+
+(defun my:delete-next-temporary-window ()
+  "Starting at the current window, find the next temporary window
+and delete it."
+  (interactive)
+  (if-let ((window (my:next-temporary-window)))
+    (my:delete-window window)))
+#+END_SRC
+
+When a window's major or minor mode matches any in these lists, that
+window will never be considered temporary.
+
+#+BEGIN_SRC emacs-lisp
+(setq my:not-temporary-major-modes
+  '(lisp-interaction-mode))
+
+(setq my:not-temporary-minor-modes
+  '(org-src-mode))
+#+END_SRC
+
+* Backups
+
+Prevent clobbering symlinks.
+
+#+BEGIN_SRC emacs-lisp
+(setq backup-by-copying t)
+#+END_SRC
+
+Use versioned backups.
+
+#+BEGIN_SRC emacs-lisp
+(setq version-control t)
+#+END_SRC
+
+Prevent backup files from being littered all over the place.
+
+#+BEGIN_SRC emacs-lisp
+(setq backup-directory-alist
+      '(("." . "~/.emacs-backups/")))
+#+END_SRC
+
+Delete excess backup versions silently.
+
+#+BEGIN_SRC emacs-lisp
+(setq delete-old-versions t  
+      kept-new-versions 6
+      kept-old-versions 2)
+#+END_SRC
+
+* Key bindings
+** Hydras
+
+Hydra is used to create action menus. I've chosen to use hydras as the
+foundation for my custom keybind scheme to improve discoverability and
+reduce cognitive load.
+
+#+BEGIN_SRC emacs-lisp
+(use-package pretty-hydra
+  :ensure t
+  :config
+  ;; <config>
+#+END_SRC
+
+*Notice*: Not all hydras are defined in this section. Other sections
+that define hydra(s):
+
+- [[*Avy][Motion > Avy]]
+- [[*Org][Languages > Org]]
+
+*** File
+
+#+BEGIN_SRC emacs-lisp
+  (pretty-hydra-define hydra:file
+    (:exit t :idle 0.25)
+    ("Switch"
+     (("f" find-file "Find file"))))
+#+END_SRC
+
+*** Buffer
+
+#+BEGIN_SRC emacs-lisp
+  (defalias 'evil-switch-to-windows-last-buffer 'last-buffer)
+  (pretty-hydra-define hydra:buffer
+    (:exit t :idle 0.25)
+    ("Switch"
+     (("b" bufler-switch-buffer "Quick switch")
+      ("i" bufler-list          "List buffers")
+      ("]" next-buffer          "Next buffer"     :exit nil)
+      ("[" previous-buffer      "Previous buffer" :exit nil)
+      ("l" last-buffer          "Last buffer"))
+     "Actions"
+     (("s" save-buffer         "Save buffer")
+      ("k" kill-current-buffer "Kill buffer")
+      ("K" kill-buffer         "Kill other buffer")
+      ("r" revert-buffer       "Revert current buffer")
+      ("R" rename-buffer       "Rename current buffer"))))
+#+END_SRC
+
+*** Window
+
+#+BEGIN_SRC emacs-lisp
+  (pretty-hydra-define hydra:window
+    (:exit t :idle 0.25) 
+    ("Switch"
+     (("w" my:switch-window "Quick switch"))
+     "Actions"
+     (("k" delete-window             "Kill window")
+      ("K" switch-window-then-delete "Kill other window")
+      ("s" evil-window-new           "Split window horizontally")
+      ("v" evil-window-vnew          "Split window vertically"))))
+#+END_SRC
+
+*** Leader key
+
+#+BEGIN_SRC emacs-lisp
+  (pretty-hydra-define hydra:leader
+    (:exit t :idle 0.25)
+    ("Hydra"
+     (("f" hydra:file/body   "File")
+      ("b" hydra:buffer/body "Buffer")
+      ("w" hydra:window/body "Window")
+      ("a" hydra:avy/body    "Avy")
+      ("o" hydra:org/body    "Org"))
+     "Shortcut"
+     (("s" save-buffer            "Save buffer")
+      ("q" save-buffer-kill-emacs "Quit")))))
+;; </config>
+#+END_SRC
+
+** General
+
+General provides a convenient way to bind keys.
+
+#+BEGIN_SRC emacs-lisp
+(use-package general
+  :ensure t
+  :init
+  (setq general-override-states
+        '(insert emacs hybrid normal visual motion operator replace))
+  :config
+  ;; <config>
+#+END_SRC
+
+Use escape to close temporary windows.
+
+#+BEGIN_SRC emacs-lisp
+  (general-define-key
+    :keymaps 'minibuffer-mode-map
+    (kbd "<escape>") 'abort-minibuffers)
+
+  (general-define-key
+    :states '(normal)
+    :keymaps 'override
+    (kbd "<escape>") 'my:delete-next-temporary-window)
+#+END_SRC
+
+Use spacebar to open the [[*Leader key][Leader key hydra]].
+
+#+BEGIN_SRC emacs-lisp
+  (general-define-key
+    :states '(normal visual motion)
+    :keymaps 'override
+    "SPC" 'hydra:leader/body))
+;; </config>
+#+END_SRC
+
+** Which-key
+
+Which-key shows all the possible completions of a partially-input
+keybind.
+
+#+BEGIN_SRC emacs-lisp
+(use-package which-key
+  :ensure t
+  :config
+  (which-key-mode))
+#+END_SRC
+
+* Evil
+
+Evil (extensible vi layer) emulates the main features of Vim.
+
+#+BEGIN_SRC emacs-lisp
+(use-package evil
+  :ensure t
+  :init
+  (setq evil-want-keybinding nil
+        evil-want-C-u-scroll t
+        evil-undo-system 'undo-redo)
+  :config
+  (evil-mode 1))
+#+END_SRC
+
+Evil collection is a collection of Evil bindings for the parts of
+Emacs that Evil does not cover properly by default.
+
+#+BEGIN_SRC emacs-lisp
+(use-package evil-collection
+  :ensure t
+  :after evil
+  :custom
+  (evil-collection-want-unimpaired-p nil)
+  :init
+  (evil-collection-init))
+#+END_SRC
+
+* Minibuffer
+** Vertico
+
+Vertico is a minibuffer completion interface.
+
+#+BEGIN_SRC emacs-lisp
+(use-package vertico
+  :ensure t
+  :init
+  (vertico-mode)
+  :config
+  (setq vertico-cycle t)
+  :bind (:map vertico-map
+         ("C-j" . vertico-next)
+         ("C-k" . vertico-previous)
+         ("TAB" . vertico-insert)))
+#+END_SRC
+
+Use the ~orderless~ completion style.
+
+#+BEGIN_SRC emacs-lisp
+(use-package orderless
+  :ensure t
+  :init
+  (setq completion-styles '(orderless basic)
+        completion-category-defaults nil
+        completion-category-overrides '((file (styles partial-completion)))))
+#+END_SRC
+
+Persist history over Emacs restarts. Vertico sorts by history
+position.
+
+#+BEGIN_SRC emacs-lisp
+(use-package savehist
+  :init
+  (savehist-mode))
+#+END_SRC
+
+Do not allow the cursor in the minibuffer prompt.
+
+#+BEGIN_SRC emacs-lisp
+(use-package emacs
+  :init
+  (setq minibuffer-prompt-properties
+        '(read-only t cursor-intangible t face minibuffer-prompt))
+  (add-hook 'minibuffer-setup-hook #'cursor-intangible-mode)
+  ;; <init>
+#+END_SRC
+
+Hide commands in M-x which do not work in the current mode. Vertico
+commands are hidden in normal buffers.
+
+#+BEGIN_SRC emacs-lisp
+  (setq read-extended-command-predicate
+        #'command-completion-default-include-p))
+;; </init>
+#+END_SRC
+
+** Marginalia
+
+Marginalia adds helpful information to entries in Vertico. For
+example, if you type ~M-x~, Vertico will open a list of usable
+commands. Marginalia will add each command's description next to it.
+
+#+BEGIN_SRC emacs-lisp
+(use-package marginalia
+  :ensure t
+  :init
+  (marginalia-mode))
+#+END_SRC
+* WIP Mode line
+
+Warning: Not tangled
+
+#+BEGIN_SRC emacs-lisp :tangle no
+(set-face-attribute 'mode-line nil :height 1.0)
+
+(defun my:mode-line-major-mode ()
+  (propertize "-%m-" 'face '(:foreground "red")))
+
+(setq-default mode-line-format '(
+    (:eval (my:mode-line-major-mode))
+))
+#+END_SRC
+
+* Motion
+** Avy
+
+Avy is a convenient tool to jump around and perform some actions based
+on a short filter.
+
+#+BEGIN_SRC emacs-lisp
+(use-package avy
+  :ensure t
+  :after evil
+  :config
+  (setq avy-timeout-seconds 0.375)
+  (advice-add 'avy-process :after #'my:advice:nav-flash-show))
+
+(pretty-hydra-define hydra:avy
+  (:exit t :idle 0.25) 
+  ("Filter"
+   (("a" avy-goto-char-timer           "Char(s) with timer")
+    ("c" avy-goto-char-in-line         "Char in line")
+    ("w" avy-goto-word-1               "Word by first char")
+    ("s" avy-goto-symbol-1             "Symbol by first char")
+    ("h" avy-org-goto-heading-timer    "Org heading with timer"))
+   "Repeat"
+   ((";" avy-next                      "Next match"     :exit nil)
+    ("," avy-previous                  "Previous match" :exit nil)
+    ("p" avy-pop-mark                  "Pop mark"       :exit nil))
+   "Actions"
+   (("y" avy-copy-line                 "Copy line")
+    ("Y" avy-copy-region               "Copy region")
+    ("m" avy-move-line                 "Move line")
+    ("M" avy-move-region               "Move region")
+    ("d" avy-kill-ring-save-whole-line "Delete line")
+    ("D" avy-kill-ring-save-region     "Delete region"))))
+#+END_SRC
+
+** Nav-flash
+
+Nav-flash makes it easier to track the cursor across large movements
+by flashing the current line.
+
+#+BEGIN_SRC emacs-lisp
+(use-package nav-flash
+  :ensure t
+  :config
+  (setq nav-flash-delay 0.125)
+  (set-face-attribute 'nav-flash-face nil
+    :background (face-attribute 'cursor :background)
+    :foreground (face-attribute 'default :background))
+
+    (--map (advice-add it :after #'my:advice:nav-flash-show) '(
+      evil-scroll-up
+      evil-scroll-down)))
+#+END_SRC
+
+* WIP Version control
+** Magit
+
+#+BEGIN_SRC emacs-lisp
+(use-package magit
+  :ensure t)
+#+END_SRC
+
+* TODO Search
+* Misc. packages
+** Try
+
+Try allows you to try Emacs packages without installing them.
+
+#+BEGIN_SRC emacs-lisp
+(use-package try :ensure t)
+#+END_SRC
+
+** Switch-window
+
+Switch-window provides a nice way to choose which window to switch to
+when there are more than two windows. When a switch-window command is
+used, a number character appears in the corner of each window. Typing
+one of the characters then switches focus to that window.
+
+#+BEGIN_SRC emacs-lisp
+(use-package switch-window
+  :ensure t
+  :init
+  :config
+  (defun my:switch-window ()
+    "Switch window and change cursor color."
+    (interactive)
+    (set-cursor-color my:switch-window-cursor-color)
+    (switch-window))
+  (defun my:switch-window-finish-hook ()
+    (set-cursor-color my:cursor-color))
+  (add-hook 'switch-window-finish-hook #'my:switch-window-finish-hook)
+
+  (setq switch-window-input-style 'minibuffer)
+  (set-face-attribute 'switch-window-label nil :height 5.0))
+#+END_SRC
+
+** Solaire mode
+
+Solaire mode helps to visually distinguish "real" buffers (code
+buffers) from "unreal" buffers (popups, sidebars, log buffers,
+terminals, etc) by giving the latter a different background.
+
+#+BEGIN_SRC emacs-lisp
+(use-package solaire-mode
+  :ensure t
+  :after general
+  :config
+  (solaire-global-mode +1))
+#+END_SRC
+
+** Bufler
+
+Bufler is an ibuffer alternative.
+
+#+BEGIN_SRC emacs-lisp
+(use-package bufler
+  :ensure t
+  :after evil
+  :config
+  (evil-define-key 'motion bufler-list-mode-map
+    (kbd "RET") 'bufler-list-buffer-switch
+    (kbd "SPC") 'bufler-list-buffer-peek
+    (kbd "C-s") 'bufler-list-buffer-save
+    "d" 'bufler-list-buffer-kill
+    "x" 'bufler-list-buffer-kill))
+#+END_SRC
+
+** WIP SVG tag mode
+
+SVG tag mode replaces keywords or regular expression with SVG tags. It
+can be used as an extra-fancy alternative to ~hl-todo~.
+
+#+BEGIN_SRC emacs-lisp
+(use-package svg-tag-mode
+  :ensure t
+  :config
+  ;; <config>
+#+END_SRC
+
+Define some simple SVG tags. The regular expressions are case
+sensitive, so there's going to be some redundant patterns.
+
+#+BEGIN_SRC emacs-lisp
+  (defconst my:svg-tags '(
+    ("TODO" . sapphire)               ; TODO 
+    ("WIP" . teal)                    ; WIP
+    ("DONE" . green)                  ; DONE
+    ("TEMP" . red)                    ; TEMP
+    ("\\(Example:?\\)" . blue)        ; Example Example:
+    ("\\(HACK:?\\)" . mauve)          ; HACK HACK:
+    ("\\(Hack:?\\)" . mauve)          ; Hack Hack:
+    ("\\(IMPORTANT[:!]?\\)" . peach)  ; IMPORTANT IMPORTANT! IMPORTANT:
+    ("\\(Important[:!]?\\)" . peach)  ; Important Important! Important:
+    ("WARN" . yellow)                 ; WARN
+    ("\\(Warning[:!]?\\)" . yellow))) ; Warning Warning! Warning:
+#+END_SRC
+
+Define the default style. It's necessary to use
+~(getnix "tagsFontFamily")~ instead of ~(getnix "fontFamily")~ because my default
+font causes some strange kerning issues.
+
+#+BEGIN_SRC emacs-lisp
+  (setq svg-lib-style-default `(
+    :background ,(catppuccin-get-color 'text)
+    :foreground ,(catppuccin-get-color 'base)
+    :font-family (getnix "tagsFontFamily")
+    :font-size (getnix "fontSize")
+    :font-weight 800
+    :padding 1
+    :margin 0
+    :stroke 0
+    :radius 5.5
+    :alignment 0.5
+    :width 20
+    :height 1.0
+    :scale 1.0
+    :ascent center
+    :collection "material"))
+#+END_SRC
+
+Create the tags by mapping the previously defined alist of patterns
+and color.
+
+#+BEGIN_SRC emacs-lisp
+  (setq svg-tag-tags (--map
+    `(,(car it) . ((lambda (tag) (svg-lib-tag tag svg-lib-style-default
+      :background ,(catppuccin-get-color (cdr it))))))
+    my:svg-tags))
+#+END_SRC
+
+Add advice to suppress the constant "SVG tag mode on" messages.
+
+#+BEGIN_SRC emacs-lisp
+  (advice-add 'svg-tag-mode-on :around #'my:advice:be-quiet)
+#+END_SRC
+
+Finally, enable the SVG tags globally.
+
+#+BEGIN_SRC emacs-lisp
+  (global-svg-tag-mode))
+;; </config>
+#+END_SRC
+
+*** TODO Add progress bar, tags, priority
+
+[[https://github.com/rougier/svg-tag-mode/blob/main/examples/example-2.el]]
+
+** Format-all
+
+#+BEGIN_SRC emacs-lisp
+(use-package format-all
+  :ensure t
+  :hook (prog-mode . format-all-mode)
+  :config
+  (setq format-all-show-errors 'never))
+#+END_SRC
+
+* Major Modes
+** WIP English
+
+#+BEGIN_SRC emacs-lisp
+(use-package langtool
+  :ensure t
+  :init
+  (setq langtool-bin (executable-find "languagetool-commandline"))
+  :config
+  (add-hook 'langtool-error-exists-hook 'my:remove-langtool-overlays))
+
+(setq my:code-properties '(font-lock-fontified
+                           src-block))
+
+(defun my:has-code-property-p (pos)
+  (--any? (get-text-property pos it) my:code-properties))
+
+(defun my:remove-langtool-overlays-p (overlay)
+  (let* ((pos (overlay-start overlay))
+         (faces (get-text-property pos 'face)))
+    (my:has-code-property-p pos)
+))
+
+(defun my:remove-langtool-overlays ()
+  (-each (langtool--overlays-region (buffer-end -1) (buffer-end +1))
+    (lambda (overlay)
+      (when (my:remove-langtool-overlays-p overlay)
+        (delete-overlay overlay)))))
+#+END_SRC
+
+** Emacs Lisp
+
+#+BEGIN_SRC emacs-lisp
+(use-package elisp-def :ensure t)
+
+(use-package highlight-quoted
+  :ensure t
+  :config
+  (add-hook 'emacs-lisp-mode-hook 'highlight-quoted-mode))
+
+(use-package flycheck
+  :ensure t
+  :init (global-flycheck-mode))
+
+;;(use-package parinfer-rust-mode
+;;  :ensure t
+;;  :hook emacs-lisp-mode
+;;  :init
+;;  (setq parinfer-rust-library (getnix "parinferRustLibrary")))
+#+END_SRC
+
+** Org
+
+Org is like Markdown but a lot better.
+
+#+BEGIN_SRC emacs-lisp
+(use-package htmlize :ensure t)
+(use-package org
+  :ensure t
+  :after evil htmlize
+  :config
+  ;; <config>
+#+END_SRC
+
+Append custom ~css~ to make exporting from ~org~ into ~html~ match our
+editor theme.
+
+#+BEGIN_SRC emacs-lisp
+(setq org-html-head
+    (concat "<style>" (getnix "exportCSS") "</style>"))
+#+END_SRC
+
+Change the default appearance of org documents.
+
+#+BEGIN_SRC emacs-lisp
+(setq org-indent-mode-turns-on-hiding-stars nil
+      org-startup-indented t
+      org-startup-folded 'content)
+
+(set-face-attribute 'org-block nil
+  :foreground my:code-color))
+;; </config>
+#+END_SRC
+
+Fix odd indentation behavior in src blocks.
+
+#+BEGIN_SRC emacs-lisp
+(setq org-src-preserve-indentation t
+      org-edit-src-content-indentation 0)
+#+END_SRC
+
+Change the ~html~ export preamble and postamble.
+
+- TODO Figure out how to hide the title for html exports only.
+
+#+BEGIN_SRC emacs-lisp
+(setq org-export-with-title nil)
+(setq org-html-preamble-format
+      '(("en" "<h1 class=\"title\">%t</h1>\n<p class=\"author\">by %a</p>")))
+
+(setq org-html-postamble t
+      org-html-postamble-format '(("en" "<p class=\"date\">Export time: %T</p>")))
+#+END_SRC
+
+*** WIP Hydra
+
+#+BEGIN_SRC emacs-lisp
+(defun my:org-toggle-emphasis-markers ()
+  "Toggle emphasis markers [*/_=~+]"
+  (interactive)
+  (setq org-hide-emphasis-markers (not org-hide-emphasis-markers)))
+
+(pretty-hydra-define hydra:org
+  (:exit t :idle 0.25) 
+  ("Toggle"
+   (("l" org-toggle-link-display        "Link display")
+    ("E" my:org-toggle-emphasis-markers "Emphasis markers")
+    ("c" org-toggle-checkbox            "Checkbox")
+    ("i" org-toggle-inline-images       "Inline images")
+    ("n" org-toggle-narrow-to-subtree   "Narrow to subtree")
+    ("p" org-toggle-pretty-entities     "Pretty entities"))
+   "Insert"
+   (("L" org-insert-link             "Link")
+    ("s" org-insert-store-link       "(Store link to here)")
+    ("S" org-insert-last-stored-link "Last stored link")
+    ("t" org-time-stamp              "Timestamp")
+    ("t" org-insert-drawer           "Drawer")
+    ("T" org-table-create            "Table"))
+   "Table"
+   (("a" org-table-align         "Align")
+    ("R" org-table-insert-row    "Insert row"    :exit nil)
+    ("C" org-table-insert-column "Insert column" :exit nil)
+    ("k" org-table-kill-row      "Kill row")
+    ("K" org-table-kill-column   "Kill column"))
+   "Hydra"
+   (("e" hydra:org-emphasize/body "Emphasize"))))
+
+(pretty-hydra-define hydra:org-emphasize
+  (:exit t :idle 0.25)
+  ("Mnemonic"
+   (("x" (org-emphasize ?\s) "Clear")
+    ("b" (org-emphasize ?*)  "Bold")
+    ("i" (org-emphasize ?/)  "Italic")
+    ("u" (org-emphasize ?_)  "Underlined")
+    ("v" (org-emphasize ?=)  "Verbatim")
+    ("c" (org-emphasize ?~)  "Code")
+    ("s" (org-emphasize ?+)  "Strike-through"))
+   "Literal"
+   (("*" (org-emphasize ?*)  "Bold")
+    ("/" (org-emphasize ?/)  "Italic")
+    ("_" (org-emphasize ?_)  "Underlined")
+    ("=" (org-emphasize ?=)  "Verbatim")
+    ("~" (org-emphasize ?~)  "Code")
+    ("+" (org-emphasize ?+)  "Strike-through"))))
+#+END_SRC
+
+** Nix
+
+#+BEGIN_SRC emacs-lisp
+(use-package nix-mode
+  :ensure t
+  :mode "\\.nix\\'"
+  :hook (nix-mode . my:nix-mode-hook))
+
+(defun my:nix-mode-hook ()
+  (setq-local format-all-formatters '(("Nix" nixfmt))))
+#+END_SRC
+
+ 

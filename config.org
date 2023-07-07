@@ -4,9 +4,21 @@
 #+OPTIONS: num:nil H:5 toc:2
 #+EXPORT_FILE_NAME: index.html
 
+* Links
+
+- Github.io page: https://fr33zing.github.io/fr33macs
+- Repository: https://github.com/fr33zing/fr33macs
+  - [[https://github.com/fr33zing/fr33macs/blob/main/flake.nix][flake.nix]] - Nix flake
+  - [[https://github.com/fr33zing/fr33macs/blob/main/config.org][config.org]] - Emacs configuration
+  - [[https://github.com/fr33zing/fr33macs/blob/main/export.scss][export.scss]] - Org-mode HTML export styles
+
 * About
 
-This is my Emacs configuration. *If you want to try it for yourself, [[*Try it yourself][click here]].*
+This document is best read on [[https://github.com/fr33zing/fr33macs][this repository]]'s [[https://fr33zing.github.io/fr33macs][github.io page]] or in
+Emacs org-mode.
+
+This document is tangled to create my Emacs configuration. *If you
+want to try it for yourself, [[*Try it yourself][click here]].*
 
 ** Tangling
 

@@ -277,9 +277,9 @@ If WINDOW is nil, use the current window."
 
 (defun my:delete-window (window)
   "Delete WINDOW or abort if WINDOW is a minibuffer."
- (if (window-minibuffer-p window)
-     (abort-recursive-edit)
-     (my:delete-window-maybe-kill-buffer window)))
+  (if (window-minibuffer-p window)
+      (abort-recursive-edit)
+      (my:delete-window-maybe-kill-buffer window)))
 
 (defun my:next-temporary-window ()
   "Attempt to find a minibuffer first. If no minibuffer is found,
@@ -642,9 +642,8 @@ by flashing the current line.
     :background (face-attribute 'cursor :background)
     :foreground (face-attribute 'default :background))
 
-    (--map (advice-add it :after #'my:advice:nav-flash-show) '(
-      evil-scroll-up
-      evil-scroll-down)))
+  (--map (advice-add it :after #'my:advice:nav-flash-show)
+         '(evil-scroll-up evil-scroll-down)))
 #+END_SRC
 
 * WIP Version control

@@ -811,7 +811,41 @@ Finally, enable the SVG tags globally.
   (setq format-all-show-errors 'never))
 #+END_SRC
 
+** Flycheck
+
+Flycheck is a modern on-the-fly syntax checking extension.
+
+#+BEGIN_SRC emacs-lisp
+(use-package flycheck
+  :ensure t
+  :init (global-flycheck-mode))
+#+END_SRC
+
+Flycheck-inline implements a minor-mode for displaying errors from
+Flycheck right below their reporting location
+
+#+BEGIN_SRC emacs-lisp
+(use-package flycheck-inline
+  :ensure t
+  :after flycheck
+  :hook (flycheck-mode . flycheck-inline-mode))
+#+END_SRC
+
 * Major Modes
+
+** Treesit-auto
+
+Treesit-auto provides an easy way to automatically install and use
+tree-sitter major modes.
+
+#+BEGIN_SRC emacs-lisp
+(use-package treesit-auto
+  :ensure t
+  :config
+  (setq treesit-auto-install t)
+  (global-treesit-auto-mode))
+#+END_SRC
+
 ** WIP English
 
 #+BEGIN_SRC emacs-lisp
@@ -850,11 +884,6 @@ Finally, enable the SVG tags globally.
   :ensure t
   :config
   (add-hook 'emacs-lisp-mode-hook 'highlight-quoted-mode))
-
-(use-package flycheck
-  :ensure t
-  :init (global-flycheck-mode))
-
 ;;(use-package parinfer-rust-mode
 ;;  :ensure t
 ;;  :hook emacs-lisp-mode
@@ -982,4 +1011,25 @@ Change the ~html~ export preamble and postamble.
   (setq-local format-all-formatters '(("Nix" nixfmt))))
 #+END_SRC
 
- 
+** Shell script
+*** Sh, bash, zsh
+
+Syntax checking and linting is provided by Shellcheck via flycheck.
+
+#+BEGIN_SRC emacs-lisp
+(add-hook 'sh-mode-hook 'flycheck-mode)
+#+END_SRC
+
+Fix treesitter hooks.
+
+#+BEGIN_SRC emacs-lisp
+(setq bash-ts-mode-hook sh-mode-hook)
+#+END_SRC
+
+*** Fish
+
+#+BEGIN_SRC emacs-lisp 
+(use-package fish-mode
+  :ensure t
+  :hook (fish-mode . flycheck-mode))
+#+END_SRC

@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2023-07-06 Thu 20:38 -->
+<!-- 2023-07-06 Thu 20:42 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Fr33macs, my Nix flake Emacs config</title>
@@ -207,104 +207,104 @@
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents" role="doc-toc">
 <ul>
-<li><a href="#orge066fbb">About</a>
+<li><a href="#orgd4e0831">About</a>
 <ul>
-<li><a href="#orgb51a52e">Tangling</a></li>
-<li><a href="#org82b8a21">Substitution</a></li>
-<li><a href="#org9d01912">Tags in comments</a></li>
+<li><a href="#orgd6dade7">Tangling</a></li>
+<li><a href="#org114669d">Substitution</a></li>
+<li><a href="#orgfc9220d">Tags in comments</a></li>
 </ul>
 </li>
-<li><a href="#org3b25739">Try it yourself</a>
+<li><a href="#org93065cc">Try it yourself</a>
 <ul>
-<li><a href="#orgb48c20e">Warning</a></li>
-<li><a href="#org9208aa3">Instructions</a></li>
+<li><a href="#org2cad4ed">Warning</a></li>
+<li><a href="#orga7c30c9">Instructions</a></li>
 </ul>
 </li>
-<li><a href="#org6431a2c">Basic setup</a></li>
-<li><a href="#org9dae410">Theme</a>
+<li><a href="#orgc2a9f28">Basic setup</a></li>
+<li><a href="#org6ffc75c">Theme</a>
 <ul>
-<li><a href="#orgf8dacf8">Variable definitions</a></li>
-<li><a href="#org71c87e2">Customization</a></li>
+<li><a href="#org944b0c2">Variable definitions</a></li>
+<li><a href="#orga217aaa">Customization</a></li>
 </ul>
 </li>
-<li><a href="#orgc1fba10">Libraries</a>
+<li><a href="#orgbf4849d">Libraries</a>
 <ul>
-<li><a href="#org716a0d8">Dash</a></li>
-<li><a href="#org23313b0">Map</a></li>
-<li><a href="#orgc018e79">Subr-x</a></li>
+<li><a href="#orgf5ab9f5">Dash</a></li>
+<li><a href="#org47bcd98">Map</a></li>
+<li><a href="#orgd7fd7e7">Subr-x</a></li>
 </ul>
 </li>
-<li><a href="#orgb173ae6">My library</a>
+<li><a href="#orgd6a6d1c">My library</a>
 <ul>
-<li><a href="#org51cf91a">Advice</a></li>
-<li><a href="#org4cb929b">Timing</a></li>
-<li><a href="#orge2fb701">Windows</a></li>
+<li><a href="#org984c1c9">Advice</a></li>
+<li><a href="#orgb1a26a8">Timing</a></li>
+<li><a href="#org74287ef">Windows</a></li>
 </ul>
 </li>
-<li><a href="#orgf5df047">Backups</a></li>
-<li><a href="#org4d0bc28">Key bindings</a>
+<li><a href="#org82673f9">Backups</a></li>
+<li><a href="#org6f535ef">Key bindings</a>
 <ul>
-<li><a href="#orgfef1c81">Hydras</a></li>
-<li><a href="#orgd49072b">General</a></li>
-<li><a href="#orgac9e3cd">Which-key</a></li>
+<li><a href="#org17ac5ee">Hydras</a></li>
+<li><a href="#org29fc501">General</a></li>
+<li><a href="#org567491b">Which-key</a></li>
 </ul>
 </li>
-<li><a href="#org93ec6bf">Evil</a></li>
-<li><a href="#org951c81a">Minibuffer</a>
+<li><a href="#orgbd34cd5">Evil</a></li>
+<li><a href="#orgf9ff19d">Minibuffer</a>
 <ul>
-<li><a href="#orgad1d7ad">Vertico</a></li>
-<li><a href="#orgaa66d04">Marginalia</a></li>
+<li><a href="#org8fe40b3">Vertico</a></li>
+<li><a href="#orgbb4ebd8">Marginalia</a></li>
 </ul>
 </li>
-<li><a href="#orgad66c15"><span class="todo WIP">WIP</span> Mode line</a></li>
-<li><a href="#org38eb029">Motion</a>
+<li><a href="#orga0d6aec"><span class="todo WIP">WIP</span> Mode line</a></li>
+<li><a href="#orgc787fdc">Motion</a>
 <ul>
-<li><a href="#org48bf147">Avy</a></li>
-<li><a href="#org340cc64">Nav-flash</a></li>
+<li><a href="#org2a7cada">Avy</a></li>
+<li><a href="#orga7497c6">Nav-flash</a></li>
 </ul>
 </li>
-<li><a href="#orgbe30d06"><span class="todo WIP">WIP</span> Version control</a>
+<li><a href="#org4ca195b"><span class="todo WIP">WIP</span> Version control</a>
 <ul>
-<li><a href="#orgd6220bb">Magit</a></li>
+<li><a href="#org278ef0a">Magit</a></li>
 </ul>
 </li>
-<li><a href="#org551a9b8"><span class="todo TODO">TODO</span> Search</a></li>
-<li><a href="#org8d02da7">Misc. packages</a>
+<li><a href="#org8291aa4"><span class="todo TODO">TODO</span> Search</a></li>
+<li><a href="#org8e46fc1">Misc. packages</a>
 <ul>
-<li><a href="#org262447d">Try</a></li>
-<li><a href="#org9f8bbd8">Switch-window</a></li>
-<li><a href="#org863a090">Solaire mode</a></li>
-<li><a href="#orgc4aa3a8">Bufler</a></li>
-<li><a href="#orgd2f8cd8"><span class="todo WIP">WIP</span> SVG tag mode</a></li>
-<li><a href="#org71ceba2">Format-all</a></li>
-<li><a href="#org8deaf9d">Flycheck</a></li>
+<li><a href="#org66e8d07">Try</a></li>
+<li><a href="#orgda57f17">Switch-window</a></li>
+<li><a href="#org93621ef">Solaire mode</a></li>
+<li><a href="#org702f042">Bufler</a></li>
+<li><a href="#org344fae0"><span class="todo WIP">WIP</span> SVG tag mode</a></li>
+<li><a href="#org6a88ad8">Format-all</a></li>
+<li><a href="#org125a2e3">Flycheck</a></li>
 </ul>
 </li>
-<li><a href="#orgb6cf957">Major Modes</a>
+<li><a href="#orgc244a81">Major Modes</a>
 <ul>
-<li><a href="#orgc036ed9">Treesit-auto</a></li>
-<li><a href="#org0874919"><span class="todo WIP">WIP</span> English</a></li>
-<li><a href="#org6419262">Emacs Lisp</a></li>
-<li><a href="#orgfde7c9b">Org</a></li>
-<li><a href="#org0e7f241">Nix</a></li>
-<li><a href="#org6331752">Shell script</a></li>
+<li><a href="#orgcdc7258">Treesit-auto</a></li>
+<li><a href="#orgd781ecf"><span class="todo WIP">WIP</span> English</a></li>
+<li><a href="#org6b31f77">Emacs Lisp</a></li>
+<li><a href="#orgeb17879">Org</a></li>
+<li><a href="#orgce2e38a">Nix</a></li>
+<li><a href="#orgbb02dc1">Shell script</a></li>
 </ul>
 </li>
 </ul>
 </div>
 </div>
 
-<div id="outline-container-orge066fbb" class="outline-2">
-<h2 id="orge066fbb">About</h2>
-<div class="outline-text-2" id="text-orge066fbb">
+<div id="outline-container-orgd4e0831" class="outline-2">
+<h2 id="orgd4e0831">About</h2>
+<div class="outline-text-2" id="text-orgd4e0831">
 <p>
-This is my Emacs configuration. <b>If you want to try it for yourself, <a href="#org3b25739">click here</a>.</b>
+This is my Emacs configuration. <b>If you want to try it for yourself, <a href="#org93065cc">click here</a>.</b>
 </p>
 </div>
 
-<div id="outline-container-orgb51a52e" class="outline-3">
-<h3 id="orgb51a52e">Tangling</h3>
-<div class="outline-text-3" id="text-orgb51a52e">
+<div id="outline-container-orgd6dade7" class="outline-3">
+<h3 id="orgd6dade7">Tangling</h3>
+<div class="outline-text-3" id="text-orgd6dade7">
 <p>
 This file is not tangled using <code>org-babel-table</code>. Instead, it's
 tangled using a bare-bones implementation in <a href="util/tangle.py"><code>util/tangle.py</code></a>, and
@@ -315,9 +315,9 @@ maintain compatibility with other tangle implementations.
 </div>
 </div>
 
-<div id="outline-container-org82b8a21" class="outline-3">
-<h3 id="org82b8a21">Substitution</h3>
-<div class="outline-text-3" id="text-org82b8a21">
+<div id="outline-container-org114669d" class="outline-3">
+<h3 id="org114669d">Substitution</h3>
+<div class="outline-text-3" id="text-org114669d">
 <p>
 The function <code>getnix</code> is used to get a variable from the Nix flake,
 sort of like <code>getenv</code> but not exactly. It isn't actually a function
@@ -328,9 +328,9 @@ literal.
 </div>
 </div>
 
-<div id="outline-container-org9d01912" class="outline-3">
-<h3 id="org9d01912">Tags in comments</h3>
-<div class="outline-text-3" id="text-org9d01912">
+<div id="outline-container-orgfc9220d" class="outline-3">
+<h3 id="orgfc9220d">Tags in comments</h3>
+<div class="outline-text-3" id="text-orgfc9220d">
 <p>
 While reading this document you may see what look to be XML tags,
 e.g.:
@@ -363,13 +363,13 @@ blocks.
 </div>
 </div>
 
-<div id="outline-container-org3b25739" class="outline-2">
-<h2 id="org3b25739">Try it yourself</h2>
-<div class="outline-text-2" id="text-org3b25739">
+<div id="outline-container-org93065cc" class="outline-2">
+<h2 id="org93065cc">Try it yourself</h2>
+<div class="outline-text-2" id="text-org93065cc">
 </div>
-<div id="outline-container-orgb48c20e" class="outline-3">
-<h3 id="orgb48c20e">Warning</h3>
-<div class="outline-text-3" id="text-orgb48c20e">
+<div id="outline-container-org2cad4ed" class="outline-3">
+<h3 id="org2cad4ed">Warning</h3>
+<div class="outline-text-3" id="text-org2cad4ed">
 <p>
 Back up your <code>.emacs.d</code> directory if you already have a configuration
 you care about. I don't <i>think</i> that this will affect it, but back it
@@ -378,9 +378,9 @@ up anyway just to be safe.
 </div>
 </div>
 
-<div id="outline-container-org9208aa3" class="outline-3">
-<h3 id="org9208aa3">Instructions</h3>
-<div class="outline-text-3" id="text-org9208aa3">
+<div id="outline-container-orga7c30c9" class="outline-3">
+<h3 id="orga7c30c9">Instructions</h3>
+<div class="outline-text-3" id="text-orga7c30c9">
 <p>
 If you don't have Nix installed, <a href="https://nixos.org/download.html">click here</a>.
 </p>
@@ -406,9 +406,9 @@ If you don't have them enabled but you want to enable them, <a href="https://nix
 </div>
 </div>
 
-<div id="outline-container-org6431a2c" class="outline-2">
-<h2 id="org6431a2c">Basic setup</h2>
-<div class="outline-text-2" id="text-org6431a2c">
+<div id="outline-container-orgc2a9f28" class="outline-2">
+<h2 id="orgc2a9f28">Basic setup</h2>
+<div class="outline-text-2" id="text-orgc2a9f28">
 <p>
 Disable unwanted UI elements and startup messages.
 </p>
@@ -445,9 +445,9 @@ Enable relative line numbers globally.
 </div>
 </div>
 
-<div id="outline-container-org9dae410" class="outline-2">
-<h2 id="org9dae410">Theme</h2>
-<div class="outline-text-2" id="text-org9dae410">
+<div id="outline-container-org6ffc75c" class="outline-2">
+<h2 id="org6ffc75c">Theme</h2>
+<div class="outline-text-2" id="text-org6ffc75c">
 <div class="org-src-container">
 <pre class="src src-emacs-lisp">(add-to-list <span style="color: #c6a0f6;">'</span><span style="color: #f5a97f;">custom-theme-load-path</span> (getnix <span style="color: #a6da95;">"themeDir"</span>))
 (load-theme <span style="color: #c6a0f6;">'</span><span style="color: #f5a97f;">catppuccin</span> t)
@@ -457,9 +457,9 @@ Enable relative line numbers globally.
 </div>
 </div>
 
-<div id="outline-container-orgf8dacf8" class="outline-3">
-<h3 id="orgf8dacf8">Variable definitions</h3>
-<div class="outline-text-3" id="text-orgf8dacf8">
+<div id="outline-container-org944b0c2" class="outline-3">
+<h3 id="org944b0c2">Variable definitions</h3>
+<div class="outline-text-3" id="text-org944b0c2">
 <div class="org-src-container">
 <pre class="src src-emacs-lisp">(<span style="color: #c6a0f6;">defvar</span> <span style="color: #cad3f5;">my:cursor-color</span> (catppuccin-get-color <span style="color: #c6a0f6;">'</span><span style="color: #f5a97f;">sapphire</span>)
   <span style="color: #6e738d;">"Default cursor color."</span>)
@@ -474,9 +474,9 @@ Enable relative line numbers globally.
 </div>
 </div>
 
-<div id="outline-container-org71c87e2" class="outline-3">
-<h3 id="org71c87e2">Customization</h3>
-<div class="outline-text-3" id="text-org71c87e2">
+<div id="outline-container-orga217aaa" class="outline-3">
+<h3 id="orga217aaa">Customization</h3>
+<div class="outline-text-3" id="text-orga217aaa">
 <div class="org-src-container">
 <pre class="src src-emacs-lisp">(set-face-attribute <span style="color: #c6a0f6;">'</span><span style="color: #f5a97f;">default</span> t <span style="color: #ed8796;">:font</span> (getnix <span style="color: #a6da95;">"font"</span>))
 
@@ -489,13 +489,13 @@ Enable relative line numbers globally.
 </div>
 </div>
 
-<div id="outline-container-orgc1fba10" class="outline-2">
-<h2 id="orgc1fba10">Libraries</h2>
-<div class="outline-text-2" id="text-orgc1fba10">
+<div id="outline-container-orgbf4849d" class="outline-2">
+<h2 id="orgbf4849d">Libraries</h2>
+<div class="outline-text-2" id="text-orgbf4849d">
 </div>
-<div id="outline-container-org716a0d8" class="outline-3">
-<h3 id="org716a0d8">Dash</h3>
-<div class="outline-text-3" id="text-org716a0d8">
+<div id="outline-container-orgf5ab9f5" class="outline-3">
+<h3 id="orgf5ab9f5">Dash</h3>
+<div class="outline-text-3" id="text-orgf5ab9f5">
 <p>
 Dash is a library for dealing with lists.
 </p>
@@ -507,9 +507,9 @@ Dash is a library for dealing with lists.
 </div>
 </div>
 
-<div id="outline-container-org23313b0" class="outline-3">
-<h3 id="org23313b0">Map</h3>
-<div class="outline-text-3" id="text-org23313b0">
+<div id="outline-container-org47bcd98" class="outline-3">
+<h3 id="org47bcd98">Map</h3>
+<div class="outline-text-3" id="text-org47bcd98">
 <p>
 Map provides generic map-manipulation functions that work on alists,
 plists, hash-tables, and arrays.
@@ -522,9 +522,9 @@ plists, hash-tables, and arrays.
 </div>
 </div>
 
-<div id="outline-container-orgc018e79" class="outline-3">
-<h3 id="orgc018e79">Subr-x</h3>
-<div class="outline-text-3" id="text-orgc018e79">
+<div id="outline-container-orgd7fd7e7" class="outline-3">
+<h3 id="orgd7fd7e7">Subr-x</h3>
+<div class="outline-text-3" id="text-orgd7fd7e7">
 <p>
 Less commonly used functions that complement basic APIs.
 </p>
@@ -537,9 +537,9 @@ Less commonly used functions that complement basic APIs.
 </div>
 </div>
 
-<div id="outline-container-orgb173ae6" class="outline-2">
-<h2 id="orgb173ae6">My library</h2>
-<div class="outline-text-2" id="text-orgb173ae6">
+<div id="outline-container-orgd6a6d1c" class="outline-2">
+<h2 id="orgd6a6d1c">My library</h2>
+<div class="outline-text-2" id="text-orgd6a6d1c">
 <p>
 <b>Notice</b>: Not all functions are defined in this section. There are
 some less general / more context-specific functions that are scattered
@@ -547,9 +547,9 @@ around with no particular rhyme or reason.
 </p>
 </div>
 
-<div id="outline-container-org51cf91a" class="outline-3">
-<h3 id="org51cf91a">Advice</h3>
-<div class="outline-text-3" id="text-org51cf91a">
+<div id="outline-container-org984c1c9" class="outline-3">
+<h3 id="org984c1c9">Advice</h3>
+<div class="outline-text-3" id="text-org984c1c9">
 <div class="org-src-container">
 <pre class="src src-emacs-lisp">(<span style="color: #c6a0f6;">defun</span> <span style="color: #8aadf4;">my:advice:be-quiet</span> (orig-fun <span style="color: #eed49f;">&amp;rest</span> args)
   <span style="color: #6e738d;">"Advice function: Suppress messages in ORIG-FUN.</span>
@@ -586,9 +586,9 @@ b3NldmthIj4gRXhhbXBsZTo8L3RleHQ+PC9zdmc+" alt="Example:" />
 </div>
 </div>
 
-<div id="outline-container-org4cb929b" class="outline-3">
-<h3 id="org4cb929b">Timing</h3>
-<div class="outline-text-3" id="text-org4cb929b">
+<div id="outline-container-orgb1a26a8" class="outline-3">
+<h3 id="orgb1a26a8">Timing</h3>
+<div class="outline-text-3" id="text-orgb1a26a8">
 <ul class="org-ul">
 <li>TODO Add <code>debounce-eval-immediately</code></li>
 </ul>
@@ -621,9 +621,9 @@ b3NldmthIj4gRXhhbXBsZTo8L3RleHQ+PC9zdmc+" alt="Example:" />
 </div>
 </div>
 
-<div id="outline-container-orge2fb701" class="outline-3">
-<h3 id="orge2fb701">Windows</h3>
-<div class="outline-text-3" id="text-orge2fb701">
+<div id="outline-container-org74287ef" class="outline-3">
+<h3 id="org74287ef">Windows</h3>
+<div class="outline-text-3" id="text-org74287ef">
 <p>
 This function was adapted from <a href="https://stackoverflow.com/questions/1832597">a StackOverflow answer</a> by <a href="https://stackoverflow.com/users/1762276/zhro">Zhro</a>.
 </p>
@@ -700,9 +700,9 @@ window will never be considered temporary.
 </div>
 </div>
 
-<div id="outline-container-orgf5df047" class="outline-2">
-<h2 id="orgf5df047">Backups</h2>
-<div class="outline-text-2" id="text-orgf5df047">
+<div id="outline-container-org82673f9" class="outline-2">
+<h2 id="org82673f9">Backups</h2>
+<div class="outline-text-2" id="text-org82673f9">
 <p>
 Prevent clobbering symlinks.
 </p>
@@ -744,13 +744,13 @@ Delete excess backup versions silently.
 </div>
 </div>
 
-<div id="outline-container-org4d0bc28" class="outline-2">
-<h2 id="org4d0bc28">Key bindings</h2>
-<div class="outline-text-2" id="text-org4d0bc28">
+<div id="outline-container-org6f535ef" class="outline-2">
+<h2 id="org6f535ef">Key bindings</h2>
+<div class="outline-text-2" id="text-org6f535ef">
 </div>
-<div id="outline-container-orgfef1c81" class="outline-3">
-<h3 id="orgfef1c81">Hydras</h3>
-<div class="outline-text-3" id="text-orgfef1c81">
+<div id="outline-container-org17ac5ee" class="outline-3">
+<h3 id="org17ac5ee">Hydras</h3>
+<div class="outline-text-3" id="text-org17ac5ee">
 <p>
 Pretty-hydra is used to create action menus. I've chosen to use hydras
 as the foundation for my custom keybind scheme to improve
@@ -781,14 +781,14 @@ that define hydra(s):
 </p>
 
 <ul class="org-ul">
-<li><a href="#org48bf147">Motion &gt; Avy</a></li>
-<li><a href="#orgfde7c9b">Languages &gt; Org</a></li>
+<li><a href="#org2a7cada">Motion &gt; Avy</a></li>
+<li><a href="#orgeb17879">Languages &gt; Org</a></li>
 </ul>
 </div>
 
-<div id="outline-container-org047cc04" class="outline-4">
-<h4 id="org047cc04">File</h4>
-<div class="outline-text-4" id="text-org047cc04">
+<div id="outline-container-org0d03cc4" class="outline-4">
+<h4 id="org0d03cc4">File</h4>
+<div class="outline-text-4" id="text-org0d03cc4">
 <div class="org-src-container">
 <pre class="src src-emacs-lisp">  (<span style="color: #c6a0f6;">pretty-hydra-define</span> hydra:file
     (<span style="color: #ed8796;">:exit</span> t <span style="color: #ed8796;">:idle</span> 0.25)
@@ -799,9 +799,9 @@ that define hydra(s):
 </div>
 </div>
 
-<div id="outline-container-orgb497f88" class="outline-4">
-<h4 id="orgb497f88">Buffer</h4>
-<div class="outline-text-4" id="text-orgb497f88">
+<div id="outline-container-orgf66e921" class="outline-4">
+<h4 id="orgf66e921">Buffer</h4>
+<div class="outline-text-4" id="text-orgf66e921">
 <div class="org-src-container">
 <pre class="src src-emacs-lisp">  (<span style="color: #c6a0f6;">defun</span> <span style="color: #8aadf4;">my:last-buffer</span> ()
     (<span style="color: #c6a0f6;">interactive</span>)
@@ -826,9 +826,9 @@ that define hydra(s):
 </div>
 </div>
 
-<div id="outline-container-org1f73818" class="outline-4">
-<h4 id="org1f73818">Window</h4>
-<div class="outline-text-4" id="text-org1f73818">
+<div id="outline-container-org312c4cf" class="outline-4">
+<h4 id="org312c4cf">Window</h4>
+<div class="outline-text-4" id="text-org312c4cf">
 <div class="org-src-container">
 <pre class="src src-emacs-lisp">  (<span style="color: #c6a0f6;">pretty-hydra-define</span> hydra:window
     (<span style="color: #ed8796;">:exit</span> t <span style="color: #ed8796;">:idle</span> 0.25) 
@@ -844,9 +844,9 @@ that define hydra(s):
 </div>
 </div>
 
-<div id="outline-container-orgc6d23c0" class="outline-4">
-<h4 id="orgc6d23c0">Leader key</h4>
-<div class="outline-text-4" id="text-orgc6d23c0">
+<div id="outline-container-orgb3883cb" class="outline-4">
+<h4 id="orgb3883cb">Leader key</h4>
+<div class="outline-text-4" id="text-orgb3883cb">
 <div class="org-src-container">
 <pre class="src src-emacs-lisp">  (<span style="color: #c6a0f6;">pretty-hydra-define</span> hydra:leader
     (<span style="color: #ed8796;">:exit</span> t <span style="color: #ed8796;">:idle</span> 0.25)
@@ -866,9 +866,9 @@ that define hydra(s):
 </div>
 </div>
 
-<div id="outline-container-orgd49072b" class="outline-3">
-<h3 id="orgd49072b">General</h3>
-<div class="outline-text-3" id="text-orgd49072b">
+<div id="outline-container-org29fc501" class="outline-3">
+<h3 id="org29fc501">General</h3>
+<div class="outline-text-3" id="text-org29fc501">
 <p>
 General provides a convenient way to bind keys.
 </p>
@@ -901,7 +901,7 @@ Use escape to close temporary windows.
 </div>
 
 <p>
-Use spacebar to open the <a href="#orgc6d23c0">Leader key hydra</a>.
+Use spacebar to open the <a href="#orgb3883cb">Leader key hydra</a>.
 </p>
 
 <div class="org-src-container">
@@ -915,9 +915,9 @@ Use spacebar to open the <a href="#orgc6d23c0">Leader key hydra</a>.
 </div>
 </div>
 
-<div id="outline-container-orgac9e3cd" class="outline-3">
-<h3 id="orgac9e3cd">Which-key</h3>
-<div class="outline-text-3" id="text-orgac9e3cd">
+<div id="outline-container-org567491b" class="outline-3">
+<h3 id="org567491b">Which-key</h3>
+<div class="outline-text-3" id="text-org567491b">
 <p>
 Which-key shows all the possible completions of a partially-input
 keybind.
@@ -934,9 +934,9 @@ keybind.
 </div>
 </div>
 
-<div id="outline-container-org93ec6bf" class="outline-2">
-<h2 id="org93ec6bf">Evil</h2>
-<div class="outline-text-2" id="text-org93ec6bf">
+<div id="outline-container-orgbd34cd5" class="outline-2">
+<h2 id="orgbd34cd5">Evil</h2>
+<div class="outline-text-2" id="text-orgbd34cd5">
 <p>
 Evil (extensible vi layer) emulates the main features of Vim.
 </p>
@@ -971,13 +971,13 @@ Emacs that Evil does not cover properly by default.
 </div>
 </div>
 
-<div id="outline-container-org951c81a" class="outline-2">
-<h2 id="org951c81a">Minibuffer</h2>
-<div class="outline-text-2" id="text-org951c81a">
+<div id="outline-container-orgf9ff19d" class="outline-2">
+<h2 id="orgf9ff19d">Minibuffer</h2>
+<div class="outline-text-2" id="text-orgf9ff19d">
 </div>
-<div id="outline-container-orgad1d7ad" class="outline-3">
-<h3 id="orgad1d7ad">Vertico</h3>
-<div class="outline-text-3" id="text-orgad1d7ad">
+<div id="outline-container-org8fe40b3" class="outline-3">
+<h3 id="org8fe40b3">Vertico</h3>
+<div class="outline-text-3" id="text-org8fe40b3">
 <p>
 Vertico is a minibuffer completion interface.
 </p>
@@ -1050,9 +1050,9 @@ commands are hidden in normal buffers.
 </div>
 </div>
 
-<div id="outline-container-orgaa66d04" class="outline-3">
-<h3 id="orgaa66d04">Marginalia</h3>
-<div class="outline-text-3" id="text-orgaa66d04">
+<div id="outline-container-orgbb4ebd8" class="outline-3">
+<h3 id="orgbb4ebd8">Marginalia</h3>
+<div class="outline-text-3" id="text-orgbb4ebd8">
 <p>
 Marginalia adds helpful information to entries in Vertico. For
 example, if you type <code>M-x</code>, Vertico will open a list of usable
@@ -1069,9 +1069,9 @@ commands. Marginalia will add each command's description next to it.
 </div>
 </div>
 </div>
-<div id="outline-container-orgad66c15" class="outline-2">
-<h2 id="orgad66c15"><span class="todo WIP">WIP</span> Mode line</h2>
-<div class="outline-text-2" id="text-orgad66c15">
+<div id="outline-container-orga0d6aec" class="outline-2">
+<h2 id="orga0d6aec"><span class="todo WIP">WIP</span> Mode line</h2>
+<div class="outline-text-2" id="text-orga0d6aec">
 <p>
 Warning: Not tangled
 </p>
@@ -1090,13 +1090,13 @@ Warning: Not tangled
 </div>
 </div>
 
-<div id="outline-container-org38eb029" class="outline-2">
-<h2 id="org38eb029">Motion</h2>
-<div class="outline-text-2" id="text-org38eb029">
+<div id="outline-container-orgc787fdc" class="outline-2">
+<h2 id="orgc787fdc">Motion</h2>
+<div class="outline-text-2" id="text-orgc787fdc">
 </div>
-<div id="outline-container-org48bf147" class="outline-3">
-<h3 id="org48bf147">Avy</h3>
-<div class="outline-text-3" id="text-org48bf147">
+<div id="outline-container-org2a7cada" class="outline-3">
+<h3 id="org2a7cada">Avy</h3>
+<div class="outline-text-3" id="text-org2a7cada">
 <p>
 Avy is a convenient tool to jump around and perform some actions based
 on a short filter.
@@ -1134,9 +1134,9 @@ on a short filter.
 </div>
 </div>
 
-<div id="outline-container-org340cc64" class="outline-3">
-<h3 id="org340cc64">Nav-flash</h3>
-<div class="outline-text-3" id="text-org340cc64">
+<div id="outline-container-orga7497c6" class="outline-3">
+<h3 id="orga7497c6">Nav-flash</h3>
+<div class="outline-text-3" id="text-orga7497c6">
 <p>
 Nav-flash makes it easier to track the cursor across large movements
 by flashing the current line.
@@ -1160,13 +1160,13 @@ by flashing the current line.
 </div>
 </div>
 
-<div id="outline-container-orgbe30d06" class="outline-2">
-<h2 id="orgbe30d06"><span class="todo WIP">WIP</span> Version control</h2>
-<div class="outline-text-2" id="text-orgbe30d06">
+<div id="outline-container-org4ca195b" class="outline-2">
+<h2 id="org4ca195b"><span class="todo WIP">WIP</span> Version control</h2>
+<div class="outline-text-2" id="text-org4ca195b">
 </div>
-<div id="outline-container-orgd6220bb" class="outline-3">
-<h3 id="orgd6220bb">Magit</h3>
-<div class="outline-text-3" id="text-orgd6220bb">
+<div id="outline-container-org278ef0a" class="outline-3">
+<h3 id="org278ef0a">Magit</h3>
+<div class="outline-text-3" id="text-org278ef0a">
 <div class="org-src-container">
 <pre class="src src-emacs-lisp">(<span style="color: #c6a0f6;">use-package</span> <span style="color: #f5a97f;">magit</span>
   <span style="color: #ed8796;">:ensure</span> t)
@@ -1176,16 +1176,16 @@ by flashing the current line.
 </div>
 </div>
 
-<div id="outline-container-org551a9b8" class="outline-2">
-<h2 id="org551a9b8"><span class="todo TODO">TODO</span> Search</h2>
+<div id="outline-container-org8291aa4" class="outline-2">
+<h2 id="org8291aa4"><span class="todo TODO">TODO</span> Search</h2>
 </div>
-<div id="outline-container-org8d02da7" class="outline-2">
-<h2 id="org8d02da7">Misc. packages</h2>
-<div class="outline-text-2" id="text-org8d02da7">
+<div id="outline-container-org8e46fc1" class="outline-2">
+<h2 id="org8e46fc1">Misc. packages</h2>
+<div class="outline-text-2" id="text-org8e46fc1">
 </div>
-<div id="outline-container-org262447d" class="outline-3">
-<h3 id="org262447d">Try</h3>
-<div class="outline-text-3" id="text-org262447d">
+<div id="outline-container-org66e8d07" class="outline-3">
+<h3 id="org66e8d07">Try</h3>
+<div class="outline-text-3" id="text-org66e8d07">
 <p>
 Try allows you to try Emacs packages without installing them.
 </p>
@@ -1197,9 +1197,9 @@ Try allows you to try Emacs packages without installing them.
 </div>
 </div>
 
-<div id="outline-container-org9f8bbd8" class="outline-3">
-<h3 id="org9f8bbd8">Switch-window</h3>
-<div class="outline-text-3" id="text-org9f8bbd8">
+<div id="outline-container-orgda57f17" class="outline-3">
+<h3 id="orgda57f17">Switch-window</h3>
+<div class="outline-text-3" id="text-orgda57f17">
 <p>
 Switch-window provides a nice way to choose which window to switch to
 when there are more than two windows. When a switch-window command is
@@ -1228,9 +1228,9 @@ one of the characters then switches focus to that window.
 </div>
 </div>
 
-<div id="outline-container-org863a090" class="outline-3">
-<h3 id="org863a090">Solaire mode</h3>
-<div class="outline-text-3" id="text-org863a090">
+<div id="outline-container-org93621ef" class="outline-3">
+<h3 id="org93621ef">Solaire mode</h3>
+<div class="outline-text-3" id="text-org93621ef">
 <p>
 Solaire mode helps to visually distinguish "real" buffers (code
 buffers) from "unreal" buffers (popups, sidebars, log buffers,
@@ -1248,9 +1248,9 @@ terminals, etc) by giving the latter a different background.
 </div>
 </div>
 
-<div id="outline-container-orgc4aa3a8" class="outline-3">
-<h3 id="orgc4aa3a8">Bufler</h3>
-<div class="outline-text-3" id="text-orgc4aa3a8">
+<div id="outline-container-org702f042" class="outline-3">
+<h3 id="org702f042">Bufler</h3>
+<div class="outline-text-3" id="text-org702f042">
 <p>
 Bufler is an ibuffer alternative.
 </p>
@@ -1271,9 +1271,9 @@ Bufler is an ibuffer alternative.
 </div>
 </div>
 
-<div id="outline-container-orgd2f8cd8" class="outline-3">
-<h3 id="orgd2f8cd8"><span class="todo WIP">WIP</span> SVG tag mode</h3>
-<div class="outline-text-3" id="text-orgd2f8cd8">
+<div id="outline-container-org344fae0" class="outline-3">
+<h3 id="org344fae0"><span class="todo WIP">WIP</span> SVG tag mode</h3>
+<div class="outline-text-3" id="text-org344fae0">
 <p>
 SVG tag mode replaces keywords or regular expression with SVG tags. It
 can be used as an extra-fancy alternative to <code>hl-todo</code>.
@@ -1522,9 +1522,9 @@ Finally, enable the SVG tags globally.
 </div>
 </div>
 
-<div id="outline-container-orgb7ee5d7" class="outline-4">
-<h4 id="orgb7ee5d7"><span class="todo TODO">TODO</span> Add progress bar, tags, priority</h4>
-<div class="outline-text-4" id="text-orgb7ee5d7">
+<div id="outline-container-orge0f35e9" class="outline-4">
+<h4 id="orge0f35e9"><span class="todo TODO">TODO</span> Add progress bar, tags, priority</h4>
+<div class="outline-text-4" id="text-orge0f35e9">
 <p>
 <a href="https://github.com/rougier/svg-tag-mode/blob/main/examples/example-2.el">https://github.com/rougier/svg-tag-mode/blob/main/examples/example-2.el</a>
 </p>
@@ -1532,9 +1532,9 @@ Finally, enable the SVG tags globally.
 </div>
 </div>
 
-<div id="outline-container-org71ceba2" class="outline-3">
-<h3 id="org71ceba2">Format-all</h3>
-<div class="outline-text-3" id="text-org71ceba2">
+<div id="outline-container-org6a88ad8" class="outline-3">
+<h3 id="org6a88ad8">Format-all</h3>
+<div class="outline-text-3" id="text-org6a88ad8">
 <div class="org-src-container">
 <pre class="src src-emacs-lisp">(<span style="color: #c6a0f6;">use-package</span> <span style="color: #f5a97f;">format-all</span>
   <span style="color: #ed8796;">:ensure</span> t
@@ -1546,9 +1546,9 @@ Finally, enable the SVG tags globally.
 </div>
 </div>
 
-<div id="outline-container-org8deaf9d" class="outline-3">
-<h3 id="org8deaf9d">Flycheck</h3>
-<div class="outline-text-3" id="text-org8deaf9d">
+<div id="outline-container-org125a2e3" class="outline-3">
+<h3 id="org125a2e3">Flycheck</h3>
+<div class="outline-text-3" id="text-org125a2e3">
 <p>
 Flycheck is a modern on-the-fly syntax checking extension.
 </p>
@@ -1576,13 +1576,13 @@ Flycheck right below their reporting location
 </div>
 </div>
 
-<div id="outline-container-orgb6cf957" class="outline-2">
-<h2 id="orgb6cf957">Major Modes</h2>
-<div class="outline-text-2" id="text-orgb6cf957">
+<div id="outline-container-orgc244a81" class="outline-2">
+<h2 id="orgc244a81">Major Modes</h2>
+<div class="outline-text-2" id="text-orgc244a81">
 </div>
-<div id="outline-container-orgc036ed9" class="outline-3">
-<h3 id="orgc036ed9">Treesit-auto</h3>
-<div class="outline-text-3" id="text-orgc036ed9">
+<div id="outline-container-orgcdc7258" class="outline-3">
+<h3 id="orgcdc7258">Treesit-auto</h3>
+<div class="outline-text-3" id="text-orgcdc7258">
 <p>
 Treesit-auto provides an easy way to automatically install and use
 tree-sitter major modes.
@@ -1599,9 +1599,9 @@ tree-sitter major modes.
 </div>
 </div>
 
-<div id="outline-container-org0874919" class="outline-3">
-<h3 id="org0874919"><span class="todo WIP">WIP</span> English</h3>
-<div class="outline-text-3" id="text-org0874919">
+<div id="outline-container-orgd781ecf" class="outline-3">
+<h3 id="orgd781ecf"><span class="todo WIP">WIP</span> English</h3>
+<div class="outline-text-3" id="text-orgd781ecf">
 <div class="org-src-container">
 <pre class="src src-emacs-lisp">(<span style="color: #c6a0f6;">use-package</span> <span style="color: #f5a97f;">langtool</span>
   <span style="color: #ed8796;">:ensure</span> t
@@ -1632,9 +1632,9 @@ tree-sitter major modes.
 </div>
 </div>
 
-<div id="outline-container-org6419262" class="outline-3">
-<h3 id="org6419262">Emacs Lisp</h3>
-<div class="outline-text-3" id="text-org6419262">
+<div id="outline-container-org6b31f77" class="outline-3">
+<h3 id="org6b31f77">Emacs Lisp</h3>
+<div class="outline-text-3" id="text-org6b31f77">
 <div class="org-src-container">
 <pre class="src src-emacs-lisp">(<span style="color: #c6a0f6;">use-package</span> <span style="color: #f5a97f;">elisp-def</span> <span style="color: #ed8796;">:ensure</span> t)
 
@@ -1647,9 +1647,9 @@ tree-sitter major modes.
 </div>
 </div>
 
-<div id="outline-container-orgfde7c9b" class="outline-3">
-<h3 id="orgfde7c9b">Org</h3>
-<div class="outline-text-3" id="text-orgfde7c9b">
+<div id="outline-container-orgeb17879" class="outline-3">
+<h3 id="orgeb17879">Org</h3>
+<div class="outline-text-3" id="text-orgeb17879">
 <p>
 Org is like Markdown but a lot better.
 </p>
@@ -1737,9 +1737,9 @@ b3NldmthIj4gRE9ORTwvdGV4dD48L3N2Zz4=" alt="DONE" />"</span>)))
 </div>
 </div>
 
-<div id="outline-container-org32fc62e" class="outline-4">
-<h4 id="org32fc62e"><span class="todo WIP">WIP</span> Hydra</h4>
-<div class="outline-text-4" id="text-org32fc62e">
+<div id="outline-container-orgfdd6c10" class="outline-4">
+<h4 id="orgfdd6c10"><span class="todo WIP">WIP</span> Hydra</h4>
+<div class="outline-text-4" id="text-orgfdd6c10">
 <div class="org-src-container">
 <pre class="src src-emacs-lisp">(<span style="color: #c6a0f6;">defun</span> <span style="color: #8aadf4;">my:org-toggle-emphasis-markers</span> ()
   <span style="color: #6e738d;">"Toggle emphasis markers [*/_=~+]"</span>
@@ -1794,9 +1794,9 @@ b3NldmthIj4gRE9ORTwvdGV4dD48L3N2Zz4=" alt="DONE" />"</span>)))
 </div>
 </div>
 
-<div id="outline-container-org0e7f241" class="outline-3">
-<h3 id="org0e7f241">Nix</h3>
-<div class="outline-text-3" id="text-org0e7f241">
+<div id="outline-container-orgce2e38a" class="outline-3">
+<h3 id="orgce2e38a">Nix</h3>
+<div class="outline-text-3" id="text-orgce2e38a">
 <div class="org-src-container">
 <pre class="src src-emacs-lisp">(<span style="color: #c6a0f6;">use-package</span> <span style="color: #f5a97f;">nix-mode</span>
   <span style="color: #ed8796;">:ensure</span> t
@@ -1810,13 +1810,13 @@ b3NldmthIj4gRE9ORTwvdGV4dD48L3N2Zz4=" alt="DONE" />"</span>)))
 </div>
 </div>
 
-<div id="outline-container-org6331752" class="outline-3">
-<h3 id="org6331752">Shell script</h3>
-<div class="outline-text-3" id="text-org6331752">
+<div id="outline-container-orgbb02dc1" class="outline-3">
+<h3 id="orgbb02dc1">Shell script</h3>
+<div class="outline-text-3" id="text-orgbb02dc1">
 </div>
-<div id="outline-container-org7014e4b" class="outline-4">
-<h4 id="org7014e4b">Sh, bash, zsh</h4>
-<div class="outline-text-4" id="text-org7014e4b">
+<div id="outline-container-org3d7e543" class="outline-4">
+<h4 id="org3d7e543">Sh, bash, zsh</h4>
+<div class="outline-text-4" id="text-org3d7e543">
 <p>
 Syntax checking and linting is provided by Shellcheck via flycheck.
 </p>
@@ -1837,9 +1837,9 @@ Fix treesitter hooks.
 </div>
 </div>
 
-<div id="outline-container-org5a1b4d1" class="outline-4">
-<h4 id="org5a1b4d1">Fish</h4>
-<div class="outline-text-4" id="text-org5a1b4d1">
+<div id="outline-container-org00a39c7" class="outline-4">
+<h4 id="org00a39c7">Fish</h4>
+<div class="outline-text-4" id="text-org00a39c7">
 <div class="org-src-container">
 <pre class="src src-emacs-lisp">(<span style="color: #c6a0f6;">use-package</span> <span style="color: #f5a97f;">fish-mode</span>
   <span style="color: #ed8796;">:ensure</span> t
@@ -1852,7 +1852,7 @@ Fix treesitter hooks.
 </div>
 </div>
 <div id="postamble" class="status">
-<p class="date">Export time: 2023-07-06 Thu 20:38</p>
+<p class="date">Export time: 2023-07-06 Thu 20:42</p>
 </div>
 </body>
 </html>

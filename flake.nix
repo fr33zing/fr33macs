@@ -82,6 +82,9 @@
 
           # Required for formatting Nix
           nixfmt
+
+          # Required to use flycheck for shell languages
+          shellcheck
         ];
         config = rec {
           file = ./config.org;

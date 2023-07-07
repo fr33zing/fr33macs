@@ -341,15 +341,25 @@ Delete excess backup versions silently.
 * Key bindings
 ** Hydras
 
-Hydra is used to create action menus. I've chosen to use hydras as the
-foundation for my custom keybind scheme to improve discoverability and
-reduce cognitive load.
+Pretty-hydra is used to create action menus. I've chosen to use hydras
+as the foundation for my custom keybind scheme to improve
+discoverability and reduce cognitive load.
 
 #+BEGIN_SRC emacs-lisp
 (use-package pretty-hydra
   :ensure t
   :config
-  ;; <config>
+  (set-face-attribute 'hydra-face-red nil
+    :foreground (catppuccin-get-color 'red))
+  (set-face-attribute 'hydra-face-blue nil
+    :foreground (catppuccin-get-color 'sapphire))
+  (set-face-attribute 'hydra-face-pink nil
+    :foreground (catppuccin-get-color 'pink))
+  (set-face-attribute 'hydra-face-teal nil
+    :foreground (catppuccin-get-color 'teal))
+  (set-face-attribute 'hydra-face-amaranth nil
+    :foreground (catppuccin-get-color 'mauve))
+    ;; <config>
 #+END_SRC
 
 *Notice*: Not all hydras are defined in this section. Other sections

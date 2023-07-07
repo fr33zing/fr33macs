@@ -884,11 +884,6 @@ tree-sitter major modes.
   :ensure t
   :config
   (add-hook 'emacs-lisp-mode-hook 'highlight-quoted-mode))
-;;(use-package parinfer-rust-mode
-;;  :ensure t
-;;  :hook emacs-lisp-mode
-;;  :init
-;;  (setq parinfer-rust-library (getnix "parinferRustLibrary")))
 #+END_SRC
 
 ** Org

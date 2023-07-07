@@ -370,7 +370,10 @@ that define hydra(s):
 *** Buffer
 
 #+BEGIN_SRC emacs-lisp
-  (defalias 'evil-switch-to-windows-last-buffer 'last-buffer)
+  (defun my:last-buffer ()
+    (interactive)
+    (switch-to-buffer (other-buffer (current-buffer) 1)))
+
   (pretty-hydra-define hydra:buffer
     (:exit t :idle 0.25)
     ("Switch"
@@ -378,7 +381,7 @@ that define hydra(s):
       ("i" bufler-list          "List buffers")
       ("]" next-buffer          "Next buffer"     :exit nil)
       ("[" previous-buffer      "Previous buffer" :exit nil)
-      ("l" last-buffer          "Last buffer"))
+      ("l" my:last-buffer       "Last buffer"))
      "Actions"
      (("s" save-buffer         "Save buffer")
       ("k" kill-current-buffer "Kill buffer")

@@ -2,16 +2,20 @@
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
     emacs-overlay.url = "github:nix-community/emacs-overlay";
-
-    alejandra = {
-      url = "github:kamadorueda/alejandra/3.0.0";
-      inputs.nixpkgs.follows = "nixpkgs";
+    catppuccinEmacs = {
+      url = "github:catppuccin/emacs";
+      flake = false;
+    };
+    corfuCandidateOverlay = {
+      url = "git+https://code.bsdgeek.org/adam/corfu-candidate-overlay";
+      flake = false;
     };
   };
 
-  outputs = { self, nixpkgs, emacs-overlay, alejandra, }:
+  outputs = { self, nixpkgs, ... }@inputs:
     let
       inherit (nixpkgs) lib;
+
       withSystem = f:
         lib.fold lib.recursiveUpdate { } (map (s: f s) [
           "x86_64-linux"
@@ -23,7 +27,7 @@
       let
         pkgs = import nixpkgs {
           inherit system;
-          overlays = [ emacs-overlay.overlays.default ];
+          overlays = [ inputs.emacs-overlay.overlays.default ];
         };
         inherit (pkgs) lib stdenv;
 
@@ -55,14 +59,18 @@
           '');
 
         #
-        # Resources
+        # Emacs Packages
         #
 
-        catppuccinTheme = pkgs.fetchgit {
-          url = "https://github.com/catppuccin/emacs.git";
-          rev = "438622d74f1b0034c354fdd67ed39c36f059e1b4";
-          sha256 = "sha256-CKxOsQHiYmURp5Fe9fOSvwcq6veDXUqKBRr8ynDOB/0=";
-        };
+        customEmacsPackages = epkgs:
+          [
+            (epkgs.trivialBuild {
+              pname = "corfu-candidate-overlay";
+              version = "1.5";
+              src = inputs.corfuCandidateOverlay;
+              packageRequires = [ epkgs.corfu ];
+            })
+          ];
 
         #
         # Configuration
@@ -73,28 +81,35 @@
           gcc
           ripgrep
 
-          # Required to display SVGs
+          # SVGs
           librsvg
 
-          # Required by langtool package
-          jre_minimal
-          languagetool
+          # Shell
+          shellcheck
 
-          # Required for formatting Nix
+          # Nix
           nixfmt
 
-          # Required to use flycheck for shell languages
-          shellcheck
+          # Python
+          (python3.withPackages (p:
+            with p; [
+              python-lsp-server
+              python-lsp-ruff # Linting
+              pylsp-rope # Completions and refactoring
+              pylsp-mypy # Type checking
+              pyls-memestra # Deprecation tracking
+              black # Formatting
+            ]))
         ];
+
         config = rec {
           file = ./config.org;
           vars = rec {
             # Variables defined here can be accessed in the configuration file.
             # Example:
-            # ```
+            #
             # (getnix "themeDir")
-            # ```
-            themeDir = catppuccinTheme;
+            themeDir = inputs.catppuccinEmacs;
             themeVariant = symbol "macchiato";
             fontFamily = "Iosevka Comfy";
             tagsFontFamily = "Iosevka";
@@ -105,6 +120,7 @@
           output = substitute vars (tangle file);
         };
       in {
+
         #
         # Outputs
         #
@@ -118,7 +134,8 @@
           });
           config = config.output;
           defaultInitFile = true;
-          extraEmacsPackages = epkgs: [ epkgs.use-package ];
+          extraEmacsPackages = epkgs:
+            [ epkgs.use-package ] ++ (customEmacsPackages epkgs);
         }).overrideAttrs (_: { meta.mainProgram = "emacs"; });
 
         devShells.${system}.default = pkgs.mkShell {

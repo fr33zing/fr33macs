@@ -4,12 +4,14 @@ INPUT = sys.argv[1]
 OUTPUT = sys.argv[2]
 
 BEGIN_TANGLE = "#+begin_src"
-TANGLE_LANGS = [ "emacs-lisp", "elisp" ]
+TANGLE_LANGS = ["emacs-lisp", "elisp"]
 CANCEL_TANGLE = ":tangle no"
 END_TANGLE = "#+end_src"
 
+
 def normalize(line):
     return line.strip().lower()
+
 
 def line_begins_tangling(line_norm):
     return (
@@ -18,8 +20,10 @@ def line_begins_tangling(line_norm):
         and not CANCEL_TANGLE in line_norm
     )
 
+
 def line_ends_tangling(line_norm):
     return line_norm == END_TANGLE
+
 
 with open(INPUT, "r") as input_file:
     with open(OUTPUT, "w") as output_file:
@@ -32,5 +36,4 @@ with open(INPUT, "r") as input_file:
                 else:
                     output_file.write(line)
             elif line_begins_tangling(line_norm):
-
                 tangle = True

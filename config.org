@@ -321,7 +321,7 @@ window will never be considered temporary.
 
 #+BEGIN_SRC emacs-lisp
 (setq my:not-temporary-major-modes
-  '(lisp-interaction-mode))
+  '(lisp-interaction-mode magit-status-mode))
 
 (setq my:not-temporary-minor-modes
   '(org-src-mode))
@@ -451,7 +451,8 @@ that define hydra(s):
       ("b" hydra:buffer/body "Buffer")
       ("w" hydra:window/body "Window")
       ("a" hydra:avy/body    "Avy")
-      ("o" hydra:org/body    "Org"))
+      ("o" hydra:org/body    "Org")
+      ("g" hydra:git/body    "Git"))
      "Shortcut"
      (("s" save-buffer            "Save buffer")
       ("q" save-buffer-kill-emacs "Quit")))))
@@ -707,8 +708,13 @@ by flashing the current line.
 ** Magit
 
 #+BEGIN_SRC emacs-lisp
-(use-package magit
-  :ensure t)
+(use-package magit :ensure t)
+
+(pretty-hydra-define hydra:git
+  (:exit t :idle 0.25) 
+  ("Git"
+   (("g" magit "Open Magit"))))
+
 #+END_SRC
 
 * TODO Search

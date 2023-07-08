@@ -6,10 +6,7 @@
 
 #+ATTR_HTML: :style display:none;
 #+BEGIN_EXAMPLE
-Read this document in this repository's github.io page or in Emacs
-org-mode for the best experience.
-
-https://fr33zing.github.io/fr33macs
+Read this document in this repository's github.io page or in Emacs for the best experience.
 #+END_EXAMPLE
 
 * Links

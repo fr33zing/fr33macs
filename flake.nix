@@ -100,6 +100,16 @@
               pyls-memestra # Deprecation tracking
               black # Formatting
             ]))
+
+          # Rust
+          rustc # Compiler
+          rust-analyzer # LSP
+          rustfmt # Formatting
+          clippy # Linting
+          cargo # Project management
+          cargo-edit # Dependency management
+          cargo-expand # Macro expansion
+          pandoc # Documentation
         ];
 
         config = rec {

@@ -4,6 +4,14 @@
 #+OPTIONS: num:nil H:5 toc:2
 #+EXPORT_FILE_NAME: index.html
 
+#+ATTR_HTML: :style display:none;
+#+BEGIN_EXAMPLE
+Read this document in this repository's github.io page or in Emacs
+org-mode for the best experience.
+
+https://fr33zing.github.io/fr33macs
+#+END_EXAMPLE
+
 * Links
 
 - Github.io page: https://fr33zing.github.io/fr33macs
@@ -14,13 +22,16 @@
 
 * About
 
-This document is best read on [[https://github.com/fr33zing/fr33macs][this repository]]'s [[https://fr33zing.github.io/fr33macs][github.io page]] or in
-Emacs org-mode.
 
 This document is tangled to create my Emacs configuration. *If you
 want to try it for yourself, [[*Try it yourself][click here]].*
 
-** Tangling
+** Scripts
+
+Utility scripts are located in [[file:util/][~util/~]] and they're used to cover parts
+of the Nix flake build that wouldn't be worth it to implement in Nix.
+
+*** Tangling
 
 This file is not tangled using ~org-babel-table~. Instead, it's
 tangled using a bare-bones implementation in [[file:util/tangle.py][~util/tangle.py~]], and
@@ -28,7 +39,7 @@ thus no fancy tangle features are supported. The ~header-args~
 property at the top of the file is not even parsed, it's only there to
 maintain compatibility with other tangle implementations.
 
-** Substitution
+*** Substitution
 
 The function ~getnix~ is used to get a variable from the Nix flake,
 sort of like ~getenv~ but not exactly. It isn't actually a function
@@ -36,7 +47,15 @@ that exists. Instead, [[file:util/substitute.py][~util/substitute.py~]] is used 
 instances of ~(getnix "variableName")~ with the appropriate Elisp
 literal.
 
-** Tags in comments
+** Formatting
+*** Blank lines
+
+Different elements, (i.e. text, blocks, headings, etc), should be
+separated with blank lines except between multiple headings. Omitting
+the blank line between multiple headings is necessary for heading
+visibility cycling to work as expected.
+
+*** Tags in comments
 
 While reading this document you may see what look to be XML tags,
 e.g.:

@@ -1023,7 +1023,7 @@ Change the ~html~ export preamble and postamble.
     ("p" org-toggle-pretty-entities     "Pretty entities"))
    "Insert"
    (("L" org-insert-link             "Link")
-    ("s" org-insert-store-link       "(Store link to here)")
+    ("s" org-store-link              "(Store link to here)")
     ("S" org-insert-last-stored-link "Last stored link")
     ("t" org-time-stamp              "Timestamp")
     ("d" org-insert-drawer           "Drawer")

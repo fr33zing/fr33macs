@@ -19,9 +19,32 @@ Read this document in this repository's github.io page or in Emacs for the best 
 
 * About
 
-
 This document is tangled to create my Emacs configuration. *If you
 want to try it for yourself, [[*Try it yourself][click here]].*
+
+Mostly intended for use with Wayland on Linux, this configuration uses
+the pure-gtk version of Emacs 29. The build process, including
+fetching gathering all external dependencies, is handled by the Nix
+flake.
+
+** Build steps
+
+1. Fetch and build external dependencies, including any developer
+   tools needed for the languages I use, such as: compilers,
+   libraries, formatters, linters, language servers.
+
+2. Use ~sass~ to convert ~export.scss~ into CSS. That CSS is then used
+   to style this document when exported to HTML.
+
+3. Tangle configuration from ~config.org~.
+
+4. Substitute variables from Nix flake (including the export CSS) into
+   tangled configuration.
+
+5. Build Emacs with tangled and subtituted configuration.
+
+6. Wrap Emacs binary to give it exclusive access to its external
+   dependencies.
 
 ** Scripts
 
@@ -190,39 +213,6 @@ Less commonly used functions that complement basic APIs.
 some less general / more context-specific functions that are scattered
 around with no particular rhyme or reason.
 
-# ** Formatting
-
-# #+BEGIN_SRC emacs-lisp
-# (defvar my:format-on-save t
-#   "Whether the buffer should be automatically formatted before
-# saving.")
-
-# (defvar my:mode-format-commands '()
-#   "Mappings from mode to command. Indicates which command to use for
-# formatting certain major modes.")
-
-# ; TODO update this doc string
-# (defun my:use-format-command (mode command)
-#   "Assign COMMAND to be used for formatting MODE buffers."
-#   (add-to-list 'my:mode-format-commands `(,mode . ,command))
-#   (add-to-list 'evil-goggles--commands
-#     '(command :face evil-goggles-change-face
-#               :switch evil-goggles-enable-change
-#               :advice evil-goggles--generic-blocking-advice)))
-
-# (defun my:format-command (mode)
-#   "Get the command to be used for formatting MODE buffers."
-#   (map-elt my:mode-format-commands mode))
-
-# (defun my:format-buffer (&optional buffer)
-#   "Format the BUFFER. If BUFFER is nil, format the current buffer."
-#   (let ((buffer* (or buffer (current-buffer))))
-#     (with-current-buffer buffer*
-#       (let ((command (my:format-command major-mode)))
-#         (when (and my:format-on-save command)
-#           (funcall command))))))
-# #+END_SRC
-
 ** Advice
 
 #+BEGIN_SRC emacs-lisp
@@ -335,6 +325,15 @@ window will never be considered temporary.
 
 (setq my:not-temporary-minor-modes
   '(org-src-mode))
+#+END_SRC
+
+** Major-mode setup
+
+#+BEGIN_SRC emacs-lisp
+(defmacro my:set-formatter (major-mode lang-name formatter)
+  (let ((hook (intern (concat (symbol-name major-mode) "-hook"))))
+  `(add-hook ',hook (lambda ()
+     (setq-local format-all-formatters '((,lang-name ,formatter)))))))
 #+END_SRC
 
 * Backups
@@ -536,6 +535,46 @@ Emacs that Evil does not cover properly by default.
   (evil-collection-init))
 #+END_SRC
 
+* Completion
+** Orderless
+
+The orderless completion style divides the pattern into
+space-separated components and matches candidates that match all of
+the components in any order.
+
+#+BEGIN_SRC emacs-lisp
+(use-package orderless
+  :ensure t
+  :custom
+  (completion-styles '(orderless basic))
+  (completion-category-defaults nil)
+  (completion-category-overrides '((file (styles partial-completion)))))
+#+END_SRC
+
+** Corfu
+
+#+BEGIN_SRC emacs-lisp
+(use-package corfu
+  :ensure t
+  :init
+  (setq tab-always-indent 'complete)
+  (global-corfu-mode))
+
+(use-package kind-icon
+  :ensure t
+  :after corfu
+  :custom
+  (kind-icon-default-face 'corfu-default)
+  :config
+  (add-to-list 'corfu-margin-formatters #'kind-icon-margin-formatter))
+
+(use-package corfu-candidate-overlay
+  ;; :ensure t
+  :after corfu
+  :config
+  (corfu-candidate-overlay-mode +1))
+#+END_SRC
+
 * Minibuffer
 ** Vertico
 
@@ -552,17 +591,6 @@ Vertico is a minibuffer completion interface.
          ("C-j" . vertico-next)
          ("C-k" . vertico-previous)
          ("TAB" . vertico-insert)))
-#+END_SRC
-
-Use the ~orderless~ completion style.
-
-#+BEGIN_SRC emacs-lisp
-(use-package orderless
-  :ensure t
-  :init
-  (setq completion-styles '(orderless basic)
-        completion-category-defaults nil
-        completion-category-overrides '((file (styles partial-completion)))))
 #+END_SRC
 
 Persist history over Emacs restarts. Vertico sorts by history
@@ -606,6 +634,7 @@ commands. Marginalia will add each command's description next to it.
   :init
   (marginalia-mode))
 #+END_SRC
+
 * WIP Mode line
 
 Warning: Not tangled
@@ -991,7 +1020,7 @@ Change the ~html~ export preamble and postamble.
     ("s" org-insert-store-link       "(Store link to here)")
     ("S" org-insert-last-stored-link "Last stored link")
     ("t" org-time-stamp              "Timestamp")
-    ("t" org-insert-drawer           "Drawer")
+    ("d" org-insert-drawer           "Drawer")
     ("T" org-table-create            "Table"))
    "Table"
    (("a" org-table-align         "Align")
@@ -1040,11 +1069,6 @@ Syntax checking and linting is provided by Shellcheck via flycheck.
 
 #+BEGIN_SRC emacs-lisp
 (add-hook 'sh-mode-hook 'flycheck-mode)
-#+END_SRC
-
-Fix treesitter hooks.
-
-#+BEGIN_SRC emacs-lisp
 (setq bash-ts-mode-hook sh-mode-hook)
 #+END_SRC
 
@@ -1054,4 +1078,11 @@ Fix treesitter hooks.
 (use-package fish-mode
   :ensure t
   :hook (fish-mode . flycheck-mode))
+#+END_SRC
+
+** Python
+
+#+BEGIN_SRC emacs-lisp
+(my:set-formatter python-mode "Python" black)
+(setq python-ts-mode-hook python-mode-hook)
 #+END_SRC

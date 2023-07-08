@@ -893,8 +893,6 @@ Flycheck right below their reporting location
   :hook (flycheck-mode . flycheck-inline-mode))
 #+END_SRC
 
-* Major Modes
-
 ** Treesit-auto
 
 Treesit-auto provides an easy way to automatically install and use
@@ -908,6 +906,7 @@ tree-sitter major modes.
   (global-treesit-auto-mode))
 #+END_SRC
 
+* Languages
 ** WIP English
 
 #+BEGIN_SRC emacs-lisp

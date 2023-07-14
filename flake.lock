@@ -1,5 +1,21 @@
 {
   "nodes": {
+    "cargoMakedocs": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1584397500,
+        "narHash": "sha256-kTyAnnJIrpfoN/kmnfA+TlA70K7AtzrogqT0YUi5P+I=",
+        "owner": "Bunogi",
+        "repo": "cargo-makedocs",
+        "rev": "08b0f4efd02534b74c583755b3ea0665f363bd62",
+        "type": "github"
+      },
+      "original": {
+        "owner": "Bunogi",
+        "repo": "cargo-makedocs",
+        "type": "github"
+      }
+    },
     "catppuccinEmacs": {
       "flake": false,
       "locked": {
@@ -120,6 +136,7 @@
     },
     "root": {
       "inputs": {
+        "cargoMakedocs": "cargoMakedocs",
         "catppuccinEmacs": "catppuccinEmacs",
         "corfuCandidateOverlay": "corfuCandidateOverlay",
         "emacs-overlay": "emacs-overlay",

@@ -10,6 +10,10 @@
       url = "git+https://code.bsdgeek.org/adam/corfu-candidate-overlay";
       flake = false;
     };
+    cargoMakedocs = {
+      url = "github:Bunogi/cargo-makedocs";
+      flake = false;
+    };
   };
 
   outputs = { self, nixpkgs, ... }@inputs:
@@ -79,7 +83,6 @@
         emacsPackage = pkgs.emacs29-pgtk;
         envPackages = with pkgs; [
           gcc
-          ripgrep
 
           # SVGs
           librsvg
@@ -110,6 +113,9 @@
           cargo-edit # Dependency management
           cargo-expand # Macro expansion
           pandoc # Documentation
+          inputs.cargoMakedocs
+          ripgrep
+          fd
         ];
 
         config = rec {

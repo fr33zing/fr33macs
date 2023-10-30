@@ -57,10 +57,13 @@
           '';
 
         toCSS = scssFile:
-          builtins.readFile
-          (pkgs.runCommand "convert-scss" { buildInputs = [ pkgs.sass ]; } ''
-            ${lib.getExe pkgs.sass} --style compressed --scss ${scssFile} $out
-          '');
+          if system == "x86_64-linux" then
+            builtins.readFile
+            (pkgs.runCommand "convert-scss" { buildInputs = [ pkgs.sass ]; } ''
+              ${lib.getExe pkgs.sass} --style compressed --scss ${scssFile} $out
+            '')
+          else
+            "/* SCSS conversion is only supported on x86_64-linux. */";
 
         #
         # Emacs Packages

@@ -117,6 +117,12 @@
           inputs.cargoMakedocs
           ripgrep
           fd
+
+          # Web
+          nodejs
+          nodePackages.prettier
+          nodePackages.typescript
+          nodePackages.typescript-language-server
         ];
 
         config = rec {

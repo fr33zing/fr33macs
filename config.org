@@ -1091,6 +1091,7 @@ Syntax checking and linting is provided by Shellcheck via flycheck.
 (my:set-formatter python-mode "Python" black)
 (setq python-ts-mode-hook python-mode-hook)
 #+END_SRC
+
 ** Rust
 
 - TODO Check if rustic can use rust-ts-mode yet:
@@ -1103,3 +1104,8 @@ Syntax checking and linting is provided by Shellcheck via flycheck.
   (rustic-lsp-client 'eglot))
 #+END_SRC
 
+** Web
+
+#+BEGIN_SRC emacs-lisp
+
+#+END_SRC

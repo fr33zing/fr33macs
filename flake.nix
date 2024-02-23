@@ -176,5 +176,16 @@
               'config.org => ${config.output}'
           '';
         };
+
+        nixosModules.default = { config }: {
+          config = {
+            services.emacs = {
+              enable = true;
+              install = true;
+              defaultEditor = true;
+              package = self.packages.${system}.default;
+            };
+          };
+        };
       });
 }

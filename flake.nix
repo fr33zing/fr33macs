@@ -177,13 +177,13 @@
           '';
         };
 
-        nixosModules.default = withSystem (system: {
+        nixosModules.${system}.default = {
           services.emacs = {
             enable = true;
             install = true;
             defaultEditor = true;
             package = self.packages.${system}.default;
           };
-        });
+        };
       });
 }

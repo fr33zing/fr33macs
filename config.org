@@ -708,7 +708,10 @@ by flashing the current line.
 ** Magit
 
 #+BEGIN_SRC emacs-lisp
-(use-package magit :ensure t)
+(use-package magit :ensure t
+  :config
+  (setq git-commit-style-convention-checks
+        '(non-empty-second-line overlong-summary-line)))
 
 (pretty-hydra-define hydra:git
   (:exit t :idle 0.25) 

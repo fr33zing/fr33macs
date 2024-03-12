@@ -717,7 +717,6 @@ by flashing the current line.
   (:exit t :idle 0.25) 
   ("Git"
    (("g" magit "Open Magit"))))
-
 #+END_SRC
 
 * TODO Search

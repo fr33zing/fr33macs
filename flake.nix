@@ -123,6 +123,9 @@
           nodePackages.prettier
           nodePackages.typescript
           nodePackages.typescript-language-server
+
+          # Java
+          jdk17
         ];
 
         config = rec {

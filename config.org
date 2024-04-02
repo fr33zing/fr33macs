@@ -1099,11 +1099,16 @@ Syntax checking and linting is provided by Shellcheck via flycheck.
 - TODO Check if rustic can use rust-ts-mode yet:
   https://github.com/brotzeit/rustic/issues/475
 
+- TODO Check if catppuccin-reload can be removed:
+  https://github.com/catppuccin/emacs/issues/121
+
 #+BEGIN_SRC emacs-lisp
 (use-package rustic
   :ensure t
   :custom
-  (rustic-lsp-client 'eglot))
+  (rustic-lsp-client 'eglot)
+  :init
+  (add-hook 'server-after-make-frame-hook #'catppuccin-reload))
 #+END_SRC
 
 ** Web

@@ -1105,6 +1105,9 @@ Syntax checking and linting is provided by Shellcheck via flycheck.
 #+BEGIN_SRC emacs-lisp
 (use-package rustic
   :ensure t
+  :config
+  (setq rustic-rustfmt-config-alist '(("edition" . "2021")))
+  (setq rustic-format-trigger 'on-save)
   :custom
   (rustic-lsp-client 'eglot)
   :init

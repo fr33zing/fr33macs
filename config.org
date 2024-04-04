@@ -895,6 +895,14 @@ Flycheck right below their reporting location
   :hook (flycheck-mode . flycheck-inline-mode))
 #+END_SRC
 
+#+BEGIN_SRC emacs-lisp
+(use-package flycheck-eglot
+  :ensure t
+  :after (flycheck eglot)
+  :config
+  (global-flycheck-eglot-mode 1))
+#+END_SRC
+
 ** Treesit-auto
 
 Treesit-auto provides an easy way to automatically install and use
@@ -1103,13 +1111,16 @@ Syntax checking and linting is provided by Shellcheck via flycheck.
   https://github.com/catppuccin/emacs/issues/121
 
 #+BEGIN_SRC emacs-lisp
+(use-package project
+ :init
+ (setq project-vc-extra-root-markers '("Cargo.toml")))
+
 (use-package rustic
   :ensure t
-  :config
-  (setq rustic-rustfmt-config-alist '(("edition" . "2021")))
-  (setq rustic-format-trigger 'on-save)
   :custom
   (rustic-lsp-client 'eglot)
+  (rustic-rustfmt-config-alist '(("edition" . "2021")))
+  (rustic-format-trigger 'on-save)
   :init
   (add-hook 'server-after-make-frame-hook #'catppuccin-reload))
 #+END_SRC

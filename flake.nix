@@ -83,6 +83,8 @@
 
         emacsPackage = pkgs.emacs29-pgtk;
         envPackages = with pkgs; [
+          # Common
+          pkg-config
           gcc
 
           # SVGs
@@ -162,7 +164,8 @@
           package = emacsPackage.overrideAttrs (package: {
             postInstall = (package.postInstall or "") + ''
               wrapProgram $out/bin/emacs \
-                --prefix PATH : "${lib.makeBinPath envPackages}"
+                --prefix PATH : "${lib.makeBinPath envPackages}" \
+                --set RUST_SRC_PATH ${pkgs.rust.packages.stable.rustPlatform.rustLibSrc}
             '';
           });
           config = config.output;

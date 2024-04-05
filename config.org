@@ -373,6 +373,9 @@ as the foundation for my custom keybind scheme to improve
 discoverability and reduce cognitive load.
 
 #+BEGIN_SRC emacs-lisp
+(use-package major-mode-hydra
+  :ensure t)
+
 (use-package pretty-hydra
   :ensure t
   :config
@@ -394,6 +397,26 @@ that define hydra(s):
 
 - [[*Avy][Motion > Avy]]
 - [[*Org][Languages > Org]]
+
+*** Code
+
+#+BEGIN_SRC emacs-lisp
+(pretty-hydra-define hydra:code
+  (:exit t :idle 0.25)
+  ("Action"
+   (("." eglot-code-actions                 "Code actions at point")
+    ("q" eglot-code-action-quickfix         "Quickfix")
+    ("e" eglot-code-action-extract          "Extract")
+    ("i" eglot-code-actions-inline          "Inline")
+    ("o" eglot-code-action-organize-imports "Organize imports")
+    ("r" eglot-code-action-rewrite          "Rewrite"))
+   "Find"
+   (("n" next-error                         "Next error"     :exit nil)
+    ("p" previous-error                     "Previous error" :exit nil)
+    ("d" xref-find-definitions              "Definitions")
+    ("D" xref-find-definitions-other-window "Defs. (other window)")
+    ("r" xref-find-references               "References"))))
+#+END_SRC
 
 *** File
 
@@ -447,14 +470,17 @@ that define hydra(s):
   (pretty-hydra-define hydra:leader
     (:exit t :idle 0.25)
     ("Hydra"
-     (("f" hydra:file/body   "File")
-      ("b" hydra:buffer/body "Buffer")
-      ("w" hydra:window/body "Window")
-      ("a" hydra:avy/body    "Avy")
-      ("o" hydra:org/body    "Org")
-      ("g" hydra:git/body    "Git"))
+     (("SPC" major-mode-hydra  "Mode-specific")
+      ("c"   hydra:code/body   "Code")
+      ("f"   hydra:file/body   "File")
+      ("b"   hydra:buffer/body "Buffer")
+      ("w"   hydra:window/body "Window")
+      ("a"   hydra:avy/body    "Avy")
+      ("o"   hydra:org/body    "Org")
+      ("g"   hydra:git/body    "Git"))
      "Shortcut"
-     (("s" save-buffer            "Save buffer")
+     (("." eglot-code-actions     "Code actions at point")
+      ("s" save-buffer            "Save buffer")
       ("q" save-buffer-kill-emacs "Quit")))))
 ;; </config>
 #+END_SRC
@@ -1123,6 +1149,14 @@ Syntax checking and linting is provided by Shellcheck via flycheck.
   (rustic-format-trigger 'on-save)
   :init
   (add-hook 'server-after-make-frame-hook #'catppuccin-reload))
+
+(major-mode-hydra-define rustic-mode
+  (:exit t :idle 0.25)
+  ("Cargo"
+   (("c" rustic-cargo-check                    "Check")
+    ("m" rustic-cargo-add-missing-dependencies "Add missing dependencies")
+    ("a" rustic-cargo-add                      "Add dependency")
+    ("r" rustic-cargo-rm                       "Remove dependency"))))
 #+END_SRC
 
 ** Web

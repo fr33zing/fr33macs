@@ -1191,7 +1191,10 @@ Syntax checking and linting is provided by Shellcheck via flycheck.
   (add-hook 'server-after-make-frame-hook #'catppuccin-reload))
 #+END_SRC
 
-*** Library
+For some unknown reason, ~format-all-mode~ does not work with
+rustic. Setting ~rustic-format-trigger~ enables formatting on save,
+but it needs to check for ~format-all-mode~ in order to respect the
+"Format on save" option in the [[*Toggle][Toggle hydra]].
 
 #+BEGIN_SRC emacs-lisp
 (defun my:rust-format-on-save ()

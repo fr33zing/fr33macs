@@ -336,6 +336,24 @@ window will never be considered temporary.
   '(org-src-mode))
 #+END_SRC
 
+** Miscellaneous
+
+#+BEGIN_SRC emacs-lisp
+(defun my:fix-next-error ()
+  "Jump to the next error and open code actions"
+  (interactive)
+  (next-error)
+  (call-interactively 'eglot-code-actions)
+  (save-buffer))
+
+(defun my:fix-previous-error ()
+  "Jump to the previous error and open code actions"
+  (interactive)
+  (previous-error)
+  (call-interactively 'eglot-code-actions)
+  (save-buffer))
+#+END_SRC
+
 ** Major-mode setup
 
 #+BEGIN_SRC emacs-lisp
@@ -500,6 +518,8 @@ that define hydra(s):
       ("g"   hydra:git/body    "Git"))
      "Shortcut"
      (("." eglot-code-actions     "Code actions at point")
+      (">" my:fix-next-error      "Fix next error" :exit nil)
+      ("<" my:fix-previous-error  "Fix previous error" :exit nil)
       ("s" save-buffer            "Save buffer")
       ("q" save-buffer-kill-emacs "Quit")))))
 ;; </config>

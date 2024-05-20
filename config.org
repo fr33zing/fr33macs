@@ -322,7 +322,6 @@ and delete it. If there is none, send keyboard-quit instead."
   (if-let ((window (my:next-temporary-window)))
     (my:delete-window window)
     (keyboard-quit)))
-
 #+END_SRC
 
 When a window's major or minor mode matches any in these lists, that
@@ -1190,7 +1189,11 @@ Syntax checking and linting is provided by Shellcheck via flycheck.
   (rustic-format-on-save-method #'my:rust-format-on-save)
   :init
   (add-hook 'server-after-make-frame-hook #'catppuccin-reload))
+#+END_SRC
 
+*** Library
+
+#+BEGIN_SRC emacs-lisp
 (defun my:rust-format-on-save ()
   "Format the file, respecting format-all-mode"
   (if format-all-mode
@@ -1203,10 +1206,7 @@ Syntax checking and linting is provided by Shellcheck via flycheck.
 (major-mode-hydra-define rustic-mode
   (:exit t :idle 0.25 :quit-key "<escape>")
   ("Cargo"
-   (("r" rustic-cargo-run                      "Run")
-    ("b" rustic-cargo-build                    "Build")
-    ("c" rustic-cargo-check                    "Check")
-    ("C" rustic-cargo-clean                    "Clean")
+   (("c" rustic-cargo-check                    "Check")
     ("m" rustic-cargo-add-missing-dependencies "Add missing dependencies")
     ("a" rustic-cargo-add                      "Add dependency")
     ("r" rustic-cargo-rm                       "Remove dependency"))))

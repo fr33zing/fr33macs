@@ -463,7 +463,7 @@ that define hydra(s):
 
 #+BEGIN_SRC emacs-lisp
   (pretty-hydra-define hydra:window
-    (:exit t :idle 0.25) 
+    (:exit t :idle 0.25)
     ("Switch"
      (("w" my:switch-window "Quick switch"))
      "Actions"
@@ -1056,7 +1056,7 @@ Change the ~html~ export preamble and postamble.
   (setq org-hide-emphasis-markers (not org-hide-emphasis-markers)))
 
 (major-mode-hydra-define org-mode
-  (:exit t :idle 0.25 :quit-key "<escape>") 
+  (:exit t :idle 0.25 :quit-key "<escape>")
   ("Toggle"
    (("l" org-toggle-link-display        "Link display")
     ("E" my:org-toggle-emphasis-markers "Emphasis markers")

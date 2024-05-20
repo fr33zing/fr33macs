@@ -314,6 +314,15 @@ and delete it."
   (interactive)
   (if-let ((window (my:next-temporary-window)))
     (my:delete-window window)))
+
+(defun my:delete-next-temporary-window-or-kb-quit ()
+  "Starting at the current window, find the next temporary window
+and delete it. If there is none, send keyboard-quit instead."
+  (interactive)
+  (if-let ((window (my:next-temporary-window)))
+    (my:delete-window window)
+    (keyboard-quit)))
+
 #+END_SRC
 
 When a window's major or minor mode matches any in these lists, that
@@ -374,7 +383,9 @@ discoverability and reduce cognitive load.
 
 #+BEGIN_SRC emacs-lisp
 (use-package major-mode-hydra
-  :ensure t)
+  :ensure t
+  :config
+  (setq major-mode-hydra-invisible-quit-key "q"))
 
 (use-package pretty-hydra
   :ensure t
@@ -470,13 +481,12 @@ that define hydra(s):
   (pretty-hydra-define hydra:leader
     (:exit t :idle 0.25)
     ("Hydra"
-     (("SPC" major-mode-hydra  "Mode-specific")
+     (("SPC" major-mode-hydra  "Mode-specific" :color red)
       ("c"   hydra:code/body   "Code")
       ("f"   hydra:file/body   "File")
       ("b"   hydra:buffer/body "Buffer")
       ("w"   hydra:window/body "Window")
       ("a"   hydra:avy/body    "Avy")
-      ("o"   hydra:org/body    "Org")
       ("g"   hydra:git/body    "Git"))
      "Shortcut"
      (("." eglot-code-actions     "Code actions at point")
@@ -1047,7 +1057,7 @@ Change the ~html~ export preamble and postamble.
   (interactive)
   (setq org-hide-emphasis-markers (not org-hide-emphasis-markers)))
 
-(pretty-hydra-define hydra:org
+(major-mode-hydra-define org-mode
   (:exit t :idle 0.25) 
   ("Toggle"
    (("l" org-toggle-link-display        "Link display")

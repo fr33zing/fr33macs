@@ -173,6 +173,8 @@ Enable relative line numbers globally.
 
 ** Customization
 
+*Notice*: Not all theming is done in this section.
+
 #+BEGIN_SRC emacs-lisp
 (set-face-attribute 'default t :font (getnix "font"))
 
@@ -181,7 +183,6 @@ Enable relative line numbers globally.
                     :background (catppuccin-get-color 'surface2))
 #+END_SRC
 
-* Libraries
 ** Dash
 
 Dash is a library for dealing with lists.
@@ -335,7 +336,7 @@ window will never be considered temporary.
   '(org-src-mode))
 #+END_SRC
 
-** Miscellaneous
+** Errors
 
 #+BEGIN_SRC emacs-lisp
 (defun my:fix-next-error ()
@@ -942,6 +943,16 @@ Finally, enable the SVG tags globally.
   (setq format-all-show-errors 'never))
 #+END_SRC
 
+** Eglot
+
+#+BEGIN_SRC emacs-lisp
+(use-package eglot
+  :ensure t
+  :config
+  (set-face-attribute 'eglot-highlight-symbol-face nil
+    :underline (catppuccin-get-color 'sapphire)))
+#+END_SRC
+
 ** Flycheck
 
 Flycheck is a modern on-the-fly syntax checking extension.
@@ -949,7 +960,17 @@ Flycheck is a modern on-the-fly syntax checking extension.
 #+BEGIN_SRC emacs-lisp
 (use-package flycheck
   :ensure t
-  :init (global-flycheck-mode))
+  :init
+  (global-flycheck-mode)
+  (set-face-attribute 'flycheck-info nil
+    :underline `(:color ,(catppuccin-get-color 'green) :style wave)
+    :weight 'bold)
+  (set-face-attribute 'flycheck-error nil
+    :underline `(:color ,(catppuccin-get-color 'red) :style wave)
+    :weight 'bold)
+  (set-face-attribute 'flycheck-warning nil
+    :underline `(:color ,(catppuccin-get-color 'peach) :style wave)
+    :weight 'bold))
 #+END_SRC
 
 Flycheck-inline implements a minor-mode for displaying errors from

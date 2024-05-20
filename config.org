@@ -622,6 +622,8 @@ the components in any order.
 #+BEGIN_SRC emacs-lisp
 (use-package corfu
   :ensure t
+  :custom
+  (corfu-auto 1)
   :init
   (setq tab-always-indent 'complete)
   (global-corfu-mode))

@@ -473,6 +473,17 @@ that define hydra(s):
       ("v" evil-window-vnew          "Split window vertically"))))
 #+END_SRC
 
+*** Toggle
+
+#+BEGIN_SRC emacs-lisp
+  (pretty-hydra-define hydra:toggle
+    (:exit t :idle 0.25)
+    ("Toggle"
+     (("w" whitespace-mode        "Whitespace visualization")
+      ("f" format-all-mode        "Format on save")
+      ("h" eglot-inlay-hints-mode "Inlay hints"))))
+#+END_SRC
+
 *** Leader key
 
 #+BEGIN_SRC emacs-lisp
@@ -480,6 +491,7 @@ that define hydra(s):
     (:exit t :idle 0.25)
     ("Hydra"
      (("SPC" major-mode-hydra  "Mode-specific")
+      ("t"   hydra:toggle/body "Toggle")
       ("c"   hydra:code/body   "Code")
       ("f"   hydra:file/body   "File")
       ("b"   hydra:buffer/body "Buffer")

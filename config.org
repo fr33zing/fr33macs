@@ -383,9 +383,7 @@ discoverability and reduce cognitive load.
 
 #+BEGIN_SRC emacs-lisp
 (use-package major-mode-hydra
-  :ensure t
-  :config
-  (setq major-mode-hydra-invisible-quit-key "q"))
+  :ensure t)
 
 (use-package pretty-hydra
   :ensure t
@@ -481,7 +479,7 @@ that define hydra(s):
   (pretty-hydra-define hydra:leader
     (:exit t :idle 0.25)
     ("Hydra"
-     (("SPC" major-mode-hydra  "Mode-specific" :color red)
+     (("SPC" major-mode-hydra  "Mode-specific")
       ("c"   hydra:code/body   "Code")
       ("f"   hydra:file/body   "File")
       ("b"   hydra:buffer/body "Buffer")
@@ -1058,7 +1056,7 @@ Change the ~html~ export preamble and postamble.
   (setq org-hide-emphasis-markers (not org-hide-emphasis-markers)))
 
 (major-mode-hydra-define org-mode
-  (:exit t :idle 0.25) 
+  (:exit t :idle 0.25 :quit-key "<escape>") 
   ("Toggle"
    (("l" org-toggle-link-display        "Link display")
     ("E" my:org-toggle-emphasis-markers "Emphasis markers")
@@ -1161,9 +1159,12 @@ Syntax checking and linting is provided by Shellcheck via flycheck.
   (add-hook 'server-after-make-frame-hook #'catppuccin-reload))
 
 (major-mode-hydra-define rustic-mode
-  (:exit t :idle 0.25)
+  (:exit t :idle 0.25 :quit-key "<escape>")
   ("Cargo"
-   (("c" rustic-cargo-check                    "Check")
+   (("r" rustic-cargo-run                      "Run")
+    ("b" rustic-cargo-build                    "Build")
+    ("c" rustic-cargo-check                    "Check")
+    ("C" rustic-cargo-clean                    "Clean")
     ("m" rustic-cargo-add-missing-dependencies "Add missing dependencies")
     ("a" rustic-cargo-add                      "Add dependency")
     ("r" rustic-cargo-rm                       "Remove dependency"))))

@@ -369,7 +369,7 @@ Prevent backup files from being littered all over the place.
 Delete excess backup versions silently.
 
 #+BEGIN_SRC emacs-lisp
-(setq delete-old-versions t  
+(setq delete-old-versions t
       kept-new-versions 6
       kept-old-versions 2)
 #+END_SRC
@@ -700,7 +700,7 @@ on a short filter.
   (advice-add 'avy-process :after #'my:advice:nav-flash-show))
 
 (pretty-hydra-define hydra:avy
-  (:exit t :idle 0.25) 
+  (:exit t :idle 0.25)
   ("Filter"
    (("a" avy-goto-char-timer           "Char(s) with timer")
     ("c" avy-goto-char-in-line         "Char in line")
@@ -836,7 +836,7 @@ sensitive, so there's going to be some redundant patterns.
 
 #+BEGIN_SRC emacs-lisp
   (defconst my:svg-tags '(
-    ("TODO" . sapphire)               ; TODO 
+    ("TODO" . sapphire)               ; TODO
     ("WIP" . teal)                    ; WIP
     ("DONE" . green)                  ; DONE
     ("TEMP" . red)                    ; TEMP
@@ -1123,7 +1123,7 @@ Syntax checking and linting is provided by Shellcheck via flycheck.
 
 *** Fish
 
-#+BEGIN_SRC emacs-lisp 
+#+BEGIN_SRC emacs-lisp
 (use-package fish-mode
   :ensure t
   :hook (fish-mode . flycheck-mode))

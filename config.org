@@ -1187,9 +1187,19 @@ Syntax checking and linting is provided by Shellcheck via flycheck.
   (rustic-lsp-client 'eglot)
   (rustic-rustfmt-config-alist '(("edition" . "2021")))
   (rustic-format-trigger 'on-save)
+  (rustic-format-on-save-method #'my:rust-format-on-save)
   :init
   (add-hook 'server-after-make-frame-hook #'catppuccin-reload))
 
+(defun my:rust-format-on-save ()
+  "Format the file, respecting format-all-mode"
+  (if format-all-mode
+    (rustic-format-file)))
+#+END_SRC
+
+*** WIP Hydra
+
+#+BEGIN_SRC emacs-lisp
 (major-mode-hydra-define rustic-mode
   (:exit t :idle 0.25 :quit-key "<escape>")
   ("Cargo"

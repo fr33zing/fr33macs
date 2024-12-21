@@ -343,14 +343,14 @@ window will never be considered temporary.
   "Jump to the next error and open code actions"
   (interactive)
   (next-error)
-  (call-interactively 'eglot-code-actions)
+  (call-interactively 'lsp-ui-sideline-apply-code-actions)
   (save-buffer))
 
 (defun my:fix-previous-error ()
   "Jump to the previous error and open code actions"
   (interactive)
   (previous-error)
-  (call-interactively 'eglot-code-actions)
+  (call-interactively 'lsp-ui-sideline-apply-code-actions)
   (save-buffer))
 #+END_SRC
 
@@ -431,18 +431,14 @@ that define hydra(s):
 (pretty-hydra-define hydra:code
   (:exit t :idle 0.25)
   ("Action"
-   (("." eglot-code-actions                 "Code actions at point")
-    ("q" eglot-code-action-quickfix         "Quickfix")
-    ("e" eglot-code-action-extract          "Extract")
-    ("i" eglot-code-actions-inline          "Inline")
-    ("o" eglot-code-action-organize-imports "Organize imports")
-    ("r" eglot-code-action-rewrite          "Rewrite"))
+   (("." lsp-ui-sideline-apply-code-actions "Code actions at point")
+    ("o" lsp-organize-imports               "Organize imports")
+    ("r" lsp-rename                         "Rename symbol"))
    "Find"
    (("n" next-error                         "Next error"     :exit nil)
     ("p" previous-error                     "Previous error" :exit nil)
-    ("d" xref-find-definitions              "Definitions")
-    ("D" xref-find-definitions-other-window "Defs. (other window)")
-    ("r" xref-find-references               "References"))))
+    ("d" lsp-ui-peek-find-definitions       "Definitions")
+    ("R" lsp-ui-peek-find-references        "References"))))
 #+END_SRC
 
 *** File
@@ -451,7 +447,8 @@ that define hydra(s):
   (pretty-hydra-define hydra:file
     (:exit t :idle 0.25)
     ("Switch"
-     (("f" find-file "Find file"))))
+     (("f" find-file         "Find file")
+      ("p" project-find-file "Find file in project"))))
 #+END_SRC
 
 *** Buffer
@@ -497,9 +494,9 @@ that define hydra(s):
   (pretty-hydra-define hydra:toggle
     (:exit t :idle 0.25)
     ("Toggle"
-     (("w" whitespace-mode        "Whitespace visualization")
-      ("f" format-all-mode        "Format on save")
-      ("h" eglot-inlay-hints-mode "Inlay hints"))))
+     (("w" whitespace-mode      "Whitespace visualization")
+      ("f" format-all-mode      "Format on save")
+      ("h" lsp-inlay-hints-mode "Inlay hints"))))
 #+END_SRC
 
 *** Leader key
@@ -508,20 +505,21 @@ that define hydra(s):
   (pretty-hydra-define hydra:leader
     (:exit t :idle 0.25)
     ("Hydra"
-     (("SPC" major-mode-hydra  "Mode-specific")
-      ("t"   hydra:toggle/body "Toggle")
-      ("c"   hydra:code/body   "Code")
-      ("f"   hydra:file/body   "File")
-      ("b"   hydra:buffer/body "Buffer")
-      ("w"   hydra:window/body "Window")
-      ("a"   hydra:avy/body    "Avy")
-      ("g"   hydra:git/body    "Git"))
+     (("m" major-mode-hydra  "Mode-specific")
+      ("t" hydra:toggle/body "Toggle")
+      ("c" hydra:code/body   "Code")
+      ("f" hydra:file/body   "File")
+      ("b" hydra:buffer/body "Buffer")
+      ("w" hydra:window/body "Window")
+      ("a" hydra:avy/body    "Avy")
+      ("g" hydra:git/body    "Git"))
      "Shortcut"
-     (("." eglot-code-actions     "Code actions at point")
-      (">" my:fix-next-error      "Fix next error" :exit nil)
-      ("<" my:fix-previous-error  "Fix previous error" :exit nil)
-      ("s" save-buffer            "Save buffer")
-      ("q" save-buffer-kill-emacs "Quit")))))
+     (("SPC" project-find-file                  "Find file in project")
+      ("."   lsp-ui-sideline-apply-code-actions "Code actions at point")
+      (">"   next-error                         "Next error")
+      ("<"   previous-error                     "Previous error")
+      ("s"   save-buffer                        "Save buffer")
+      ("q"   save-buffer-kill-emacs             "Quit")))))
 ;; </config>
 #+END_SRC
 
@@ -614,7 +612,6 @@ the components in any order.
   :ensure t
   :custom
   (completion-styles '(orderless basic))
-  (completion-category-defaults nil)
   (completion-category-overrides '((file (styles partial-completion)))))
 #+END_SRC
 
@@ -624,9 +621,10 @@ the components in any order.
 (use-package corfu
   :ensure t
   :custom
-  (corfu-auto 1)
+  (corfu-auto 1)			
   :init
   (setq tab-always-indent 'complete)
+  (setq text-mode-ispell-word-completion nil)
   (global-corfu-mode))
 
 (use-package kind-icon
@@ -638,7 +636,6 @@ the components in any order.
   (add-to-list 'corfu-margin-formatters #'kind-icon-margin-formatter))
 
 (use-package corfu-candidate-overlay
-  ;; :ensure t
   :after corfu
   :config
   (corfu-candidate-overlay-mode +1))
@@ -943,14 +940,43 @@ Finally, enable the SVG tags globally.
   (setq format-all-show-errors 'never))
 #+END_SRC
 
-** Eglot
+** LSP
 
 #+BEGIN_SRC emacs-lisp
-(use-package eglot
+(use-package lsp-mode
   :ensure t
-  :config
-  (set-face-attribute 'eglot-highlight-symbol-face nil
-    :underline (catppuccin-get-color 'sapphire)))
+  :hook ((lsp-mode . lsp-diagnostics-mode)
+         (lsp-mode . lsp-enable-which-key-integration))
+  :custom
+  (lsp-headerline-breadcrumb-enable nil)
+  (lsp-lens-enable nil)
+  (lsp-enable-snippet nil)
+  ;(lsp-completion-provider :none) 
+  (lsp-diagnostics-provider :flycheck)
+  (lsp-keep-workspace-alive nil)
+  (lsp-enable-xref t)
+  (lsp-auto-configure t)
+  (lsp-eldoc-enable-hover t)
+  (lsp-enable-symbol-highlighting t))
+
+(use-package lsp-ui
+  :ensure t
+  :after (lsp-mode evil)
+  :bind (("C-K" . lsp-ui-doc-focus-frame))
+  :custom
+  (lsp-ui-peek-enable t)
+  
+  ;(lsp-ui-sideline-show-diagnostics t)
+  (lsp-ui-sideline-show-hover t) 
+  (lsp-ui-sideline-show-code-actions t)
+
+  (evil-lookup-func #'lsp-ui-doc-glance)
+  (lsp-ui-doc-enable t)
+  (lsp-ui-doc-include-signature t)
+  (lsp-ui-doc-show-with-cursor nil)
+  (lsp-ui-doc-show-with-mouse nil)
+  (lsp-ui-doc-position 'at-point)
+  (lsp-ui-doc-max-height 30))
 #+END_SRC
 
 ** Flycheck
@@ -977,18 +1003,18 @@ Flycheck-inline implements a minor-mode for displaying errors from
 Flycheck right below their reporting location
 
 #+BEGIN_SRC emacs-lisp
-(use-package flycheck-inline
-  :ensure t
-  :after flycheck
-  :hook (flycheck-mode . flycheck-inline-mode))
+;; (use-package flycheck-inline
+;;   :ensure t
+;;   :after flycheck
+;;   :hook (flycheck-mode . flycheck-inline-mode))
 #+END_SRC
 
 #+BEGIN_SRC emacs-lisp
-(use-package flycheck-eglot
-  :ensure t
-  :after (flycheck eglot)
-  :config
-  (global-flycheck-eglot-mode 1))
+;; (use-package flycheck-eglot
+;;   :ensure t
+;;   :after (flycheck eglot)
+;;   :config
+;;   (global-flycheck-eglot-mode 1))
 #+END_SRC
 
 ** Treesit-auto
@@ -1203,15 +1229,57 @@ Syntax checking and linting is provided by Shellcheck via flycheck.
  :init
  (setq project-vc-extra-root-markers '("Cargo.toml")))
 
+;; (use-package rust-mode
+;;   :ensure t
+;;   :hook ((rust-mode rust-ts-mode) . eglot)
+;;   :hook ((rust-mode rust-ts-mode) . eglot-ensure)
+;;   :config
+;;   (add-to-list 'eglot-server-programs '((rust-ts-mode rust-mode) . ("rustup" "run" "stable" "rust-analyzer")))
+;;   ;; (add-to-list 'eglot-server-programs
+;;   ;;              '((rust-ts-mode rust-mode) .
+;;   ;;              ("rust-analyzer" :initializationOptions (:check (:command "clippy")))))
+;;   :init
+;;   (setq rust-mode-treesitter-derive t))
+
+;; (use-package flycheck-rust
+;;   :ensure t
+;;   :init
+;;   (with-eval-after-load 'rust-mode
+;;     (add-hook 'flycheck-mode-hook #'flycheck-rust-setup)))
+
+;; (use-package rustic
+;;   :ensure t
+;;   :after (rust-mode)
+;;   :custom
+;;   (rustic-lsp-client 'eglot)
+;;   ;; (rustic-rustfmt-config-alist '(("edition" . "2021")))
+;;   (rustic-format-trigger 'on-save)
+;;   (rustic-format-on-save-method #'my:rust-format-on-save)
+;;   :init
+;;   (add-hook 'server-after-make-frame-hook #'catppuccin-reload)
+;;   (add-hook 'eglot--managed-mode-hook (lambda () (flymake-mode -1))))
+
+;; (use-package rust-mode
+;;   :ensure t
+;;   :custom
+;;   (rust-mode-treesitter-derive t))
+
 (use-package rustic
   :ensure t
   :custom
-  (rustic-lsp-client 'eglot)
-  (rustic-rustfmt-config-alist '(("edition" . "2021")))
   (rustic-format-trigger 'on-save)
   (rustic-format-on-save-method #'my:rust-format-on-save)
-  :init
-  (add-hook 'server-after-make-frame-hook #'catppuccin-reload))
+  (add-hook 'server-after-make-frame-hook #'catppuccin-reload)
+
+  (lsp-inlay-hint-enable nil)
+  (lsp-rust-analyzer-display-lifetime-elision-hints-enable "skip_trivial")
+  (lsp-rust-analyzer-display-chaining-hints t)
+  (lsp-rust-analyzer-display-lifetime-elision-hints-use-parameter-names t)
+  (lsp-rust-analyzer-display-closure-return-type-hints t)
+  (lsp-rust-analyzer-display-parameter-hints t)
+  (lsp-rust-analyzer-display-reborrow-hints t)
+  )
+
 #+END_SRC
 
 For some unknown reason, ~format-all-mode~ does not work with

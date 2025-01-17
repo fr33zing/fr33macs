@@ -32,22 +32,6 @@
         "type": "github"
       }
     },
-    "corfuCandidateOverlay": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1711131243,
-        "narHash": "sha256-XXeXN+y1TZQSjV+6laL2MFY1HbKfGORmVxRpRQWYGZ8=",
-        "ref": "refs/heads/master",
-        "rev": "f730de2c150720ee70d4d7be4b8bb533c7dfc97e",
-        "revCount": 30,
-        "type": "git",
-        "url": "https://code.bsdgeek.org/adam/corfu-candidate-overlay"
-      },
-      "original": {
-        "type": "git",
-        "url": "https://code.bsdgeek.org/adam/corfu-candidate-overlay"
-      }
-    },
     "emacs-overlay": {
       "inputs": {
         "nixpkgs": "nixpkgs",
@@ -119,7 +103,6 @@
       "inputs": {
         "cargoMakedocs": "cargoMakedocs",
         "catppuccinEmacs": "catppuccinEmacs",
-        "corfuCandidateOverlay": "corfuCandidateOverlay",
         "emacs-overlay": "emacs-overlay",
         "nixpkgs": "nixpkgs_2"
       }

@@ -6,10 +6,6 @@
       url = "github:catppuccin/emacs";
       flake = false;
     };
-    corfuCandidateOverlay = {
-      url = "git+https://code.bsdgeek.org/adam/corfu-candidate-overlay";
-      flake = false;
-    };
     cargoMakedocs = {
       url = "github:Bunogi/cargo-makedocs";
       flake = false;
@@ -69,12 +65,13 @@
 
         customEmacsPackages = epkgs:
           [
-            (epkgs.trivialBuild {
-              pname = "corfu-candidate-overlay";
-              version = "1.5";
-              src = inputs.corfuCandidateOverlay;
-              packageRequires = [ epkgs.corfu ];
-            })
+            # Example
+            # (epkgs.trivialBuild {
+            #   pname = "corfu-candidate-overlay";
+            #   version = "1.5";
+            #   src = inputs.corfuCandidateOverlay;
+            #   packageRequires = [ epkgs.corfu ];
+            # })
           ];
 
         #

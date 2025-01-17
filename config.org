@@ -583,8 +583,7 @@ Evil (extensible vi layer) emulates the main features of Vim.
   (setq evil-want-keybinding nil
         evil-want-C-u-scroll t
         evil-undo-system 'undo-redo)
-  :config
-  (evil-mode 1))
+  :config (evil-mode 1))
 #+END_SRC
 
 Evil collection is a collection of Evil bindings for the parts of
@@ -615,30 +614,17 @@ the components in any order.
   (completion-category-overrides '((file (styles partial-completion)))))
 #+END_SRC
 
-** Corfu
+** Company
 
 #+BEGIN_SRC emacs-lisp
-(use-package corfu
+(use-package yasnippet
+  :ensure t
+  :hook ((lsp-mode . yas-minor-mode)))
+
+  (use-package company
   :ensure t
   :custom
-  (corfu-auto 1)			
-  :init
-  (setq tab-always-indent 'complete)
-  (setq text-mode-ispell-word-completion nil)
-  (global-corfu-mode))
-
-(use-package kind-icon
-  :ensure t
-  :after corfu
-  :custom
-  (kind-icon-default-face 'corfu-default)
-  :config
-  (add-to-list 'corfu-margin-formatters #'kind-icon-margin-formatter))
-
-(use-package corfu-candidate-overlay
-  :after corfu
-  :config
-  (corfu-candidate-overlay-mode +1))
+  (company-idle-delay 0))
 #+END_SRC
 
 * Minibuffer
@@ -786,6 +772,25 @@ by flashing the current line.
 
 * TODO Search
 * Misc. packages
+** Eldoc
+
+#+BEGIN_SRC emacs-lisp
+(use-package markdown-mode)
+
+(defun my:open-docs ()
+  (call-interactively 'eldoc-doc-buffer)
+  (with-current-buffer (eldoc-doc-buffer)
+    (markdown-mode 1)))
+
+(use-package eldoc
+  :after evil
+  :custom
+  (global-eldoc-mode nil)
+  (eldoc-echo-area-use-multiline-p nil)
+  (evil-lookup-func 'my:open-docs))
+#+END_SRC
+
+
 ** Try
 
 Try allows you to try Emacs packages without installing them.
@@ -945,18 +950,19 @@ Finally, enable the SVG tags globally.
 #+BEGIN_SRC emacs-lisp
 (use-package lsp-mode
   :ensure t
+  :after eldoc
   :hook ((lsp-mode . lsp-diagnostics-mode)
-         (lsp-mode . lsp-enable-which-key-integration))
+	 (lsp-mode . lsp-enable-which-key-integration))
   :custom
+  (lsp-auto-execute-action nil)
   (lsp-headerline-breadcrumb-enable nil)
   (lsp-lens-enable nil)
-  (lsp-enable-snippet nil)
-  ;(lsp-completion-provider :none) 
   (lsp-diagnostics-provider :flycheck)
   (lsp-keep-workspace-alive nil)
   (lsp-enable-xref t)
   (lsp-auto-configure t)
   (lsp-eldoc-enable-hover t)
+  (lsp-eldoc-render-all t)
   (lsp-enable-symbol-highlighting t))
 
 (use-package lsp-ui
@@ -965,13 +971,11 @@ Finally, enable the SVG tags globally.
   :bind (("C-K" . lsp-ui-doc-focus-frame))
   :custom
   (lsp-ui-peek-enable t)
-  
-  ;(lsp-ui-sideline-show-diagnostics t)
-  (lsp-ui-sideline-show-hover t) 
+
+  (lsp-ui-sideline-show-hover nil) 
   (lsp-ui-sideline-show-code-actions t)
 
-  (evil-lookup-func #'lsp-ui-doc-glance)
-  (lsp-ui-doc-enable t)
+  (lsp-ui-doc-enable nil)
   (lsp-ui-doc-include-signature t)
   (lsp-ui-doc-show-with-cursor nil)
   (lsp-ui-doc-show-with-mouse nil)
@@ -1229,44 +1233,10 @@ Syntax checking and linting is provided by Shellcheck via flycheck.
  :init
  (setq project-vc-extra-root-markers '("Cargo.toml")))
 
-;; (use-package rust-mode
-;;   :ensure t
-;;   :hook ((rust-mode rust-ts-mode) . eglot)
-;;   :hook ((rust-mode rust-ts-mode) . eglot-ensure)
-;;   :config
-;;   (add-to-list 'eglot-server-programs '((rust-ts-mode rust-mode) . ("rustup" "run" "stable" "rust-analyzer")))
-;;   ;; (add-to-list 'eglot-server-programs
-;;   ;;              '((rust-ts-mode rust-mode) .
-;;   ;;              ("rust-analyzer" :initializationOptions (:check (:command "clippy")))))
-;;   :init
-;;   (setq rust-mode-treesitter-derive t))
-
-;; (use-package flycheck-rust
-;;   :ensure t
-;;   :init
-;;   (with-eval-after-load 'rust-mode
-;;     (add-hook 'flycheck-mode-hook #'flycheck-rust-setup)))
-
-;; (use-package rustic
-;;   :ensure t
-;;   :after (rust-mode)
-;;   :custom
-;;   (rustic-lsp-client 'eglot)
-;;   ;; (rustic-rustfmt-config-alist '(("edition" . "2021")))
-;;   (rustic-format-trigger 'on-save)
-;;   (rustic-format-on-save-method #'my:rust-format-on-save)
-;;   :init
-;;   (add-hook 'server-after-make-frame-hook #'catppuccin-reload)
-;;   (add-hook 'eglot--managed-mode-hook (lambda () (flymake-mode -1))))
-
-;; (use-package rust-mode
-;;   :ensure t
-;;   :custom
-;;   (rust-mode-treesitter-derive t))
-
 (use-package rustic
   :ensure t
   :custom
+  (rustic-rustfmt-config-alist '(("edition" . "2021")))
   (rustic-format-trigger 'on-save)
   (rustic-format-on-save-method #'my:rust-format-on-save)
   (add-hook 'server-after-make-frame-hook #'catppuccin-reload)
@@ -1277,9 +1247,7 @@ Syntax checking and linting is provided by Shellcheck via flycheck.
   (lsp-rust-analyzer-display-lifetime-elision-hints-use-parameter-names t)
   (lsp-rust-analyzer-display-closure-return-type-hints t)
   (lsp-rust-analyzer-display-parameter-hints t)
-  (lsp-rust-analyzer-display-reborrow-hints t)
-  )
-
+  (lsp-rust-analyzer-display-reborrow-hints t))
 #+END_SRC
 
 For some unknown reason, ~format-all-mode~ does not work with

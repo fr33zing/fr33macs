@@ -238,6 +238,13 @@ Example:
   (nav-flash-show))
 #+END_SRC
 
+#+BEGIN_SRC emacs-lisp
+(defun my:advice:always-force-save (&rest _)
+  (set-buffer-modified-p t))
+
+(advice-add 'save-buffer :before #'my:advice:always-force-save)
+#+END_SRC
+
 ** Timing
 
 - TODO Add ~debounce-eval-immediately~

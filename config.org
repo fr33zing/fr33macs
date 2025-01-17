@@ -767,6 +767,9 @@ by flashing the current line.
 
 #+BEGIN_SRC emacs-lisp
 (use-package magit :ensure t
+  :init
+  (with-eval-after-load 'magit-mode
+    (add-hook 'after-save-hook 'magit-after-save-refresh-status t))
   :config
   (setq git-commit-style-convention-checks
         '(non-empty-second-line overlong-summary-line)))
@@ -796,7 +799,6 @@ by flashing the current line.
   (eldoc-echo-area-use-multiline-p nil)
   (evil-lookup-func 'my:open-docs))
 #+END_SRC
-
 
 ** Try
 
@@ -829,6 +831,13 @@ one of the characters then switches focus to that window.
 
   (setq switch-window-input-style 'minibuffer)
   (set-face-attribute 'switch-window-label nil :height 5.0))
+
+(defun my:advice:always-show-switch-window-overlay (orig-fun &rest args)
+  (setq switch-window-threshold 1)
+  (apply orig-fun args)
+  (setq switch-window-threshold 2))
+
+(advice-add 'switch-window-then-delete :around #'my:advice:always-show-switch-window-overlay)
 #+END_SRC
 
 ** Solaire mode

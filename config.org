@@ -788,14 +788,14 @@ by flashing the current line.
 (use-package markdown-mode)
 
 (defun my:open-docs ()
-  (call-interactively 'eldoc-doc-buffer)
+  (call-interactively 'eldoc)
   (with-current-buffer (eldoc-doc-buffer)
-    (markdown-mode 1)))
+    (markdown-mode)))
 
 (use-package eldoc
   :after evil
   :custom
-  (global-eldoc-mode nil)
+  (global-eldoc-mode t)
   (eldoc-echo-area-use-multiline-p nil)
   (evil-lookup-func 'my:open-docs))
 #+END_SRC
@@ -962,7 +962,6 @@ Finally, enable the SVG tags globally.
 #+END_SRC
 
 ** LSP
-
 #+BEGIN_SRC emacs-lisp
 (use-package lsp-mode
   :ensure t
@@ -970,6 +969,7 @@ Finally, enable the SVG tags globally.
   :hook ((lsp-mode . lsp-diagnostics-mode)
 	 (lsp-mode . lsp-enable-which-key-integration))
   :custom
+  (lsp-enable-on-type-formatting nil)
   (lsp-auto-execute-action nil)
   (lsp-headerline-breadcrumb-enable nil)
   (lsp-lens-enable nil)
@@ -1258,6 +1258,8 @@ Syntax checking and linting is provided by Shellcheck via flycheck.
   (add-hook 'server-after-make-frame-hook #'catppuccin-reload)
 
   (lsp-inlay-hint-enable nil)
+  (lsp-rust-analyzer-completion-add-call-argument-snippets nil)
+  (lsp-rust-analyzer-completion-add-call-parenthesis nil)
   (lsp-rust-analyzer-display-lifetime-elision-hints-enable "skip_trivial")
   (lsp-rust-analyzer-display-chaining-hints t)
   (lsp-rust-analyzer-display-lifetime-elision-hints-use-parameter-names t)
@@ -1290,8 +1292,9 @@ but it needs to check for ~format-all-mode~ in order to respect the
     ("r" rustic-cargo-rm                       "Remove dependency"))))
 #+END_SRC
 
-** Web
+** WGSL
 
 #+BEGIN_SRC emacs-lisp
-
+(use-package wgsl-mode
+  :ensure t)
 #+END_SRC

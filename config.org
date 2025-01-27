@@ -575,6 +575,7 @@ keybind.
 #+BEGIN_SRC emacs-lisp
 (use-package which-key
   :ensure t
+  :delight
   :config
   (which-key-mode))
 #+END_SRC
@@ -626,10 +627,12 @@ the components in any order.
 #+BEGIN_SRC emacs-lisp
 (use-package yasnippet
   :ensure t
+  :delight yas-minor-mode
   :hook ((lsp-mode . yas-minor-mode)))
 
   (use-package company
   :ensure t
+  :delight
   :custom
   (company-idle-delay 0))
 #+END_SRC
@@ -696,17 +699,21 @@ commands. Marginalia will add each command's description next to it.
 
 * WIP Mode line
 
-Warning: Not tangled
+#+BEGIN_SRC emacs-lisp
+(use-package mini-modeline
+  :ensure t
+  :delight mini-modeline-mode
+  :init
+  (mini-modeline-mode t)
+  :custom
+  (mini-modeline-enhance-visual t)
+  (mini-modeline-right-padding 6))
 
-#+BEGIN_SRC emacs-lisp :tangle no
-(set-face-attribute 'mode-line nil :height 1.0)
+(use-package delight
+  :ensure t)
 
-(defun my:mode-line-major-mode ()
-  (propertize "-%m-" 'face '(:foreground "red")))
-
-(setq-default mode-line-format '(
-    (:eval (my:mode-line-major-mode))
-))
+(use-package autorevert
+  :delight auto-revert-mode)
 #+END_SRC
 
 * Motion
@@ -794,6 +801,7 @@ by flashing the current line.
 
 (use-package eldoc
   :after evil
+  :delight
   :custom
   (global-eldoc-mode t)
   (eldoc-echo-area-use-multiline-p nil)
@@ -956,6 +964,7 @@ Finally, enable the SVG tags globally.
 #+BEGIN_SRC emacs-lisp
 (use-package format-all
   :ensure t
+  :delight
   :hook (prog-mode . format-all-mode)
   :config
   (setq format-all-show-errors 'never))
@@ -965,6 +974,7 @@ Finally, enable the SVG tags globally.
 #+BEGIN_SRC emacs-lisp
 (use-package lsp-mode
   :ensure t
+  :delight
   :after eldoc
   :hook ((lsp-mode . lsp-diagnostics-mode)
 	 (lsp-mode . lsp-enable-which-key-integration))
@@ -1048,6 +1058,42 @@ tree-sitter major modes.
   :config
   (setq treesit-auto-install t)
   (global-treesit-auto-mode))
+#+END_SRC
+
+** Rainbow-delimiters
+
+#+BEGIN_SRC emacs-lisp
+(use-package rainbow-delimiters
+  :ensure t
+  :init (rainbow-delimiters-mode))
+#+END_SRC
+
+** Dimmer
+
+#+BEGIN_SRC emacs-lisp
+(use-package dimmer
+  :ensure t
+  :init
+  (dimmer-configure-which-key)
+  (dimmer-configure-company-box)
+  (dimmer-configure-hydra)
+  (dimmer-configure-magit)
+  (dimmer-configure-org)
+  (dimmer-mode t))
+#+END_SRC
+
+** Sublimity-attractive
+
+Centers each buffer horizontally.
+
+#+BEGIN_SRC emacs-lisp
+(use-package sublimity
+  :ensure t
+  :init (sublimity-mode 1))
+
+(use-package sublimity-attractive
+    :custom
+  (sublimity-attractive-centering-width 100))
 #+END_SRC
 
 * Languages
@@ -1293,7 +1339,6 @@ but it needs to check for ~format-all-mode~ in order to respect the
 #+END_SRC
 
 ** WGSL
-
 #+BEGIN_SRC emacs-lisp
 (use-package wgsl-mode
   :ensure t)

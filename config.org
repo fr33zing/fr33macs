@@ -649,7 +649,7 @@ the components in any order.
   :ensure t
   :delight
   :custom
-  (company-idle-delay 0))
+  (company-idle-delay 0.1))
 #+END_SRC
 
 * Minibuffer
@@ -1107,8 +1107,8 @@ Centers each buffer horizontally.
   :init (sublimity-mode 1))
 
 (use-package sublimity-attractive
-    :custom
-  (sublimity-attractive-centering-width 100))
+  :custom
+  (sublimity-attractive-centering-width 110))
 #+END_SRC
 
 * Languages

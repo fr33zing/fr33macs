@@ -245,6 +245,14 @@ Example:
 (advice-add 'save-buffer :before #'my:advice:always-force-save)
 #+END_SRC
 
+#+BEGIN_SRC emacs-lisp
+(defun my:advice:save-after-code-actions (&rest _)
+  (save-buffer))
+
+(advice-add 'lsp-ui-sideline-apply-code-actions :after #'my:advice:save-after-code-actions)
+#+END_SRC
+
+
 ** Timing
 
 - TODO Add ~debounce-eval-immediately~
@@ -1291,9 +1299,7 @@ Syntax checking and linting is provided by Shellcheck via flycheck.
   https://github.com/catppuccin/emacs/issues/121
 
 #+BEGIN_SRC emacs-lisp
-(use-package project
- :init
- (setq project-vc-extra-root-markers '("Cargo.toml")))
+(use-package project)
 
 (use-package rustic
   :ensure t

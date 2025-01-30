@@ -149,6 +149,13 @@ Enable relative line numbers globally.
 (global-display-line-numbers-mode)
 #+END_SRC
 
+Try to always split window vertically.
+
+#+BEGIN_SRC emacs-lisp
+(setq split-width-threshold 0)
+(setq split-height-threshold nil)
+#+END_SRC
+
 * Theme
 
 #+BEGIN_SRC emacs-lisp

@@ -83,6 +83,7 @@
           # Common
           pkg-config
           gcc
+          gdb
 
           # SVGs
           librsvg

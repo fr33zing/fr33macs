@@ -163,6 +163,16 @@ Try to always split window vertically.
 (load-theme 'catppuccin t)
 (setq catppuccin-flavor (getnix "themeVariant"))
 (catppuccin-reload)
+
+(set-face-attribute 'font-lock-number-face nil
+  :foreground (catppuccin-get-color 'text))
+
+(set-face-attribute 'font-lock-property-name-face nil
+  :foreground (catppuccin-get-color 'text))
+(set-face-attribute 'font-lock-property-use-face nil
+  :foreground (catppuccin-get-color 'text))
+(set-face-attribute 'font-lock-function-call-face nil
+  :foreground (catppuccin-get-color 'text))
 #+END_SRC
 
 ** Variable definitions
@@ -258,7 +268,6 @@ Example:
 
 (advice-add 'lsp-ui-sideline-apply-code-actions :after #'my:advice:save-after-code-actions)
 #+END_SRC
-
 
 ** Timing
 
@@ -1299,17 +1308,16 @@ Syntax checking and linting is provided by Shellcheck via flycheck.
 
 ** Rust
 
-- TODO Check if rustic can use rust-ts-mode yet:
-  https://github.com/brotzeit/rustic/issues/475
-
-- TODO Check if catppuccin-reload can be removed:
-  https://github.com/catppuccin/emacs/issues/121
-
 #+BEGIN_SRC emacs-lisp
-(use-package project)
+(use-package rust-mode
+  :ensure t
+  :custom
+  (rust-mode-treesitter-derive t)
+  (treesit-font-lock-level 4))
 
 (use-package rustic
   :ensure t
+  :after (rust-mode)
   :custom
   (rustic-rustfmt-config-alist '(("edition" . "2021")))
   (rustic-format-trigger 'on-save)

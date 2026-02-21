@@ -1309,15 +1309,15 @@ Syntax checking and linting is provided by Shellcheck via flycheck.
 ** Rust
 
 #+BEGIN_SRC emacs-lisp
-(use-package rust-mode
-  :ensure t
-  :custom
-  (rust-mode-treesitter-derive t)
-  (treesit-font-lock-level 4))
+;; (use-package rust-mode
+;;   :ensure t
+;;   :custom
+;;   (rust-mode-treesitter-derive t)
+;;   (treesit-font-lock-level 4))
 
 (use-package rustic
   :ensure t
-  :after (rust-mode)
+  ;; :after (rust-mode)
   :custom
   (rustic-rustfmt-config-alist '(("edition" . "2021")))
   (rustic-format-trigger 'on-save)

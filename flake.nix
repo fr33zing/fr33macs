@@ -78,7 +78,7 @@
         # Configuration
         #
 
-        emacsPackage = pkgs.emacs29-pgtk;
+        emacsPackage = pkgs.emacs-pgtk;
         envPackages = with pkgs; [
           # Common
           pkg-config

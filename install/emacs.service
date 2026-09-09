@@ -1,0 +1,15 @@
+[Unit]
+Description=Emacs text editor
+Documentation=info:emacs man:emacs(1) https://gnu.org/software/emacs/
+
+[Service]
+Type=simple
+ExecStart=@bin@/emacs --fg-daemon
+ExecStop=@bin@/emacsclient --eval "(kill-emacs)"
+Environment=SSH_AUTH_SOCK=%t/keyring/ssh
+Restart=on-failure
+
+[Install]
+WantedBy=default.target
+
+# Ignore this unused replacement: @icon@

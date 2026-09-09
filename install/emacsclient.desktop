@@ -1,0 +1,7 @@
+[Desktop Entry]
+Name=Emacs Client
+Categories=TextEditor;
+Exec=@bin@/emacsclient -c %f
+Icon=@icon@
+Type=Application
+StartupNotify=true

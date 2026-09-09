@@ -12,18 +12,24 @@
     };
   };
 
-  outputs = { self, nixpkgs, ... }@inputs:
+  outputs =
+    { self, nixpkgs, ... }@inputs:
     let
       inherit (nixpkgs) lib;
 
-      withSystem = f:
-        lib.fold lib.recursiveUpdate { } (map (s: f s) [
-          "x86_64-linux"
-          "x86_64-darwin"
-          "aarch64-linux"
-          "aarch64-darwin"
-        ]);
-    in withSystem (system:
+      withSystem =
+        f:
+        lib.fold lib.recursiveUpdate { } (
+          map (s: f s) [
+            "x86_64-linux"
+            "x86_64-darwin"
+            "aarch64-linux"
+            "aarch64-darwin"
+          ]
+        );
+    in
+    withSystem (
+      system:
       let
         pkgs = import nixpkgs {
           inherit system;
@@ -37,42 +43,50 @@
 
         symbol = s: "'" + s;
 
-        tangle = orgFile:
+        tangle =
+          orgFile:
           pkgs.runCommand "tangle" { buildInputs = [ pkgs.python3Minimal ]; } ''
             python ${./util/tangle.py} ${orgFile} $out
           '';
 
-        substitute = substitutions: elFile:
+        substitute =
+          substitutions: elFile:
           let
-            substitutionsFile =
-              pkgs.writeText "substitutions" (builtins.toJSON substitutions);
-          in pkgs.runCommand "substitute" {
-            buildInputs = [ pkgs.python3Minimal ];
-          } ''
-            python ${./util/substitute.py} ${elFile} ${substitutionsFile} $out
-          '';
+            substitutionsFile = pkgs.writeText "substitutions" (builtins.toJSON substitutions);
+          in
+          pkgs.runCommand "substitute"
+            {
+              buildInputs = [ pkgs.python3Minimal ];
+            }
+            ''
+              python ${./util/substitute.py} ${elFile} ${substitutionsFile} $out
+            '';
 
-        toCSS = scssFile:
-          builtins.readFile (pkgs.runCommand "convert-scss" {
-            buildInputs = [ pkgs.dart-sass ];
-          } ''
-            ${lib.getExe pkgs.dart-sass} --style=compressed ${scssFile} $out
-          '');
+        toCSS =
+          scssFile:
+          builtins.readFile (
+            pkgs.runCommand "convert-scss"
+              {
+                buildInputs = [ pkgs.dart-sass ];
+              }
+              ''
+                ${lib.getExe pkgs.dart-sass} --style=compressed ${scssFile} $out
+              ''
+          );
 
         #
         # Emacs Packages
         #
 
-        customEmacsPackages = epkgs:
-          [
-            # Example
-            # (epkgs.trivialBuild {
-            #   pname = "corfu-candidate-overlay";
-            #   version = "1.5";
-            #   src = inputs.corfuCandidateOverlay;
-            #   packageRequires = [ epkgs.corfu ];
-            # })
-          ];
+        customEmacsPackages = epkgs: [
+          # Example
+          # (epkgs.trivialBuild {
+          #   pname = "corfu-candidate-overlay";
+          #   version = "1.5";
+          #   src = inputs.corfuCandidateOverlay;
+          #   packageRequires = [ epkgs.corfu ];
+          # })
+        ];
 
         #
         # Configuration
@@ -95,15 +109,16 @@
           nixfmt
 
           # Python
-          (python3.withPackages (p:
-            with p; [
+          (python3.withPackages (
+            p: with p; [
               python-lsp-server
               python-lsp-ruff # Linting
               pylsp-rope # Completions and refactoring
               pylsp-mypy # Type checking
               pyls-memestra # Deprecation tracking
               black # Formatting
-            ]))
+            ]
+          ))
 
           # Rust
           rustc # Compiler
@@ -137,15 +152,16 @@
             # (getnix "themeDir")
             themeDir = inputs.catppuccinEmacs;
             themeVariant = symbol "macchiato";
-            fontFamily = "Iosevka Comfy";
-            tagsFontFamily = "Iosevka";
+            fontFamily = "Aporetic Sans Mono";
+            tagsFontFamily = "Aporetic Sans Mono";
             fontSize = 12;
             font = "${fontFamily}-${toString fontSize}";
             exportCSS = toCSS ./export.scss;
           };
           output = substitute vars (tangle file);
         };
-      in {
+      in
+      {
 
         #
         # Outputs
@@ -158,28 +174,85 @@
           ];
         };
 
-        packages.${system}.default = (pkgs.emacsWithPackagesFromUsePackage {
-          package = emacsPackage.overrideAttrs (package: {
-            postInstall = (package.postInstall or "") + ''
-              wrapProgram $out/bin/emacs \
-                --prefix PATH : "${lib.makeBinPath envPackages}" \
-                --set RUST_SRC_PATH ${pkgs.rust.packages.stable.rustPlatform.rustLibSrc}
-            '';
-          });
-          config = config.output;
-          defaultInitFile = true;
-          extraEmacsPackages = epkgs:
-            [ epkgs.use-package ] ++ (customEmacsPackages epkgs);
-        }).overrideAttrs (_: { meta.mainProgram = "emacs"; });
+        packages.${system} = {
+          default =
+            (pkgs.emacsWithPackagesFromUsePackage {
+              package = emacsPackage.overrideAttrs (package: {
+                postInstall = (package.postInstall or "") + ''
+                  wrapProgram $out/bin/emacs \
+                    --prefix PATH : "${lib.makeBinPath envPackages}" \
+                    --set RUST_SRC_PATH ${pkgs.rust.packages.stable.rustPlatform.rustLibSrc}
+                '';
+              });
+              config = config.output;
+              defaultInitFile = true;
+              extraEmacsPackages = epkgs: [ epkgs.use-package ] ++ (customEmacsPackages epkgs);
+            }).overrideAttrs
+              (_: {
+                meta.mainProgram = "emacs";
+              });
 
-        devShells.${system}.default = pkgs.mkShell {
-          packages = [ self.packages.${system}.default ];
-          shellHook = ''
-            printf '\n%s\n%s\n' \
-              'emacs =>      ${self.packages.${system}.default}' \
-              'config.org => ${config.output}'
-          '';
+          installFiles =
+            let
+              emacs = self.packages.${system}.default;
+              icon = stdenv.mkDerivation {
+                name = "icon.png";
+                src = lib.fileset.toSource {
+                  root = ./.;
+                  fileset = ./install/icon.png;
+                };
+                postInstall = "cp $src/**/icon.png $out";
+              };
+
+              replaceFile =
+                prefix: file:
+                pkgs.replaceVarsWith {
+                  src = file;
+                  name = "${prefix}${builtins.baseNameOf file}";
+                  replacements = {
+                    inherit icon;
+                    bin = "${emacs}/bin";
+                  };
+                };
+
+              files = [
+                (replaceFile "" ./install/install-emacs)
+                (replaceFile "fr33macs." ./install/emacs.desktop)
+                (replaceFile "fr33macs." ./install/emacsclient.desktop)
+                (replaceFile "fr33macs." ./install/emacs.service)
+              ];
+            in
+            pkgs.runCommand "emacs-install-files" { } ''
+              mkdir -p $out
+              for src in ${lib.concatStringsSep " " files}; do
+                src_bn="$(basename $src)"
+                out_bn="''${src_bn#*-}"
+                cp "$src" "$out/$out_bn"
+              done
+              chmod +x "$out/install-emacs"
+            '';
         };
+
+        devShells.${system}.default =
+          let
+            emacs = self.packages.${system}.default;
+            installFiles = self.packages.${system}.installFiles;
+          in
+          pkgs.mkShell {
+            packages = [
+              emacs
+              installFiles
+            ];
+            shellHook = ''
+              export PATH="${installFiles}:$PATH"
+              printf '\n%s\n%s\n%s\n\n%s\n\n' \
+                'emacs      => ${emacs}' \
+                'config.org => ${config.output}' \
+                'install    => ${installFiles}' \
+                'Use command `install-emacs` to install on non-NixOS systems.' 
+            '';
+            installPhase = "install-emacs";
+          };
 
         nixosModules.${system}.default = {
           services.emacs = {
@@ -189,5 +262,6 @@
             package = self.packages.${system}.default;
           };
         };
-      });
+      }
+    );
 }

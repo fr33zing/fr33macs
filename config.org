@@ -476,6 +476,7 @@ that define hydra(s):
   (:exit t :idle 0.25)
   ("Action"
    (("." lsp-ui-sideline-apply-code-actions "Code actions at point")
+    ("/" comment-dwim                       "Comment code")
     ("o" lsp-organize-imports               "Organize imports")
     ("r" lsp-rename                         "Rename symbol"))
    "Find"
@@ -559,6 +560,7 @@ that define hydra(s):
       ("g" hydra:git/body    "Git"))
      "Shortcut"
      (("SPC" project-find-file                  "Find file in project")
+      ("/"   comment-dwim                       "Comment code")
       ("."   lsp-ui-sideline-apply-code-actions "Code actions at point")
       (">"   next-error                         "Next error")
       ("<"   previous-error                     "Previous error")

@@ -2,10 +2,6 @@
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
     emacs-overlay.url = "github:nix-community/emacs-overlay";
-    catppuccinEmacs = {
-      url = "github:catppuccin/emacs";
-      flake = false;
-    };
     cargoMakedocs = {
       url = "github:Bunogi/cargo-makedocs";
       flake = false;
@@ -19,7 +15,7 @@
 
       withSystem =
         f:
-        lib.fold lib.recursiveUpdate { } (
+        lib.foldr lib.recursiveUpdate { } (
           map (s: f s) [
             "x86_64-linux"
             "x86_64-darwin"
@@ -135,9 +131,9 @@
 
           # Web
           nodejs
-          nodePackages.prettier
-          nodePackages.typescript
-          nodePackages.typescript-language-server
+          prettier
+          typescript
+          typescript-language-server
 
           # Java
           jdk17
@@ -150,7 +146,6 @@
             # Example:
             #
             # (getnix "themeDir")
-            themeDir = inputs.catppuccinEmacs;
             themeVariant = symbol "macchiato";
             fontFamily = "Aporetic Sans Mono";
             tagsFontFamily = "Aporetic Sans Mono";
@@ -186,7 +181,12 @@
               });
               config = config.output;
               defaultInitFile = true;
-              extraEmacsPackages = epkgs: [ epkgs.use-package ] ++ (customEmacsPackages epkgs);
+              extraEmacsPackages =
+                epkgs:
+                [
+                  epkgs.use-package
+                ]
+                ++ (customEmacsPackages epkgs);
             }).overrideAttrs
               (_: {
                 meta.mainProgram = "emacs";

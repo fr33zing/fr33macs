@@ -159,7 +159,7 @@ Try to always split window vertically.
 * Theme
 
 #+BEGIN_SRC emacs-lisp
-(add-to-list 'custom-theme-load-path (getnix "themeDir"))
+(use-package catppuccin-theme :ensure t)
 (load-theme 'catppuccin t)
 (setq catppuccin-flavor (getnix "themeVariant"))
 (catppuccin-reload)

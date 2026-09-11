@@ -625,10 +625,33 @@ Evil (extensible vi layer) emulates the main features of Vim.
 (use-package evil
   :ensure t
   :init
-  (setq evil-want-keybinding nil
+  (setq evil-default-cursor t
+        evil-want-keybinding nil
         evil-want-C-u-scroll t
         evil-undo-system 'undo-redo)
-  :config (evil-mode 1))
+  :config
+  (evil-mode 1)
+;; <config>
+#+END_SRC
+
+Prevent shifting text from clearing selection:
+
+#+BEGIN_SRC emacs-lisp
+  (define-key evil-visual-state-map (kbd ">") 'my:evil-shift-right-visual)
+  (define-key evil-visual-state-map (kbd "<") 'my:evil-shift-left-visual)
+
+  (defun my:evil-shift-left-visual ()
+    (interactive)
+    (evil-shift-left (region-beginning) (region-end))
+    (evil-normal-state)
+    (evil-visual-restore))
+
+  (defun my:evil-shift-right-visual ()
+    (interactive)
+    (evil-shift-right (region-beginning) (region-end))
+    (evil-normal-state)
+    (evil-visual-restore)))
+;; </config>
 #+END_SRC
 
 Evil collection is a collection of Evil bindings for the parts of

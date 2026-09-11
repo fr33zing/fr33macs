@@ -323,6 +323,20 @@ If no other window shows its buffer, kill the buffer too."
       (kill-buffer buf))))
 #+END_SRC
 
+Switch to new window after split.
+
+#+BEGIN_SRC emacs-lisp
+(defun my:split-window-right ()
+  (interactive)
+  (split-window-right)
+  (other-window 1))
+
+(defun my:split-window-below ()
+  (interactive)
+  (split-window-below)
+  (other-window 1))
+#+END_SRC
+
 It's irritating to need to switch to a temporary window to close
 it. These functions are used to make closing temporary windows more
 convenient.
@@ -529,8 +543,8 @@ that define hydra(s):
      "Actions"
      (("k" delete-window             "Kill window")
       ("K" switch-window-then-delete "Kill other window")
-      ("s" evil-window-new           "Split window horizontally")
-      ("v" evil-window-vnew          "Split window vertically"))))
+      ("s" my:split-window-below     "Split window horizontally")
+      ("v" my:split-window-right     "Split window vertically"))))
 #+END_SRC
 
 *** Toggle

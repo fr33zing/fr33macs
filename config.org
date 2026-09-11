@@ -175,6 +175,19 @@ Try to always split window vertically.
   :foreground (catppuccin-get-color 'text))
 #+END_SRC
 
+Enable window dividers
+
+#+BEGIN_SRC emacs-lisp
+
+(set-face-foreground 'window-divider (catppuccin-get-color 'crust))
+(set-face-foreground 'window-divider-first-pixel nil)
+(set-face-foreground 'window-divider-last-pixel nil)
+(setq window-divider-default-places t
+      window-divider-default-right-width 2
+      window-divider-default-bottom-width 2)
+(window-divider-mode t)
+#+END_SRC
+
 ** Variable definitions
 
 #+BEGIN_SRC emacs-lisp
@@ -195,7 +208,7 @@ Try to always split window vertically.
 #+BEGIN_SRC emacs-lisp
 (set-face-attribute 'default t :font (getnix "font"))
 
-(set-cursor-color my:cursor-color)
+(add-to-list 'default-frame-alist `(cursor-color . ,my:cursor-color))
 (set-face-attribute 'region nil
                     :background (catppuccin-get-color 'surface2))
 #+END_SRC
@@ -723,6 +736,8 @@ commands. Marginalia will add each command's description next to it.
 
 * WIP Mode line
 
+For unknown reasons, mini-modeline-enhance-visual breaks theming on emacsclient.
+
 #+BEGIN_SRC emacs-lisp
 (use-package mini-modeline
   :ensure t
@@ -730,7 +745,8 @@ commands. Marginalia will add each command's description next to it.
   :init
   (mini-modeline-mode t)
   :custom
-  (mini-modeline-enhance-visual t)
+  (mini-modeline-display-gui-line t)
+  (mini-modeline-enhance-visual nil)
   (mini-modeline-right-padding 6))
 
 (use-package delight

@@ -53,7 +53,8 @@ printdone
 printf "Setting up daemon service..."
 run sudo cp "${SCRIPT_DIR}/fr33macs.emacs.service" /etc/systemd/user/emacs.service
 run systemctl --user daemon-reload
-run systemctl --user enable --now emacs
+run systemctl --user enable emacs
+run systemctl --user restart emacs
 printdone
 
 printf "Adding links to /usr/bin..."

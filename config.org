@@ -876,7 +876,7 @@ by flashing the current line.
 (defun my:open-docs ()
   (call-interactively 'eldoc)
   (with-current-buffer (eldoc-doc-buffer)
-    (markdown-mode)))
+    (markdown-view-mode)))
 
 (use-package eldoc
   :after evil
@@ -1080,12 +1080,17 @@ Finally, enable the SVG tags globally.
   (lsp-ui-sideline-show-hover nil) 
   (lsp-ui-sideline-show-code-actions t)
 
-  (lsp-ui-doc-enable nil)
+  (lsp-ui-doc-enable t)
   (lsp-ui-doc-include-signature t)
   (lsp-ui-doc-show-with-cursor nil)
   (lsp-ui-doc-show-with-mouse nil)
   (lsp-ui-doc-position 'at-point)
-  (lsp-ui-doc-max-height 30))
+  (lsp-ui-doc-max-height 30)
+  :config
+  (set-face-foreground 'lsp-ui-sideline-code-action
+		       (catppuccin-get-color 'surface2))
+  (define-key evil-normal-state-map (kbd "K") 'lsp-ui-doc-glance))
+
 #+END_SRC
 
 ** Flycheck

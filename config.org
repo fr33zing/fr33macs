@@ -950,6 +950,8 @@ Bufler is an ibuffer alternative.
   :ensure t
   :after evil
   :config
+  (add-hook 'bufler-list-mode-hook
+    (lambda () (setq-local font-lock-unfontify-region-function #'ignore)))
   (evil-define-key 'motion bufler-list-mode-map
     (kbd "RET") 'bufler-list-buffer-switch
     (kbd "SPC") 'bufler-list-buffer-peek

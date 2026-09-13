@@ -283,15 +283,14 @@ Example:
 #+END_SRC
 
 #+BEGIN_SRC emacs-lisp
-(defun my:advice:bufler-list-center-header (orig-fun &rest args)
-  (apply orig-fun args)
-    (with-current-buffer (get-buffer-create "*Bufler*")
-      (let (( n (max (/ (- (frame-width) sublimity-attractive-centering-width) 2) 0)))
-        (message "bufler-list called with args %s" n)
-        (setf header-line-format
-	      (concat (make-string n (string-to-char " ")) header-line-format)))))
+(defun my:advice:bufler-list-center-header (&rest _)
+  (with-current-buffer (get-buffer-create "*Bufler*")
+    (let (( n (max (/ (- (frame-width) sublimity-attractive-centering-width) 2) 0)))
+      (message "bufler-list called with args %s" n)
+      (setf header-line-format
+	    (concat (make-string n (string-to-char " ")) header-line-format)))))
 
-(advice-add 'bufler-list :around #'my:advice:bufler-list-center-header)
+(advice-add 'bufler-list :after #'my:advice:bufler-list-center-header)
 #+END_SRC
 
 ** Timing
@@ -718,11 +717,13 @@ the components in any order.
   :delight yas-minor-mode
   :hook ((lsp-mode . yas-minor-mode)))
 
-  (use-package company
-  :ensure t
-  :delight
-  :custom
-  (company-idle-delay 0.1))
+(use-package company
+:ensure t
+:delight
+:custom
+(company-idle-delay 0.1))
+
+(add-hook 'after-init-hook 'global-company-mode)
 #+END_SRC
 
 * Minibuffer
@@ -1375,6 +1376,7 @@ Syntax checking and linting is provided by Shellcheck via flycheck.
 #+BEGIN_SRC emacs-lisp
 (my:set-formatter python-mode "Python" black)
 (setq python-ts-mode-hook python-mode-hook)
+(add-hook 'python-ts-mode-hook 'lsp)
 #+END_SRC
 
 ** Rust

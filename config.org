@@ -831,15 +831,12 @@ on a short filter.
     ("h" avy-org-goto-heading-timer    "Org heading with timer"))
    "Repeat"
    ((";" avy-next                      "Next match"     :exit nil)
-    ("," avy-previous                  "Previous match" :exit nil)
-    ("p" avy-pop-mark                  "Pop mark"       :exit nil))
+    ("," avy-previous                  "Previous match" :exit nil))
    "Actions"
    (("y" avy-copy-line                 "Copy line")
     ("Y" avy-copy-region               "Copy region")
-    ("m" avy-move-line                 "Move line")
-    ("M" avy-move-region               "Move region")
-    ("d" avy-kill-ring-save-whole-line "Delete line")
-    ("D" avy-kill-ring-save-region     "Delete region"))))
+    ("d" avy-kill-whole-line           "Delete line")
+    ("D" avy-kill-region               "Delete region"))))
 #+END_SRC
 
 ** Nav-flash

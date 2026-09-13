@@ -894,18 +894,55 @@ by flashing the current line.
 * TODO Search
 ** Symbols Outline
 
+Show an outline of all the symbols in a code file.
+The default indentation is hardcoded, so I have to replace the relevant function entirely.
+
 #+BEGIN_SRC emacs-lisp
 (use-package symbols-outline
   :ensure t
   :init
   (add-hook 'lsp-mode-hook (lambda ()
     (setq-local symbols-outline-fetch-fn #'symbols-outline-lsp-fetch)))
-  :custom (symbols-outline-window-width 60)
+  :custom
+  (symbols-outline-window-width 60)
+  (symbols-outline-format-symbol-name-p nil)
   :config
   (evil-define-key 'motion symbols-outline-mode-map
     (kbd "RET") 'symbols-outline-visit-and-quit)
 
-  (symbols-outline-follow-mode))
+  (symbols-outline-follow-mode)
+
+  (defun my:advice:symbols-outline--insert-line (orig-fun node depth)
+    (let* ((name (symbols-outline-node-name node))
+           (kind (symbols-outline-node-kind node))
+           (face (symbols-outline--get-kind-face kind))
+           (line (symbols-outline-node-line node))
+           (lp (concat
+                " "
+                (make-string (* depth 3) ?\s) ; CHANGED 
+                (when (or (display-graphic-p) 
+                          symbols-outline-use-nerd-icon-in-tui)
+                  (concat (symbols-outline--get-kind-icon (or kind "null"))
+                          " ")))))
+      (when (symbols-outline-node-children node)
+        (if-let (ov (symbols-outline-node-ov node))
+            (unless (eq (overlay-start ov) (point))
+              (move-overlay ov (point) (point)))
+          (setq ov (make-overlay (point) (point)))
+          (setf (symbols-outline-node-ov node) ov))
+        (overlay-put (symbols-outline-node-ov node) 'before-string
+                     (symbols-outline--get-margin-spec-cache
+                      (symbols-outline-node-collapsed node))))
+      (insert (propertize (symbols-outline--format-symbol-name name)
+                          'line line
+                          'depth depth
+                          'face face
+                          'node node
+                          'mouse-face 'highlight
+                          'line-prefix lp))))
+
+   (advice-add 'symbols-outline--insert-line :around #'my:advice:symbols-outline--insert-line))
+
 #+END_SRC
 
 ** imenu-list

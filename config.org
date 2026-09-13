@@ -724,8 +724,6 @@ the components in any order.
 :delight
 :custom
 (company-idle-delay 0.1))
-
-(add-hook 'after-init-hook 'global-company-mode)
 #+END_SRC
 
 * Minibuffer
@@ -1070,7 +1068,8 @@ Finally, enable the SVG tags globally.
   :delight
   :after eldoc
   :hook ((lsp-mode . lsp-diagnostics-mode)
-	 (lsp-mode . lsp-enable-which-key-integration))
+	 (lsp-mode . lsp-enable-which-key-integration)
+	 (lsp-mode . company-mode)
   :custom
   (lsp-enable-on-type-formatting nil)
   (lsp-auto-execute-action nil)
@@ -1244,6 +1243,7 @@ Org is like Markdown but a lot better.
 (use-package org
   :ensure t
   :after evil htmlize
+  :hook (org-mode . company-mode)
   :config
   ;; <config>
 #+END_SRC
@@ -1384,15 +1384,9 @@ Syntax checking and linting is provided by Shellcheck via flycheck.
 ** Rust
 
 #+BEGIN_SRC emacs-lisp
-;; (use-package rust-mode
-;;   :ensure t
-;;   :custom
-;;   (rust-mode-treesitter-derive t)
-;;   (treesit-font-lock-level 4))
-
 (use-package rustic
   :ensure t
-  ;; :after (rust-mode)
+  :hook (rustic-mode . company-mode)
   :custom
   (rustic-rustfmt-config-alist '(("edition" . "2021")))
   (rustic-format-trigger 'on-save)

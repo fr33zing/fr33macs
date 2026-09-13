@@ -282,6 +282,18 @@ Example:
 (advice-add 'lsp-ui-sideline-apply-code-actions :after #'my:advice:save-after-code-actions)
 #+END_SRC
 
+#+BEGIN_SRC emacs-lisp
+(defun my:advice:bufler-list-center-header (orig-fun &rest args)
+  (apply orig-fun args)
+    (with-current-buffer (get-buffer-create "*Bufler*")
+      (let (( n (max (/ (- (frame-width) sublimity-attractive-centering-width) 2) 0)))
+        (message "bufler-list called with args %s" n)
+        (setf header-line-format
+	      (concat (make-string n (string-to-char " ")) header-line-format)))))
+
+(advice-add 'bufler-list :around #'my:advice:bufler-list-center-header)
+#+END_SRC
+
 ** Timing
 
 - TODO Add ~debounce-eval-immediately~

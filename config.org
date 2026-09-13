@@ -407,7 +407,7 @@ window will never be considered temporary.
 
 #+BEGIN_SRC emacs-lisp
 (setq my:not-temporary-major-modes
-  '(lisp-interaction-mode magit-status-mode))
+  '(lisp-interaction-mode))
 
 (setq my:not-temporary-minor-modes
   '(org-src-mode))
@@ -874,13 +874,15 @@ by flashing the current line.
 ** Magit
 
 #+BEGIN_SRC emacs-lisp
-(use-package magit :ensure t
+(use-package magit
+  :ensure t
   :init
   (with-eval-after-load 'magit-mode
     (add-hook 'after-save-hook 'magit-after-save-refresh-status t))
   :config
   (setq git-commit-style-convention-checks
-        '(non-empty-second-line overlong-summary-line)))
+        '(non-empty-second-line overlong-summary-line))
+  (keymap-set transient-map "<escape>" #'transient-quit-one))
 
 (pretty-hydra-define hydra:git
   (:exit t :idle 0.25) 

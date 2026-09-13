@@ -566,6 +566,7 @@ that define hydra(s):
      "Actions"
      (("k" delete-window             "Kill window")
       ("K" switch-window-then-delete "Kill other window")
+      ("b" balance-windows           "Balance windows")
       ("s" my:split-window-below     "Split window horizontally")
       ("v" my:split-window-right     "Split window vertically"))))
 #+END_SRC

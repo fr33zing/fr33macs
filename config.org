@@ -293,6 +293,14 @@ Example:
 (advice-add 'bufler-list :after #'my:advice:bufler-list-center-header)
 #+END_SRC
 
+#+BEGIN_SRC emacs-lisp
+(defun my:advice:imenu-list-close-after-goto (&rest _)
+  (with-current-buffer (get-buffer-create "*Ilist*")
+    (kill-buffer-and-window)))
+
+(advice-add #'imenu-list--goto-entry :after 'my:advice:imenu-list-close-after-goto)
+#+END_SRC
+
 ** Timing
 
 - TODO Add ~debounce-eval-immediately~
@@ -504,11 +512,13 @@ that define hydra(s):
   ("Action"
    (("." lsp-ui-sideline-apply-code-actions "Code actions at point")
     ("/" comment-dwim                       "Comment code")
-    ("o" lsp-organize-imports               "Organize imports")
+    ("O" lsp-organize-imports               "Organize imports")
     ("r" lsp-rename                         "Rename symbol"))
    "Find"
    (("n" next-error                         "Next error"     :exit nil)
     ("p" previous-error                     "Previous error" :exit nil)
+    ("o" symbols-outline-show               "Show symbols outline")
+    ("i" imenu-list-smart-toggle            "Show imenu list")
     ("d" lsp-ui-peek-find-definitions       "Definitions")
     ("R" lsp-ui-peek-find-references        "References"))))
 #+END_SRC
@@ -589,6 +599,8 @@ that define hydra(s):
      (("SPC" project-find-file                  "Find file in project")
       ("/"   comment-dwim                       "Comment code")
       ("."   lsp-ui-sideline-apply-code-actions "Code actions at point")
+      ("o"   symbols-outline-show               "Show symbols outline")
+      ("i"   imenu-list-smart-toggle            "Show imenu list")
       (">"   next-error                         "Next error")
       ("<"   previous-error                     "Previous error")
       ("s"   save-buffer                        "Save buffer")
@@ -877,6 +889,36 @@ by flashing the current line.
 #+END_SRC
 
 * TODO Search
+** Symbols Outline
+
+#+BEGIN_SRC emacs-lisp
+(use-package symbols-outline
+  :ensure t
+  :init
+  (add-hook 'lsp-mode-hook (lambda ()
+    (setq-local symbols-outline-fetch-fn #'symbols-outline-lsp-fetch)))
+  :custom (symbols-outline-window-width 60)
+  :config
+  (evil-define-key 'motion symbols-outline-mode-map
+    (kbd "RET") 'symbols-outline-visit-and-quit)
+
+  (symbols-outline-follow-mode))
+#+END_SRC
+
+** imenu-list
+
+#+BEGIN_SRC emacs-lisp
+(use-package imenu-list
+  :ensure t
+  :custom
+  (imenu-list-focus-after-activation t)
+  (imenu-sort-function #'imenu--sort-by-name)
+  :config
+  (set-face-foreground 'imenu-list-entry-face-0 (catppuccin-get-color 'mauve))
+  (set-face-foreground 'imenu-list-entry-subalist-face-0 (catppuccin-get-color 'mauve))
+  (set-face-foreground 'imenu-list-entry-face-1 (catppuccin-get-color 'text)))
+#+END_SRC
+
 * Misc. packages
 ** Eldoc
 
@@ -1069,7 +1111,7 @@ Finally, enable the SVG tags globally.
   :after eldoc
   :hook ((lsp-mode . lsp-diagnostics-mode)
 	 (lsp-mode . lsp-enable-which-key-integration)
-	 (lsp-mode . company-mode)
+	 (lsp-mode . company-mode))
   :custom
   (lsp-enable-on-type-formatting nil)
   (lsp-auto-execute-action nil)

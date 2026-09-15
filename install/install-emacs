@@ -50,18 +50,18 @@ run sudo cp "${SCRIPT_DIR}/fr33macs.emacs.desktop" /usr/share/applications
 run sudo cp "${SCRIPT_DIR}/fr33macs.emacsclient.desktop" /usr/share/applications
 printdone
 
-printf "Setting up daemon service..."
-run sudo cp "${SCRIPT_DIR}/fr33macs.emacs.service" /etc/systemd/user/emacs.service
-run systemctl --user daemon-reload
-run systemctl --user enable emacs
-run systemctl --user restart emacs
-printdone
-
 printf "Adding links to /usr/bin..."
 clean /usr/bin/emacs
 clean /usr/bin/emacsclient
 run sudo ln -s "${EMACS_BIN_DIR}/emacs" /usr/bin/emacs
 run sudo ln -s "${EMACS_BIN_DIR}/emacsclient" /usr/bin/emacsclient
+printdone
+
+printf "Setting up daemon service..."
+run sudo cp "${SCRIPT_DIR}/fr33macs.emacs.service" /etc/systemd/user/emacs.service
+run systemctl --user daemon-reload
+run systemctl --user enable emacs
+run systemctl --user restart emacs
 printdone
 
 printf '\n%s\n\n' "${GOOD}Successfully installed.${RESET}"

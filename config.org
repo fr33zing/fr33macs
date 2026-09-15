@@ -407,7 +407,7 @@ window will never be considered temporary.
 
 #+BEGIN_SRC emacs-lisp
 (setq my:not-temporary-major-modes
-  '(lisp-interaction-mode))
+  '(lisp-interaction-mode eat-mode))
 
 (setq my:not-temporary-minor-modes
   '(org-src-mode))
@@ -598,6 +598,7 @@ that define hydra(s):
       ("g" hydra:git/body    "Git"))
      "Shortcut"
      (("SPC" project-find-file                  "Find file in project")
+      ("`"   eat-other-window                   "Terminal")
       ("/"   comment-dwim                       "Comment code")
       ("."   lsp-ui-sideline-apply-code-actions "Code actions at point")
       ("o"   symbols-outline-show               "Show symbols outline")
@@ -1273,6 +1274,15 @@ Centers each buffer horizontally.
 (use-package sublimity-attractive
   :custom
   (sublimity-attractive-centering-width 110))
+#+END_SRC
+
+** Eat
+
+Eat is a terminal emulator. Works best with [[https://codeberg.org/akib/emacs-eat#:~:text=shell integration,-for][shell integration]].
+
+#+BEGIN_SRC emacs-lisp
+(use-package eat
+    :ensure t)
 #+END_SRC
 
 * Languages

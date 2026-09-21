@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+trap 'sudo -k' EXIT
+
 SCRIPT_DIR="$(dirname "$0")"
 EMACS_BIN_DIR="@bin@"
 LOG_FILE="/tmp/install-emacs.log"
@@ -7,7 +9,6 @@ LOG_FILE="/tmp/install-emacs.log"
 GOOD=$(tput setaf 2)
 BAD=$(tput setaf 1)
 RESET=$(tput sgr0)
-
 
 printdone () {
     printf '%s\n' " ${GOOD}Done${RESET}"
@@ -19,9 +20,20 @@ printerr () {
     printf '%s' "$RESET"
 }
 
+getsudo () {
+    tput bel
+    exec 3>&1 4>&2 1>>/dev/null 2>&1
+    echo '#!/usr/bin/env bash
+    zenity --password --title "Install fr33macs"' > /tmp/askpass
+    chmod +x /tmp/askpass
+    [ -z "$SUDO_ASKPASS" ] && SUDO_ASKPASS="/tmp/askpass"
+    sudo -Av || exit 1
+    exec 1>&3 2>&4 3>&- 4>&-
+}
+
 clean () {
     exec 3>&1 4>&2 1>>/dev/null 2>&1
-    sudo rm "$@"
+    sudo -n rm "$@"
     exec 1>&3 2>&4 3>&- 4>&-
 }
 
@@ -42,23 +54,25 @@ run() {
 # Main
 #
 
+
+getsudo -n
 clean $LOG_FILE
 
 printf '\n%s' "Copying .desktop files to /usr/share/applications..."
 clean /usr/share/applications/fr33macs.*.desktop
-run sudo cp "${SCRIPT_DIR}/fr33macs.emacs.desktop" /usr/share/applications
-run sudo cp "${SCRIPT_DIR}/fr33macs.emacsclient.desktop" /usr/share/applications
+run sudo -n cp "${SCRIPT_DIR}/fr33macs.emacs.desktop" /usr/share/applications
+run sudo -n cp "${SCRIPT_DIR}/fr33macs.emacsclient.desktop" /usr/share/applications
 printdone
 
 printf "Adding links to /usr/bin..."
 clean /usr/bin/emacs
 clean /usr/bin/emacsclient
-run sudo ln -s "${EMACS_BIN_DIR}/emacs" /usr/bin/emacs
-run sudo ln -s "${EMACS_BIN_DIR}/emacsclient" /usr/bin/emacsclient
+run sudo -n ln -s "${EMACS_BIN_DIR}/emacs" /usr/bin/emacs
+run sudo -n ln -s "${EMACS_BIN_DIR}/emacsclient" /usr/bin/emacsclient
 printdone
 
 printf "Setting up daemon service..."
-run sudo cp "${SCRIPT_DIR}/fr33macs.emacs.service" /etc/systemd/user/emacs.service
+run sudo -n cp "${SCRIPT_DIR}/fr33macs.emacs.service" /etc/systemd/user/emacs.service
 run systemctl --user daemon-reload
 run systemctl --user enable emacs
 run systemctl --user restart emacs

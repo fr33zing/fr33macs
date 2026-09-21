@@ -100,21 +100,16 @@
 
           # Shell
           shellcheck
+          shfmt
+          bash-language-server
 
           # Nix
           nixfmt
 
           # Python
-          (python3.withPackages (
-            p: with p; [
-              python-lsp-server
-              python-lsp-ruff # Linting
-              pylsp-rope # Completions and refactoring
-              pylsp-mypy # Type checking
-              pyls-memestra # Deprecation tracking
-              black # Formatting
-            ]
-          ))
+          ty
+          ruff
+          python3
 
           # Rust
           rustc # Compiler
@@ -151,6 +146,9 @@
               capt-of
             ]
           ))
+
+          # English
+          ltex-ls-plus
         ];
 
         config = rec {

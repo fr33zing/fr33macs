@@ -9,6 +9,13 @@
 Read this document in this repository's github.io page or in Emacs for the best experience.
 #+END_EXAMPLE
 
+* TODO ASAP
+
+- Find a plugin to show me all my TODOs in all projects when I open Emacs
+- Make ltex-ls-plus less annoying (doesn't take new dictionary entries?)
+  - https://ltex-plus.github.io/ltex-plus/vscode-ltex-plus/setting-scopes-files.html#multi-scope-settings
+- make all org docs fully expanded by default
+
 * Links
 
 - Github.io page: https://fr33zing.github.io/fr33macs
@@ -140,6 +147,11 @@ Enable some things which should probably be default.
 (setq require-final-newline t)
 (setq frame-inhibit-implied-resize t)
 (global-hl-line-mode)
+
+(save-place-mode 1)
+(recentf-mode 1)
+(setq recentf-max-menu-items 10)
+(setq recentf-max-saved-items 10)
 #+END_SRC
 
 Enable relative line numbers globally.
@@ -522,13 +534,11 @@ that define hydra(s):
   ("Action"
    (("." lsp-ui-sideline-apply-code-actions "Code actions at point")
     ("/" comment-dwim                       "Comment code")
-    ("O" lsp-organize-imports               "Organize imports")
+    ("o" lsp-organize-imports               "Organize imports")
     ("r" lsp-rename                         "Rename symbol"))
    "Find"
    (("n" next-error                         "Next error"     :exit nil)
     ("p" previous-error                     "Previous error" :exit nil)
-    ("o" symbols-outline-show               "Show symbols outline")
-    ("i" imenu-list-smart-toggle            "Show imenu list")
     ("d" lsp-ui-peek-find-definitions       "Definitions")
     ("R" lsp-ui-peek-find-references        "References"))))
 #+END_SRC
@@ -553,7 +563,7 @@ that define hydra(s):
   (pretty-hydra-define hydra:buffer
     (:exit t :idle 0.25)
     ("Switch"
-     (("b" bufler-switch-buffer "Quick switch")
+     (("b" consult-buffer       "Quick switch")
       ("i" bufler-list          "List buffers")
       ("]" next-buffer          "Next buffer"     :exit nil)
       ("[" previous-buffer      "Previous buffer" :exit nil)
@@ -593,31 +603,47 @@ that define hydra(s):
       ("h" lsp-inlay-hints-mode "Inlay hints"))))
 #+END_SRC
 
+*** Find (Consult)
+
+#+BEGIN_SRC emacs-lisp
+(pretty-hydra-define hydra:find
+  (:exit t :idle 0.25)
+  ("Consult"
+   (("<tab>" consult-imenu           "Imenu")
+    ("i"     consult-imenu-multi     "Project Imenu")
+    ("o"     consult-outline         "Outline")
+    ("b"     consult-buffer          "Buffer")
+    ("g"     consult-ripgrep         "Ripgrep")
+    ("e"     consult-flycheck        "Flycheck errors")
+    ("r"     consult-recent-file     "Recent files"))
+  ("Show"
+   (("O"     symbols-outline-show    "Symbols outline")
+    ("I"     imenu-list-smart-toggle "Imenu list")
+    ))))
+#+END_SRC
+
 *** Leader key
 
 #+BEGIN_SRC emacs-lisp
   (pretty-hydra-define hydra:leader
     (:exit t :idle 0.25)
     ("Hydra"
-     (("m" major-mode-hydra  "Mode-specific")
-      ("t" hydra:toggle/body "Toggle")
-      ("c" hydra:code/body   "Code")
-      ("f" hydra:file/body   "File")
-      ("b" hydra:buffer/body "Buffer")
-      ("w" hydra:window/body "Window")
-      ("a" hydra:avy/body    "Avy")
-      ("g" hydra:git/body    "Git"))
+     (("<tab>" hydra:find/body   "Find")
+      ("m"     major-mode-hydra  "Mode-specific")
+      ("t"     hydra:toggle/body "Toggle")
+      ("c"     hydra:code/body   "Code")
+      ("f"     hydra:file/body   "File")
+      ("b"     hydra:buffer/body "Buffer")
+      ("w"     hydra:window/body "Window")
+      ("a"     hydra:avy/body    "Avy")
+      ("g"     hydra:git/body    "Git"))
      "Shortcut"
-     (("SPC" project-find-file                  "Find file in project")
-      ("`"   eat-other-window                   "Terminal")
-      ("/"   comment-dwim                       "Comment code")
-      ("."   lsp-ui-sideline-apply-code-actions "Code actions at point")
-      ("o"   symbols-outline-show               "Show symbols outline")
-      ("i"   imenu-list-smart-toggle            "Show imenu list")
-      (">"   next-error                         "Next error")
-      ("<"   previous-error                     "Previous error")
-      ("s"   save-buffer                        "Save buffer")
-      ("q"   save-buffer-kill-emacs             "Quit")))))
+     (("SPC"   project-find-file                  "Find file in project")
+      ("`"     eat-other-window                   "Terminal")
+      ("/"     comment-dwim                       "Comment code")
+      ("."     lsp-ui-sideline-apply-code-actions "Code actions at point")
+      ("s"     save-buffer                        "Save buffer")
+      ("q"     save-buffer-kill-emacs             "Quit")))))
 ;; </config>
 #+END_SRC
 
@@ -971,6 +997,16 @@ The default indentation is hardcoded, so I have to replace the relevant function
   (set-face-foreground 'imenu-list-entry-face-1 (catppuccin-get-color 'text)))
 #+END_SRC
 
+** Consult
+
+#+BEGIN_SRC emacs-lisp
+(use-package consult
+  :ensure t)
+
+(use-package consult-flycheck
+  :ensure t)
+#+END_SRC
+
 * Misc. packages
 ** Eldoc
 
@@ -1047,7 +1083,7 @@ terminals, etc) by giving the latter a different background.
 
 ** Bufler
 
-Bufler is an ibuffer alternative.
+Bufler is an ibuffer alternative.   
 
 #+BEGIN_SRC emacs-lisp
 (use-package bufler
@@ -1188,6 +1224,7 @@ Finally, enable the SVG tags globally.
   (lsp-ui-peek-enable t)
 
   (lsp-ui-sideline-show-hover nil) 
+  (lsp-ui-sideline-show-diagnostics nil)
   (lsp-ui-sideline-show-code-actions t)
 
   (lsp-ui-doc-enable t)
@@ -1210,35 +1247,41 @@ Flycheck is a modern on-the-fly syntax checking extension.
 #+BEGIN_SRC emacs-lisp
 (use-package flycheck
   :ensure t
+  :custom
+  (flycheck-annotate-other-lines-style nil)
+  (flycheck-annotate-current-line-style 'below)
+  (flycheck-annotate-background t)
+  (flycheck-indication-mode nil)
   :init
   (global-flycheck-mode)
+  (global-flycheck-annotate-mode)
+
+  (add-hook 'flycheck-error-list-mode (lambda ()
+    (setq sublimity-attractive-centering-width 0)))
+
+  (set-face-background 'flycheck-annotate-info-background "#3b3855")
+  (set-face-attribute 'flycheck-annotate-info nil
+		      :foreground (catppuccin-get-color 'mauve)
+		      :background "#3b3855")
   (set-face-attribute 'flycheck-info nil
-    :underline `(:color ,(catppuccin-get-color 'green) :style wave)
+    :underline `(:color ,(catppuccin-get-color 'mauve) :style wave)
     :weight 'bold)
+
+  (set-face-background 'flycheck-annotate-error-background "#413547")
+  (set-face-attribute 'flycheck-annotate-error nil
+		      :foreground (catppuccin-get-color 'red)
+		      :background "#413547")
   (set-face-attribute 'flycheck-error nil
     :underline `(:color ,(catppuccin-get-color 'red) :style wave)
     :weight 'bold)
+  
+  (set-face-background 'flycheck-annotate-warning-background "#423a44")
+  (set-face-attribute 'flycheck-annotate-warning nil
+		      :foreground (catppuccin-get-color 'mauve)
+		      :background "#423a44")
   (set-face-attribute 'flycheck-warning nil
     :underline `(:color ,(catppuccin-get-color 'peach) :style wave)
     :weight 'bold))
-#+END_SRC
-
-Flycheck-inline implements a minor-mode for displaying errors from
-Flycheck right below their reporting location
-
-#+BEGIN_SRC emacs-lisp
-;; (use-package flycheck-inline
-;;   :ensure t
-;;   :after flycheck
-;;   :hook (flycheck-mode . flycheck-inline-mode))
-#+END_SRC
-
-#+BEGIN_SRC emacs-lisp
-;; (use-package flycheck-eglot
-;;   :ensure t
-;;   :after (flycheck eglot)
-;;   :config
-;;   (global-flycheck-eglot-mode 1))
 #+END_SRC
 
 ** Treesit-auto
@@ -1304,30 +1347,27 @@ Eat is a terminal emulator. Works best with [[https://codeberg.org/akib/emacs-ea
 ** WIP English
 
 #+BEGIN_SRC emacs-lisp
-(use-package langtool
-  :ensure t
-  :init
-  (setq langtool-bin (executable-find "languagetool-commandline"))
-  :config
-  (add-hook 'langtool-error-exists-hook 'my:remove-langtool-overlays))
+(use-package lsp-mode
+  :custom
+  (lsp-markdown-server-command "ltex-ls-plus")
+  (lsp-markdown-server-command-args '("--endless")))
+#+END_SRC
 
-(setq my:code-properties '(font-lock-fontified
-                           src-block))
+Custom LSP client def, sigh
 
-(defun my:has-code-property-p (pos)
-  (--any? (get-text-property pos it) my:code-properties))
-
-(defun my:remove-langtool-overlays-p (overlay)
-  (let* ((pos (overlay-start overlay))
-         (faces (get-text-property pos 'face)))
-    (my:has-code-property-p pos)
-))
-
-(defun my:remove-langtool-overlays ()
-  (-each (langtool--overlays-region (buffer-end -1) (buffer-end +1))
-    (lambda (overlay)
-      (when (my:remove-langtool-overlays-p overlay)
-        (delete-overlay overlay)))))
+#+BEGIN_SRC emacs-lisp
+(use-package lsp-mode
+:config
+(lsp-register-client
+ (make-lsp-client
+  :new-connection
+  (lsp-stdio-connection (lambda ()
+      (cons (executable-find "ltex-ls-plus") '("--endless"))))
+ :activation-fn (lsp-activate-on "org")
+ :initialized-fn
+   (lambda (workspace))
+ :priority -1
+ :server-id 'ltex-ls-plus)))
 #+END_SRC
 
 ** Emacs Lisp
@@ -1352,10 +1392,11 @@ Org is like Markdown but a lot better.
 (use-package org
   :ensure t
   :after evil htmlize
-  :hook (org-mode . company-mode)
+  :hook
+  (org-mode . company-mode)
+  (org-mode . lsp)
   :custom
   (org-pretty-entities t)
-  (org-startup-with-latex-preview t)
   :config
   ;; <config>
 #+END_SRC

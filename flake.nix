@@ -130,13 +130,27 @@
           fd
 
           # Web
-          nodejs
+          deno
           prettier
-          typescript
-          typescript-language-server
+          djlint
+          vscode-langservers-extracted
+          emmet-ls
 
           # Java
           jdk17
+
+          # LaTeX
+          (pkgs.texliveBasic.withPackages (
+            ps: with ps; [
+              dvisvgm
+              dvipng
+              wrapfig
+              amsmath
+              ulem
+              hyperref
+              capt-of
+            ]
+          ))
         ];
 
         config = rec {
@@ -176,7 +190,8 @@
                 postInstall = (package.postInstall or "") + ''
                   wrapProgram $out/bin/emacs \
                     --prefix PATH : "${lib.makeBinPath envPackages}" \
-                    --set RUST_SRC_PATH ${pkgs.rust.packages.stable.rustPlatform.rustLibSrc}
+                    --set RUST_SRC_PATH ${pkgs.rust.packages.stable.rustPlatform.rustLibSrc} \
+                    --set LSP_USE_PLISTS true
                 '';
               });
               config = config.output;
@@ -244,6 +259,8 @@
               installFiles
             ];
             shellHook = ''
+              [[ -z "$AFTER" ]] || $AFTER
+
               export PATH="${installFiles}:$PATH"
               printf '\n%s\n%s\n%s\n\n%s\n\n' \
                 'emacs      => ${emacs}' \

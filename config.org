@@ -413,6 +413,16 @@ window will never be considered temporary.
   '(org-src-mode))
 #+END_SRC
 
+** Buffers
+
+Working on a project with a lot of files can get annoying.
+
+#+BEGIN_SRC emacs-lisp
+(defun my:kill-all-buffers ()
+  (interactive)
+  (mapc 'kill-buffer (buffer-list)))
+#+END_SRC
+
 ** Errors
 
 #+BEGIN_SRC emacs-lisp
@@ -552,6 +562,7 @@ that define hydra(s):
      (("s" save-buffer         "Save buffer")
       ("k" kill-current-buffer "Kill buffer")
       ("K" kill-buffer         "Kill other buffer")
+      ("X" my:kill-all-buffers "Kill all buffers")
       ("r" revert-buffer       "Revert current buffer")
       ("R" rename-buffer       "Rename current buffer"))))
 #+END_SRC
@@ -980,7 +991,7 @@ The default indentation is hardcoded, so I have to replace the relevant function
   (evil-lookup-func 'my:open-docs))
 #+END_SRC
 
-** Try
+* Try
 
 Try allows you to try Emacs packages without installing them.
 
@@ -1140,8 +1151,8 @@ Finally, enable the SVG tags globally.
   :ensure t
   :delight
   :hook (prog-mode . format-all-mode)
-  :config
-  (setq format-all-show-errors 'never))
+  :custom
+  (format-all-show-errors 'never))
 #+END_SRC
 
 ** LSP
@@ -1154,6 +1165,9 @@ Finally, enable the SVG tags globally.
 	 (lsp-mode . lsp-enable-which-key-integration)
 	 (lsp-mode . company-mode))
   :custom
+  (gc-cons-threshold 100000000)
+  (read-process-output-max (* 1024 1024))
+  
   (lsp-enable-on-type-formatting nil)
   (lsp-auto-execute-action nil)
   (lsp-headerline-breadcrumb-enable nil)
@@ -1252,6 +1266,7 @@ tree-sitter major modes.
 
 #+BEGIN_SRC emacs-lisp
 (use-package dimmer
+  :vc "https://github.com/chrhansk/dimmer.el.git"
   :ensure t
   :init
   (dimmer-configure-which-key)
@@ -1332,10 +1347,15 @@ Org is like Markdown but a lot better.
 
 #+BEGIN_SRC emacs-lisp
 (use-package htmlize :ensure t)
+(use-package auctex :ensure t)
+(use-package cdlatex :ensure t)
 (use-package org
   :ensure t
   :after evil htmlize
   :hook (org-mode . company-mode)
+  :custom
+  (org-pretty-entities t)
+  (org-startup-with-latex-preview t)
   :config
   ;; <config>
 #+END_SRC
@@ -1524,4 +1544,57 @@ but it needs to check for ~format-all-mode~ in order to respect the
 #+BEGIN_SRC emacs-lisp
 (use-package wgsl-mode
   :ensure t)
+#+END_SRC
+** Web
+
+#+BEGIN_SRC emacs-lisp
+(use-package web-mode
+  :ensure t
+  :hook (html-ts-mode . web-mode))
+
+(add-hook 'web-mode-hook 'lsp)
+(add-hook 'css-ts-mode-hook 'lsp)
+(add-hook 'scss-mode-hook 'lsp)
+(add-hook 'js-ts-mode-hook 'lsp)
+(add-hook 'json-ts-mode-hook 'lsp)
+(add-hook 'typescript-ts-mode-hook 'lsp)
+
+(eval-after-load 'format-all '(progn
+  (add-hook 'web-mode-hook (lambda ()
+    (setq format-all-formatters
+      '(("HTML" (prettier))))))
+  (add-hook 'css-ts-mode-hook (lambda ()
+    (setq format-all-formatters
+      '(("CSS" (prettier))))))
+  (add-hook 'scss-mode-hook (lambda ()
+    (setq format-all-formatters
+      '(("SCSS" (prettier))))))
+  (add-hook 'js-ts-mode-hook (lambda ()
+    (setq format-all-formatters
+      '(("JavaScript" (prettier))))))
+  (add-hook 'json-ts-mode-hook (lambda ()
+    (setq format-all-formatters
+      '(("JSON" (prettier))))))
+  (add-hook 'typescript-mode-hook (lambda ()
+    (setq format-all-formatters
+      '(("TypeScript" (prettier))))))))
+#+END_SRC
+
+*** Tera / Jinja2
+
+Use Jinja2 stuff for Tera. It's close enough.
+
+#+BEGIN_SRC emacs-lisp
+(use-package jinja2-mode :ensure t)
+
+(eval-after-load 'format-all '(progn
+  (define-format-all-formatter djlint
+    (:executable "djlint")
+    (:install)
+    (:languages "HTML")
+    (:features)
+    (:format (format-all--buffer-easy executable "--reformat" "-")))
+  (add-hook 'jinja2-mode-hook (lambda ()
+    (setq format-all-formatters
+      '(("HTML" (djlint))))))))
 #+END_SRC

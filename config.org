@@ -12,7 +12,6 @@ Read this document in this repository's github.io page or in Emacs for the best 
 * TODO ASAP
 
 - Find a plugin to show me all my TODOs in all projects when I open Emacs
-- make all org docs fully expanded by default
 
 * Links
 
@@ -937,7 +936,7 @@ by flashing the current line.
          '(evil-scroll-up evil-scroll-down)))
 #+END_SRC
 
-* WIP Version control
+* Version control
 ** Magit
 
 #+BEGIN_SRC emacs-lisp
@@ -963,7 +962,7 @@ by flashing the current line.
   :init (global-diff-hl-mode))
 #+END_SRC
 
-* TODO Search
+* Search
 ** Symbols Outline
 
 Show an outline of all the symbols in a code file.
@@ -1305,10 +1304,11 @@ Flycheck is a modern on-the-fly syntax checking extension.
         :underline `(:color ,fg :style wave)
         :weight 'bold))
   )
-  
-  (set-flycheck-color "error"   'red    "#563949")
-  (set-flycheck-color "warning" 'yellow "#564f4b")
-  (set-flycheck-color "info"    'mauve  "#493f62")
+
+  ;                                     5% opacity
+  (set-flycheck-color "error"   'red    "#453243")
+  (set-flycheck-color "warning" 'yellow "#454144")
+  (set-flycheck-color "info"    'mauve  "#3c3653")
 )
   
 #+END_SRC
@@ -1373,33 +1373,14 @@ Eat is a terminal emulator. Works best with [[https://codeberg.org/akib/emacs-ea
 #+END_SRC
 
 * Languages
-** WIP English
+** English
 
 #+BEGIN_SRC emacs-lisp
 (use-package lsp-ltex-plus
   :ensure t
   :vc (:url "https://github.com/ltex-plus/emacs-ltex-plus" :rev :newest)
-  :init
-  (lsp-ltex-plus-enable-for-modes)
-  :custom
-  (lsp-ltex-plus-diagnostics-provider 'flycheck))
-#+END_SRC
-
-Custom LSP client def, sigh
-
-#+BEGIN_SRC emacs-lisp
-(use-package lsp-mode
-:config
-(lsp-register-client
- (make-lsp-client
-  :new-connection
-  (lsp-stdio-connection (lambda ()
-      (cons (executable-find "ltex-ls-plus") '("--endless"))))
- :activation-fn (lsp-activate-on "org")
- :initialized-fn
-   (lambda (workspace))
- :priority -1
- :server-id 'ltex-ls-plus)))
+  :init (lsp-ltex-plus-enable-for-modes)
+  :custom (lsp-ltex-plus-diagnostics-provider 'flycheck))
 #+END_SRC
 
 ** Emacs Lisp
@@ -1411,6 +1392,10 @@ Custom LSP client def, sigh
   :ensure t
   :config
   (add-hook 'emacs-lisp-mode-hook 'highlight-quoted-mode))
+
+(use-package srefactor
+  :ensure t
+  :vc (:url "https://github.com/tuhdo/semantic-refactor" :rev :newest))
 #+END_SRC
 
 ** Org
@@ -1419,8 +1404,6 @@ Org is like Markdown but a lot better.
 
 #+BEGIN_SRC emacs-lisp
 (use-package htmlize :ensure t)
-(use-package auctex :ensure t)
-(use-package cdlatex :ensure t)
 (use-package org
   :ensure t
   :after evil htmlize
@@ -1445,7 +1428,7 @@ Change the default appearance of org documents.
 #+BEGIN_SRC emacs-lisp
 (setq org-indent-mode-turns-on-hiding-stars nil
       org-startup-indented t
-      org-startup-folded 'content)
+      org-startup-folded 'nofold)
 
 (set-face-attribute 'org-block nil
   :foreground my:code-color))
@@ -1459,7 +1442,7 @@ Fix odd indentation behavior in src blocks.
       org-edit-src-content-indentation 0)
 #+END_SRC
 
-Change the ~html~ export preamble and postamble.
+Change the ~HTML~ export preamble and postamble.
 
 - TODO Figure out how to hide the title for HTML exports only.
 
@@ -1491,7 +1474,6 @@ Change the ~html~ export preamble and postamble.
     ("c" org-toggle-checkbox            "Checkbox")
     ("i" org-toggle-inline-images       "Inline images")
     ("n" org-toggle-narrow-to-subtree   "Narrow to subtree")
-    ("x" org-latex-preview              "LaTeX preview")
     ("p" org-toggle-pretty-entities     "Pretty entities"))
    "Insert"
    (("L" org-insert-link             "Link")
@@ -1526,6 +1508,24 @@ Change the ~html~ export preamble and postamble.
     ("=" (org-emphasize ?=)  "Verbatim")
     ("~" (org-emphasize ?~)  "Code")
     ("+" (org-emphasize ?+)  "Strike-through"))))
+#+END_SRC
+
+** LaTeX
+
+#+BEGIN_SRC emacs-lisp
+(use-package auctex :ensure t)
+(use-package cdlatex
+  :ensure t)
+#+END_SRC
+
+Automatically render LaTeX fragments, toggle them when the cursor enters them.
+
+#+BEGIN_SRC emacs-lisp
+(use-package org-fragtog
+  :ensure t
+  :hook (org-mode . org-fragtog-mode))
+
+(setq org-startup-with-latex-preview t)
 #+END_SRC
 
 ** Nix

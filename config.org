@@ -461,6 +461,35 @@ Working on a project with a lot of files can get annoying.
      (setq-local format-all-formatters '((,lang-name ,formatter)))))))
 #+END_SRC
 
+** Code actions
+
+Code actions are provided by lsp-mode and lsp-ltex-plus via different
+commands, this bridges the gap between them.
+
+#+BEGIN_SRC emacs-lisp
+(setq my:point-action-sources
+   '((:name "English (ltex-ls-plus)"
+      :action lsp-ltex-plus-actions
+      :check lsp-ltex-plus--actions-here)
+     (:name "Code actions (lsp-mode)"
+      :action lsp-ui-sideline-apply-code-actions
+      :check (lambda () (if (boundp 'lsp-ui-sideline--code-actions)
+			    lsp-ui-sideline--code-actions)))))
+
+(defun my:choose-point-action ()
+  (interactive)
+  (let (( sources (seq-remove (lambda (src) (null (funcall (plist-get src :check))))
+			      my:point-action-sources)))
+    (if sources
+      (if (= 1 (length sources))
+        (call-interactively (plist-get (car sources) :action))
+        (let* (( choice (completing-read "Action source: "
+                          (seq-map (lambda (src) (plist-get src :name)) sources))))
+	  (dolist (src sources)
+	    (if (string-equal choice (plist-get src :name))
+	      (call-interactively (plist-get src :action)))))))))
+#+END_SRC
+
 * Backups
 
 Prevent clobbering symlinks.
@@ -531,16 +560,16 @@ that define hydra(s):
 (pretty-hydra-define hydra:code
   (:exit t :idle 0.25)
   ("Action"
-   (("c" project-compile                    "Compile project")
-    ("." lsp-ui-sideline-apply-code-actions "Code actions at point")
-    ("/" comment-dwim                       "Comment code")
-    ("o" lsp-organize-imports               "Organize imports")
-    ("r" lsp-rename                         "Rename symbol"))
+   (("c" project-compile              "Compile project")
+    ("." my:choose-point-action       "Code actions at point")
+    ("/" comment-dwim                 "Comment code")
+    ("o" lsp-organize-imports         "Organize imports")
+    ("r" lsp-rename                   "Rename symbol"))
    "Find"
-   (("n" next-error                         "Next error"     :exit nil)
-    ("p" previous-error                     "Previous error" :exit nil)
-    ("d" lsp-ui-peek-find-definitions       "Definitions")
-    ("R" lsp-ui-peek-find-references        "References"))))
+   (("n" next-error                   "Next error"     :exit nil)
+    ("p" previous-error               "Previous error" :exit nil)
+    ("d" lsp-ui-peek-find-definitions "Definitions")
+    ("R" lsp-ui-peek-find-references  "References"))))
 #+END_SRC
 
 *** File
@@ -637,13 +666,13 @@ that define hydra(s):
       ("b"     hydra:buffer/body "Buffer")
       ("w"     hydra:window/body "Window"))
      "Shortcut"
-     (("SPC"   project-find-file                  "Find file in project")
-      ("`"     eat-other-window                   "Terminal")
-      ("/"     comment-dwim                       "Comment code")
-      ("."     lsp-ui-sideline-apply-code-actions "Code actions at point")
-      ("g"     magit                              "Open Magit")
-      ("s"     save-buffer                        "Save buffer")
-      ("q"     save-buffer-kill-emacs             "Quit")))))
+     (("SPC"   project-find-file      "Find file in project")
+      ("`"     eat-other-window       "Terminal")
+      ("/"     comment-dwim           "Comment code")
+      ("."     my:choose-point-action "Code actions at point")
+      ("g"     magit                  "Open Magit")
+      ("s"     save-buffer            "Save buffer")
+      ("q"     save-buffer-kill-emacs "Quit")))))
 ;; </config>
 #+END_SRC
 
@@ -751,8 +780,7 @@ Emacs that Evil does not cover properly by default.
 ** Orderless
 
 The orderless completion style divides the pattern into
-space-separated components and matches candidates that match all of
-the components in any order.
+space-separated components and matches candidates that match all the components in any order.
 
 #+BEGIN_SRC emacs-lisp
 (use-package orderless
@@ -1032,7 +1060,7 @@ The default indentation is hardcoded, so I have to replace the relevant function
   (evil-lookup-func 'my:open-docs))
 #+END_SRC
 
-* Try
+** Try
 
 Try allows you to try Emacs packages without installing them.
 
@@ -1264,29 +1292,25 @@ Flycheck is a modern on-the-fly syntax checking extension.
   (add-hook 'flycheck-error-list-mode (lambda ()
     (setq sublimity-attractive-centering-width 0)))
 
-  (set-face-background 'flycheck-annotate-info-background "#3b3855")
-  (set-face-attribute 'flycheck-annotate-info nil
-		      :foreground (catppuccin-get-color 'mauve)
-		      :background "#3b3855")
-  (set-face-attribute 'flycheck-info nil
-    :underline `(:color ,(catppuccin-get-color 'mauve) :style wave)
-    :weight 'bold)
-
-  (set-face-background 'flycheck-annotate-error-background "#413547")
-  (set-face-attribute 'flycheck-annotate-error nil
-		      :foreground (catppuccin-get-color 'red)
-		      :background "#413547")
-  (set-face-attribute 'flycheck-error nil
-    :underline `(:color ,(catppuccin-get-color 'red) :style wave)
-    :weight 'bold)
+  (defun set-flycheck-color (type fg-name bg)
+    (let ((fg (catppuccin-get-color fg-name))
+	  (problem-text (intern (concat "flycheck-" type)))
+	  (annotation-fg (intern (concat "flycheck-annotate-" type)))
+	  (annotation-bg (intern (concat "flycheck-annotate-" type "-background"))))
+      
+      (set-face-background annotation-bg bg)
+      (set-face-attribute annotation-fg nil
+        :foreground fg :background bg)
+      (set-face-attribute problem-text nil
+        :underline `(:color ,fg :style wave)
+        :weight 'bold))
+  )
   
-  (set-face-background 'flycheck-annotate-warning-background "#423a44")
-  (set-face-attribute 'flycheck-annotate-warning nil
-		      :foreground (catppuccin-get-color 'mauve)
-		      :background "#423a44")
-  (set-face-attribute 'flycheck-warning nil
-    :underline `(:color ,(catppuccin-get-color 'peach) :style wave)
-    :weight 'bold))
+  (set-flycheck-color "error"   'red    "#563949")
+  (set-flycheck-color "warning" 'yellow "#564f4b")
+  (set-flycheck-color "info"    'mauve  "#493f62")
+)
+  
 #+END_SRC
 
 ** Treesit-auto
@@ -1352,10 +1376,13 @@ Eat is a terminal emulator. Works best with [[https://codeberg.org/akib/emacs-ea
 ** WIP English
 
 #+BEGIN_SRC emacs-lisp
-(use-package lsp-mode
+(use-package lsp-ltex-plus
+  :ensure t
+  :vc (:url "https://github.com/ltex-plus/emacs-ltex-plus" :rev :newest)
+  :init
+  (lsp-ltex-plus-enable-for-modes)
   :custom
-  (lsp-markdown-server-command "ltex-ls-plus")
-  (lsp-markdown-server-command-args '("--endless")))
+  (lsp-ltex-plus-diagnostics-provider 'flycheck))
 #+END_SRC
 
 Custom LSP client def, sigh
@@ -1399,7 +1426,6 @@ Org is like Markdown but a lot better.
   :after evil htmlize
   :hook
   (org-mode . company-mode)
-  (org-mode . lsp)
   :custom
   (org-pretty-entities t)
   :config

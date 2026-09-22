@@ -167,7 +167,6 @@ Try to always split window vertically.
 (setq split-width-threshold 0)
 (setq split-height-threshold nil)
 #+END_SRC
-
 * Theme
 
 #+BEGIN_SRC emacs-lisp
@@ -532,7 +531,8 @@ that define hydra(s):
 (pretty-hydra-define hydra:code
   (:exit t :idle 0.25)
   ("Action"
-   (("." lsp-ui-sideline-apply-code-actions "Code actions at point")
+   (("c" project-compile                    "Compile project")
+    ("." lsp-ui-sideline-apply-code-actions "Code actions at point")
     ("/" comment-dwim                       "Comment code")
     ("o" lsp-organize-imports               "Organize imports")
     ("r" lsp-rename                         "Rename symbol"))
@@ -603,7 +603,7 @@ that define hydra(s):
       ("h" lsp-inlay-hints-mode "Inlay hints"))))
 #+END_SRC
 
-*** Find (Consult)
+*** Find
 
 #+BEGIN_SRC emacs-lisp
 (pretty-hydra-define hydra:find
@@ -612,6 +612,7 @@ that define hydra(s):
    (("<tab>" consult-imenu           "Imenu")
     ("i"     consult-imenu-multi     "Project Imenu")
     ("o"     consult-outline         "Outline")
+    ("h"     consult-org-heading     "Headings")
     ("b"     consult-buffer          "Buffer")
     ("g"     consult-ripgrep         "Ripgrep")
     ("e"     consult-flycheck        "Flycheck errors")
@@ -634,14 +635,13 @@ that define hydra(s):
       ("c"     hydra:code/body   "Code")
       ("f"     hydra:file/body   "File")
       ("b"     hydra:buffer/body "Buffer")
-      ("w"     hydra:window/body "Window")
-      ("a"     hydra:avy/body    "Avy")
-      ("g"     hydra:git/body    "Git"))
+      ("w"     hydra:window/body "Window"))
      "Shortcut"
      (("SPC"   project-find-file                  "Find file in project")
       ("`"     eat-other-window                   "Terminal")
       ("/"     comment-dwim                       "Comment code")
       ("."     lsp-ui-sideline-apply-code-actions "Code actions at point")
+      ("g"     magit                              "Open Magit")
       ("s"     save-buffer                        "Save buffer")
       ("q"     save-buffer-kill-emacs             "Quit")))))
 ;; </config>
@@ -922,11 +922,17 @@ by flashing the current line.
   (setq git-commit-style-convention-checks
         '(non-empty-second-line overlong-summary-line))
   (keymap-set transient-map "<escape>" #'transient-quit-one))
+#+END_SRC
 
-(pretty-hydra-define hydra:git
-  (:exit t :idle 0.25) 
-  ("Git"
-   (("g" magit "Open Magit"))))
+** diff-hl
+
+#+BEGIN_SRC emacs-lisp
+(use-package diff-hl
+  :ensure t
+  :hook
+  (magit-post-refresh-hook . diff-hl-magit-post-refresh)
+  (after-save-hook . magit-after-save-refresh-status)
+  :init (global-diff-hl-mode))
 #+END_SRC
 
 * TODO Search
@@ -1000,11 +1006,10 @@ The default indentation is hardcoded, so I have to replace the relevant function
 ** Consult
 
 #+BEGIN_SRC emacs-lisp
-(use-package consult
-  :ensure t)
-
-(use-package consult-flycheck
-  :ensure t)
+(use-package consult :ensure t)
+(use-package consult-flycheck :ensure t)
+(use-package hl-todo :ensure t)
+(use-package consult-todo :ensure t)
 #+END_SRC
 
 * Misc. packages
@@ -1121,7 +1126,7 @@ sensitive, so there's going to be some redundant patterns.
     ("WIP" . teal)                    ; WIP
     ("DONE" . green)                  ; DONE
     ("TEMP" . red)                    ; TEMP
-    ("\\(Example:?\\)" . blue)        ; Example Example:
+    ("\\(Examples?:?\\)" . blue)      ; Example Example: Examples Examples:
     ("\\(HACK:?\\)" . mauve)          ; HACK HACK:
     ("\\(Hack:?\\)" . mauve)          ; Hack Hack:
     ("\\(IMPORTANT[:!]?\\)" . peach)  ; IMPORTANT IMPORTANT! IMPORTANT:
@@ -1460,6 +1465,7 @@ Change the ~html~ export preamble and postamble.
     ("c" org-toggle-checkbox            "Checkbox")
     ("i" org-toggle-inline-images       "Inline images")
     ("n" org-toggle-narrow-to-subtree   "Narrow to subtree")
+    ("x" org-latex-preview              "LaTeX preview")
     ("p" org-toggle-pretty-entities     "Pretty entities"))
    "Insert"
    (("L" org-insert-link             "Link")

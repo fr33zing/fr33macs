@@ -12,13 +12,11 @@ Read this document in this repository's github.io page or in Emacs for the best 
 * TODO ASAP
 
 - Find a plugin to show me all my TODOs in all projects when I open Emacs
-- Make ltex-ls-plus less annoying (doesn't take new dictionary entries?)
-  - https://ltex-plus.github.io/ltex-plus/vscode-ltex-plus/setting-scopes-files.html#multi-scope-settings
 - make all org docs fully expanded by default
 
 * Links
 
-- Github.io page: https://fr33zing.github.io/fr33macs
+- GitHub.io page: https://fr33zing.github.io/fr33macs
 - Repository: https://github.com/fr33zing/fr33macs
   - [[https://github.com/fr33zing/fr33macs/blob/main/flake.nix][flake.nix]] - Nix flake
   - [[https://github.com/fr33zing/fr33macs/blob/main/config.org][config.org]] - Emacs configuration
@@ -48,7 +46,7 @@ flake.
 4. Substitute variables from Nix flake (including the export CSS) into
    tangled configuration.
 
-5. Build Emacs with tangled and subtituted configuration.
+5. Build Emacs with tangled and substituted configuration.
 
 6. Wrap Emacs binary to give it exclusive access to its external
    dependencies.
@@ -71,13 +69,13 @@ maintain compatibility with other tangle implementations.
 The function ~getnix~ is used to get a variable from the Nix flake,
 sort of like ~getenv~ but not exactly. It isn't actually a function
 that exists. Instead, [[file:util/substitute.py][~util/substitute.py~]] is used to substitute all
-instances of ~(getnix "variableName")~ with the appropriate Elisp
+instances of ~(getnix "variableName")~ with the appropriate elisp
 literal.
 
 ** Formatting
 *** Blank lines
 
-Different elements, (i.e. text, blocks, headings, etc), should be
+Different elements, (i.e. text, blocks, headings, etc.), should be
 separated with blank lines except between multiple headings. Omitting
 the blank line between multiple headings is necessary for heading
 visibility cycling to work as expected.
@@ -123,7 +121,7 @@ If you have the experimental features [[https://nixos.wiki/wiki/Nix_command][nix
 nix run github:fr33zing/fr33macs
 #+END_SRC
 
-If you don't have them enabled but you want to enable them, [[https://nixos.wiki/wiki/Flakes#Enable_flakes][click here]].
+If you don't have them enabled, but you want to enable them, [[https://nixos.wiki/wiki/Flakes#Enable_flakes][click here]].
 
 #+BEGIN_SRC shell :tangle no
 nix --experimental-features 'nix-command flakes' run github:fr33zing/fr33macs
@@ -338,7 +336,7 @@ Example:
 
 ** Windows
 
-This function was adapted from [[https://stackoverflow.com/questions/1832597][a StackOverflow answer]] by [[https://stackoverflow.com/users/1762276/zhro][Zhro]].
+This function was adapted from [[https://stackoverflow.com/questions/1832597][a Stack Overflow answer]] by [[https://stackoverflow.com/users/1762276/zhro][Zhro]].
 
 #+BEGIN_SRC emacs-lisp
 (defun my:delete-window-maybe-kill-buffer (&optional window)
@@ -441,14 +439,14 @@ Working on a project with a lot of files can get annoying.
   "Jump to the next error and open code actions"
   (interactive)
   (next-error)
-  (call-interactively 'lsp-ui-sideline-apply-code-actions)
+  (call-interactively 'my:choose-point-action)
   (save-buffer))
 
 (defun my:fix-previous-error ()
   "Jump to the previous error and open code actions"
   (interactive)
   (previous-error)
-  (call-interactively 'lsp-ui-sideline-apply-code-actions)
+  (call-interactively 'my:choose-point-action)
   (save-buffer))
 #+END_SRC
 
@@ -666,13 +664,15 @@ that define hydra(s):
       ("b"     hydra:buffer/body "Buffer")
       ("w"     hydra:window/body "Window"))
      "Shortcut"
-     (("SPC"   project-find-file      "Find file in project")
-      ("`"     eat-other-window       "Terminal")
-      ("/"     comment-dwim           "Comment code")
-      ("."     my:choose-point-action "Code actions at point")
-      ("g"     magit                  "Open Magit")
-      ("s"     save-buffer            "Save buffer")
-      ("q"     save-buffer-kill-emacs "Quit")))))
+     (("SPC"   project-find-file       "Find file in project")
+      ("`"     eat-other-window        "Terminal")
+      ("/"     comment-dwim            "Comment code")
+      ("."     my:choose-point-action  "Code actions at point")
+      (">"     my:fix-next-error       "Fix next error")
+      ("<"     my:fix-previous-error   "Fix previous error")
+      ("g"     magit                   "Open Magit")
+      ("s"     save-buffer             "Save buffer")
+      ("q"     save-buffers-kill-emacs "Save & quit")))))
 ;; </config>
 #+END_SRC
 
@@ -1040,7 +1040,7 @@ The default indentation is hardcoded, so I have to replace the relevant function
 (use-package consult-todo :ensure t)
 #+END_SRC
 
-* Misc. packages
+* Misc. Packages
 ** Eldoc
 
 #+BEGIN_SRC emacs-lisp
@@ -1104,7 +1104,7 @@ one of the characters then switches focus to that window.
 
 Solaire mode helps to visually distinguish "real" buffers (code
 buffers) from "unreal" buffers (popups, sidebars, log buffers,
-terminals, etc) by giving the latter a different background.
+terminals, etc.) by giving the latter a different background.
 
 #+BEGIN_SRC emacs-lisp
 (use-package solaire-mode
@@ -1116,7 +1116,7 @@ terminals, etc) by giving the latter a different background.
 
 ** Bufler
 
-Bufler is an ibuffer alternative.   
+Bufler is an ibuffer alternative.
 
 #+BEGIN_SRC emacs-lisp
 (use-package bufler
@@ -1145,8 +1145,8 @@ can be used as an extra-fancy alternative to ~hl-todo~.
   ;; <config>
 #+END_SRC
 
-Define some simple SVG tags. The regular expressions are case
-sensitive, so there's going to be some redundant patterns.
+Define some simple SVG tags. The regular expressions are
+case-sensitive, so there's going to be some redundant patterns.
 
 #+BEGIN_SRC emacs-lisp
   (defconst my:svg-tags '(
@@ -1461,7 +1461,7 @@ Fix odd indentation behavior in src blocks.
 
 Change the ~html~ export preamble and postamble.
 
-- TODO Figure out how to hide the title for html exports only.
+- TODO Figure out how to hide the title for HTML exports only.
 
 #+BEGIN_SRC emacs-lisp
 (setq org-export-with-title nil)

@@ -126,6 +126,16 @@ If you don't have them enabled, but you want to enable them, [[https://nixos.wik
 nix --experimental-features 'nix-command flakes' run github:fr33zing/fr33macs
 #+END_SRC
 
+** Permanent installation (Non-NixOS)
+
+If you have an existing Emacs installation... say goodbye.
+
+#+BEGIN_SRC shell :tangle no
+nix develop github:fr33zing/fr33macs --install
+#+END_SRC
+
+Same deal with the ~--experimental-features~ if you don't have flakes enabled.
+
 * Basic setup
 
 Disable unwanted UI elements and startup messages.
@@ -138,7 +148,7 @@ Disable unwanted UI elements and startup messages.
       use-dialog-box nil)
 #+END_SRC
 
-Enable some things which should probably be default.
+Enable some things which should probably be default
 
 #+BEGIN_SRC emacs-lisp
 (setq require-final-newline t)
@@ -164,6 +174,7 @@ Try to always split window vertically.
 (setq split-width-threshold 0)
 (setq split-height-threshold nil)
 #+END_SRC
+
 * Theme
 
 #+BEGIN_SRC emacs-lisp
@@ -186,7 +197,6 @@ Try to always split window vertically.
 Enable window dividers
 
 #+BEGIN_SRC emacs-lisp
-
 (set-face-foreground 'window-divider (catppuccin-get-color 'crust))
 (set-face-foreground 'window-divider-first-pixel nil)
 (set-face-foreground 'window-divider-last-pixel nil)
@@ -296,7 +306,7 @@ Example:
     (let (( n (max (/ (- (frame-width) sublimity-attractive-centering-width) 2) 0)))
       (message "bufler-list called with args %s" n)
       (setf header-line-format
-	    (concat (make-string n (string-to-char " ")) header-line-format)))))
+            (concat (make-string n (string-to-char " ")) header-line-format)))))
 
 (advice-add 'bufler-list :after #'my:advice:bufler-list-center-header)
 #+END_SRC
@@ -471,20 +481,20 @@ commands, this bridges the gap between them.
      (:name "Code actions (lsp-mode)"
       :action lsp-ui-sideline-apply-code-actions
       :check (lambda () (if (boundp 'lsp-ui-sideline--code-actions)
-			    lsp-ui-sideline--code-actions)))))
+                            lsp-ui-sideline--code-actions)))))
 
 (defun my:choose-point-action ()
   (interactive)
   (let (( sources (seq-remove (lambda (src) (null (funcall (plist-get src :check))))
-			      my:point-action-sources)))
+                              my:point-action-sources)))
     (if sources
       (if (= 1 (length sources))
         (call-interactively (plist-get (car sources) :action))
         (let* (( choice (completing-read "Action source: "
                           (seq-map (lambda (src) (plist-get src :name)) sources))))
-	  (dolist (src sources)
-	    (if (string-equal choice (plist-get src :name))
-	      (call-interactively (plist-get src :action)))))))))
+          (dolist (src sources)
+            (if (string-equal choice (plist-get src :name))
+              (call-interactively (plist-get src :action)))))))))
 #+END_SRC
 
 * Backups
@@ -990,8 +1000,8 @@ The default indentation is hardcoded, so I have to replace the relevant function
            (line (symbols-outline-node-line node))
            (lp (concat
                 " "
-                (make-string (* depth 3) ?\s) ; CHANGED 
-                (when (or (display-graphic-p) 
+                (make-string (* depth 3) ?\s) ; CHANGED
+                (when (or (display-graphic-p)
                           symbols-outline-use-nerd-icon-in-tui)
                   (concat (symbols-outline--get-kind-icon (or kind "null"))
                           " ")))))
@@ -1230,12 +1240,12 @@ Finally, enable the SVG tags globally.
   :delight
   :after eldoc
   :hook ((lsp-mode . lsp-diagnostics-mode)
-	 (lsp-mode . lsp-enable-which-key-integration)
-	 (lsp-mode . company-mode))
+         (lsp-mode . lsp-enable-which-key-integration)
+         (lsp-mode . company-mode))
   :custom
   (gc-cons-threshold 100000000)
   (read-process-output-max (* 1024 1024))
-  
+
   (lsp-enable-on-type-formatting nil)
   (lsp-auto-execute-action nil)
   (lsp-headerline-breadcrumb-enable nil)
@@ -1255,7 +1265,7 @@ Finally, enable the SVG tags globally.
   :custom
   (lsp-ui-peek-enable t)
 
-  (lsp-ui-sideline-show-hover nil) 
+  (lsp-ui-sideline-show-hover nil)
   (lsp-ui-sideline-show-diagnostics nil)
   (lsp-ui-sideline-show-code-actions t)
 
@@ -1267,7 +1277,7 @@ Finally, enable the SVG tags globally.
   (lsp-ui-doc-max-height 30)
   :config
   (set-face-foreground 'lsp-ui-sideline-code-action
-		       (catppuccin-get-color 'surface2))
+                       (catppuccin-get-color 'surface2))
   (define-key evil-normal-state-map (kbd "K") 'lsp-ui-doc-glance))
 
 #+END_SRC
@@ -1293,24 +1303,21 @@ Flycheck is a modern on-the-fly syntax checking extension.
 
   (defun set-flycheck-color (type fg-name bg)
     (let ((fg (catppuccin-get-color fg-name))
-	  (problem-text (intern (concat "flycheck-" type)))
-	  (annotation-fg (intern (concat "flycheck-annotate-" type)))
-	  (annotation-bg (intern (concat "flycheck-annotate-" type "-background"))))
-      
+          (problem-text (intern (concat "flycheck-" type)))
+          (annotation-fg (intern (concat "flycheck-annotate-" type)))
+          (annotation-bg (intern (concat "flycheck-annotate-" type "-background"))))
+
       (set-face-background annotation-bg bg)
       (set-face-attribute annotation-fg nil
         :foreground fg :background bg)
       (set-face-attribute problem-text nil
         :underline `(:color ,fg :style wave)
-        :weight 'bold))
-  )
+        :weight 'bold)))
 
   ;                                     5% opacity
   (set-flycheck-color "error"   'red    "#453243")
   (set-flycheck-color "warning" 'yellow "#454144")
-  (set-flycheck-color "info"    'mauve  "#3c3653")
-)
-  
+  (set-flycheck-color "info"    'mauve  "#3c3653"))
 #+END_SRC
 
 ** Treesit-auto
@@ -1370,6 +1377,24 @@ Eat is a terminal emulator. Works best with [[https://codeberg.org/akib/emacs-ea
 #+BEGIN_SRC emacs-lisp
 (use-package eat
     :ensure t)
+#+END_SRC
+
+** Ethan-wspace
+
+Tabs make me sick to my stomach.
+
+#+BEGIN_SRC emacs-lisp
+(setq indent-tabs-mode nil)
+(use-package ethan-wspace
+  :ensure t
+  :custom (mode-require-final-newline nil)
+  :config
+  (set-face-background 'ethan-wspace-face (catppuccin-get-color 'peach))
+  (global-ethan-wspace-mode 1))
+
+(global-whitespace-mode)
+(setq whitespace-style '(face tabs))
+(set-face-background 'whitespace-tab (catppuccin-get-color 'peach))
 #+END_SRC
 
 * Languages

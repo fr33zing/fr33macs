@@ -1269,18 +1269,25 @@ case-sensitive, so there's going to be some redundant patterns.
 
 #+BEGIN_SRC emacs-lisp
   (defconst my:svg-tags '(
-    ("TODO" . sapphire)               ; TODO
-    ("WIP" . teal)                    ; WIP
-    ("DONE" . green)                  ; DONE
-    ("TEMP" . red)                    ; TEMP
-    ("\\(Examples?:?\\)" . blue)      ; Example Example: Examples Examples:
-    ("\\(HACK:?\\)" . mauve)          ; HACK HACK:
-    ("\\(Hack:?\\)" . mauve)          ; Hack Hack:
-    ("\\(IMPORTANT[:!]?\\)" . peach)  ; IMPORTANT IMPORTANT! IMPORTANT:
-    ("\\(Important[:!]?\\)" . peach)  ; Important Important! Important:
-    ("WARN" . yellow)                 ; WARN
-    ("\\(Warning[:!]?\\)" . yellow))) ; Warning Warning! Warning:
+    ("\\(Example\\(?:s\\| [[:digit:]]+\\)?:?\\)" . blue)
+    ; Example Examples Example: Examples: Example 16 Example 32:
+
+    ("\\(Question\\(?:s\\| [[:digit:]]+\\)?:?\\)" . mauve)
+    ; Question Questions Question: Questions: Question 16 Question 32:
+
+    ("TODO"                 . sapphire) ; TODO
+    ("WIP"                  . teal)     ; WIP
+    ("DONE"                 . green)    ; DONE
+    ("TEMP"                 . red)      ; TEMP
+    ("\\(HACK:?\\)"         . mauve)    ; HACK HACK:
+    ("\\(Hack:?\\)"         . mauve)    ; Hack Hack:
+    ("\\(IMPORTANT[:!]?\\)" . peach)    ; IMPORTANT IMPORTANT! IMPORTANT:
+    ("\\(Important[:!]?\\)" . peach)    ; Important Important! Important:
+    ("WARN"                 . yellow)   ; WARN
+    ("\\(Warning[:!]?\\)"   . yellow))) ; Warning Warning! Warning:
 #+END_SRC
+
+Example
 
 Define the default style. It's necessary to use
 ~(getnix "tagsFontFamily")~ instead of ~(getnix "fontFamily")~ because my default

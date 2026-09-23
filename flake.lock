@@ -35,6 +35,22 @@
         "type": "github"
       }
     },
+    "kisses": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1662825345,
+        "narHash": "sha256-8RFp9ihSsHsVm/7Wr1Y6I1KswZoEf2TZNIVf2yQZCks=",
+        "owner": "jsilve24",
+        "repo": "kisses",
+        "rev": "d621a64043b00c997638dd388063bc8122a8e7a7",
+        "type": "github"
+      },
+      "original": {
+        "owner": "jsilve24",
+        "repo": "kisses",
+        "type": "github"
+      }
+    },
     "nixpkgs": {
       "locked": {
         "lastModified": 1789785513,
@@ -87,6 +103,7 @@
       "inputs": {
         "cargoMakedocs": "cargoMakedocs",
         "emacs-overlay": "emacs-overlay",
+        "kisses": "kisses",
         "nixpkgs": "nixpkgs_2"
       }
     }

@@ -11,7 +11,12 @@ Read this document in this repository's github.io page or in Emacs for the best 
 
 * TODO ASAP
 
+- Find out why LTEX errors aren't always working with flycheck
+- Find out why recursive load in emacs but not emacsclient
 - Find a plugin to show me all my TODOs in all projects when I open Emacs
+
+- After
+  - Check which external libs are actually needed
 
 * Links
 
@@ -175,6 +180,32 @@ Try to always split window vertically.
 (setq split-height-threshold nil)
 #+END_SRC
 
+* External libraries
+** Dash
+
+Dash is a library for dealing with lists.
+
+#+BEGIN_SRC emacs-lisp
+(use-package dash :ensure t)
+#+END_SRC
+
+** Map
+
+Map provides generic map-manipulation functions that work on alists,
+plists, hash-tables, and arrays.
+
+#+BEGIN_SRC emacs-lisp
+(use-package map)
+#+END_SRC
+
+** Subr-x
+
+Less commonly used functions that complement basic APIs.
+
+#+BEGIN_SRC emacs-lisp
+(use-package subr-x)
+#+END_SRC
+
 * Theme
 
 #+BEGIN_SRC emacs-lisp
@@ -231,29 +262,75 @@ Enable window dividers
                     :background (catppuccin-get-color 'surface2))
 #+END_SRC
 
-** Dash
-
-Dash is a library for dealing with lists.
+* Startup screen
 
 #+BEGIN_SRC emacs-lisp
-(use-package dash :ensure t)
-#+END_SRC
+(setq fr33macs-banner "
+-----------------------------------------------------------------------------
+---@@@@@@@@-@@@@@@@--@@@@@@--@@@@@@--@@@@@@@@@@---@@@@@@---@@@@@@@--@@@@@@---
+---@@!------@@!--@@@-----@@!-----@@!-@@!-@@!-@@!-@@!--@@@-!@@------!@@-------
+---@!!!:!---@!@!!@!---@!!!:---@!!!:--@!!-!!@-@!@-@!@!@!@!-!@!-------!@@!!----
+---!!:------!!:-:!!------!!:-----!!:-!!:-----!!:-!!:--!!!-:!!----------!:!---
+---:--------:---:-:-:::-::--:::-::---:------:----:---:-:--::-::-:-::::-:-----
+-----------------------------------------------------------------------------
 
-** Map
+This needs to recenter when the width changes.
 
-Map provides generic map-manipulation functions that work on alists,
-plists, hash-tables, and arrays.
+")
 
-#+BEGIN_SRC emacs-lisp
-(use-package map)
-#+END_SRC
+(define-derived-mode fr33macs-splash-mode
+  special-mode "fr33macs splash"
+  "it's my splash screen"
+    ;(cursor-intangible-mode 1)
+   (hl-line-mode -1)
+   (display-line-numbers-mode -1)
+  )
 
-** Subr-x
+(defun fr33macs-make-splash-buffer ()
+  (interactive)
+  (let ((inhibit-read-only t))
+  (let* ((splash-buffer (get-buffer-create "*splash*"))
+         (banner fr33macs-banner))
+    (with-current-buffer splash-buffer
+      (if (string= major-mode "fr33macs-splash-mode") (erase-buffer) nil)
 
-Less commonly used functions that complement basic APIs.
+      (message "%s --- TODO" (window-width (selected-window)))
 
-#+BEGIN_SRC emacs-lisp
-(use-package subr-x)
+      (setq banner (mapconcat (lambda (line)
+        (let ((padding (make-string (/ (- 80 (length line)) 2) ?\s)))
+          (concat ;(propertize "" 'invisible t)
+            padding line padding "\n")))
+        (string-lines banner)))
+
+      (let ((banner-chars (string-to-vector banner)))
+        (dotimes (i (length banner))
+          (let* ((c (aref banner-chars i))
+               (colors (cond ((char-equal c ?@) (cons "#a6da95" "#181825"))
+                             ((char-equal c ?!) (cons "#8dc67a" "#181825"))
+                             ((char-equal c ?:) (cons "#5a9049" "#1e2228"))
+                             ((char-equal c ?-) (cons "#181825" "#181825")))))
+          (if colors
+            (put-text-property i (1+ i) 'font-lock-face
+              `(:foreground ,(car colors)
+                :background ,(cdr colors))
+              banner)))))
+
+      ;; (insert (propertize banner 'read-only t
+      ;;                            'comment t
+      ;;                            'rear-nonsticky t
+      ;;                            'front-sticky t
+      ;;                            'cursor-intangible t
+      ;;                            'intangible t
+      ;;                            'display-line-numbers-disable t))
+
+      (insert banner)
+      (fr33macs-splash-mode)
+
+      (pop-to-buffer-same-window splash-buffer)
+    splash-buffer))))
+
+
+(setq initial-buffer-choice 'fr33macs-make-splash-buffer)
 #+END_SRC
 
 * My library
@@ -470,8 +547,8 @@ Working on a project with a lot of files can get annoying.
 
 ** Code actions
 
-Code actions are provided by lsp-mode and lsp-ltex-plus via different
-commands, this bridges the gap between them.
+Code actions are provided by ~lsp-mode~ and ~lsp-ltex-plus~ via
+different commands, this bridges the gap between them.
 
 #+BEGIN_SRC emacs-lisp
 (setq my:point-action-sources
@@ -480,17 +557,19 @@ commands, this bridges the gap between them.
       :check lsp-ltex-plus--actions-here)
      (:name "Code actions (lsp-mode)"
       :action lsp-ui-sideline-apply-code-actions
-      :check (lambda () (if (boundp 'lsp-ui-sideline--code-actions)
-                            lsp-ui-sideline--code-actions)))))
+      :check (lambda () lsp-ui-sideline--code-actions))))
+
+(defun my:--action-source-p (src)
+ (let ((inhibit-message t))
+   (not (null (ignore-errors (funcall (plist-get src :check)))))))
 
 (defun my:choose-point-action ()
   (interactive)
-  (let (( sources (seq-remove (lambda (src) (null (funcall (plist-get src :check))))
-                              my:point-action-sources)))
+  (let (( sources (seq-filter #'my:--action-source-p my:point-action-sources)))
     (if sources
       (if (= 1 (length sources))
         (call-interactively (plist-get (car sources) :action))
-        (let* (( choice (completing-read "Action source: "
+        (let (( choice (completing-read "Action source: "
                           (seq-map (lambda (src) (plist-get src :name)) sources))))
           (dolist (src sources)
             (if (string-equal choice (plist-get src :name))
@@ -527,6 +606,7 @@ Delete excess backup versions silently.
 #+END_SRC
 
 * Key bindings
+
 ** Hydras
 
 Pretty-hydra is used to create action menus. I've chosen to use hydras
@@ -1287,6 +1367,26 @@ Finally, enable the SVG tags globally.
 Flycheck is a modern on-the-fly syntax checking extension.
 
 #+BEGIN_SRC emacs-lisp
+(defun my:flycheck-annotate-format (err &optional include-snippet)
+  (car (split-string
+    (or (flycheck-error-message err)
+      (format "Unknown %S" (flycheck-error-level err)))
+    "\n")))
+
+(defun my:set-flycheck-color (type fg-name bg)
+  (let ((fg (catppuccin-get-color fg-name))
+        (problem-text (intern (concat "flycheck-" type)))
+        (annotation-fg (intern (concat "flycheck-annotate-" type)))
+        (annotation-bg (intern (concat "flycheck-annotate-" type "-background"))))
+
+    (set-face-background annotation-bg bg)
+    (set-face-attribute annotation-fg nil
+      :foreground fg :background bg)
+    (set-face-attribute problem-text nil
+      :underline `(:color ,fg :style wave)
+      :weight 'bold)))
+
+
 (use-package flycheck
   :ensure t
   :custom
@@ -1294,6 +1394,7 @@ Flycheck is a modern on-the-fly syntax checking extension.
   (flycheck-annotate-current-line-style 'below)
   (flycheck-annotate-background t)
   (flycheck-indication-mode nil)
+  (flycheck-annotate-format-function #'my:flycheck-annotate-format)
   :init
   (global-flycheck-mode)
   (global-flycheck-annotate-mode)
@@ -1301,23 +1402,10 @@ Flycheck is a modern on-the-fly syntax checking extension.
   (add-hook 'flycheck-error-list-mode (lambda ()
     (setq sublimity-attractive-centering-width 0)))
 
-  (defun set-flycheck-color (type fg-name bg)
-    (let ((fg (catppuccin-get-color fg-name))
-          (problem-text (intern (concat "flycheck-" type)))
-          (annotation-fg (intern (concat "flycheck-annotate-" type)))
-          (annotation-bg (intern (concat "flycheck-annotate-" type "-background"))))
-
-      (set-face-background annotation-bg bg)
-      (set-face-attribute annotation-fg nil
-        :foreground fg :background bg)
-      (set-face-attribute problem-text nil
-        :underline `(:color ,fg :style wave)
-        :weight 'bold)))
-
   ;                                     5% opacity
-  (set-flycheck-color "error"   'red    "#453243")
-  (set-flycheck-color "warning" 'yellow "#454144")
-  (set-flycheck-color "info"    'mauve  "#3c3653"))
+  (my:set-flycheck-color "error"   'red    "#453243")
+  (my:set-flycheck-color "warning" 'yellow "#454144")
+  (my:set-flycheck-color "info"    'mauve  "#3c3653"))
 #+END_SRC
 
 ** Treesit-auto
@@ -1343,9 +1431,11 @@ tree-sitter major modes.
 
 ** Dimmer
 
+Naughty package!
+
 #+BEGIN_SRC emacs-lisp
 (use-package dimmer
-  :vc "https://github.com/chrhansk/dimmer.el.git"
+  :vc (:src "https://github.com/chrhansk/dimmer.el.git" :rev :newest)
   :ensure t
   :init
   (dimmer-configure-which-key)
@@ -1385,11 +1475,13 @@ Tabs make me sick to my stomach.
 
 #+BEGIN_SRC emacs-lisp
 (setq indent-tabs-mode nil)
+
 (use-package ethan-wspace
   :ensure t
-  :custom (mode-require-final-newline nil)
   :config
   (set-face-background 'ethan-wspace-face (catppuccin-get-color 'peach))
+  (setq require-final-newline nil)
+  (setq mode-require-final-newline nil)
   (global-ethan-wspace-mode 1))
 
 (global-whitespace-mode)
@@ -1405,7 +1497,9 @@ Tabs make me sick to my stomach.
   :ensure t
   :vc (:url "https://github.com/ltex-plus/emacs-ltex-plus" :rev :newest)
   :init (lsp-ltex-plus-enable-for-modes)
-  :custom (lsp-ltex-plus-diagnostics-provider 'flycheck))
+  :custom
+  (lsp-ltex-plus-check-programming-languages t)
+  (lsp-ltex-plus-diagnostics-provider 'flycheck))
 #+END_SRC
 
 ** Emacs Lisp
@@ -1417,10 +1511,6 @@ Tabs make me sick to my stomach.
   :ensure t
   :config
   (add-hook 'emacs-lisp-mode-hook 'highlight-quoted-mode))
-
-(use-package srefactor
-  :ensure t
-  :vc (:url "https://github.com/tuhdo/semantic-refactor" :rev :newest))
 #+END_SRC
 
 ** Org
@@ -1434,8 +1524,6 @@ Org is like Markdown but a lot better.
   :after evil htmlize
   :hook
   (org-mode . company-mode)
-  :custom
-  (org-pretty-entities t)
   :config
   ;; <config>
 #+END_SRC
@@ -1599,6 +1687,7 @@ Syntax checking and linting is provided by Shellcheck via flycheck.
   :hook (rustic-mode . company-mode)
   :custom
   (rustic-rustfmt-config-alist '(("edition" . "2021")))
+  (rustic-format-display-method #'ignore)
   (rustic-format-trigger 'on-save)
   (rustic-format-on-save-method #'my:rust-format-on-save)
   (add-hook 'server-after-make-frame-hook #'catppuccin-reload)

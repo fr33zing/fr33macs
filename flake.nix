@@ -6,6 +6,11 @@
       url = "github:Bunogi/cargo-makedocs";
       flake = false;
     };
+
+    kisses = {
+      url = "github:jsilve24/kisses";
+      flake = false;
+    };
   };
 
   outputs =
@@ -82,6 +87,13 @@
           #   src = inputs.corfuCandidateOverlay;
           #   packageRequires = [ epkgs.corfu ];
           # })
+          (epkgs.trivialBuild {
+            pname = "kisses";
+            version = "0.0.2";
+            src = inputs.kisses;
+            packageRequires = [ epkgs.dash ];
+          })
+
         ];
 
         #

@@ -14,6 +14,8 @@ Read this document in this repository's github.io page or in Emacs for the best 
 - Find out why LTEX errors aren't always working with flycheck
 - Find out why recursive load in emacs but not emacsclient
 - Find a plugin to show me all my TODOs in all projects when I open Emacs
+- Disable LTEX in read only
+- Ask y/n instead of yes/no
 
 - After
   - Check which external libs are actually needed
@@ -365,6 +367,7 @@ Example:
 
 #+BEGIN_SRC emacs-lisp
 (defun my:advice:always-force-save (&rest _)
+  (my:fix-whitespace)
   (set-buffer-modified-p t))
 
 (advice-add 'save-buffer :before #'my:advice:always-force-save)
@@ -1129,6 +1132,33 @@ The default indentation is hardcoded, so I have to replace the relevant function
 (use-package consult-todo :ensure t)
 #+END_SRC
 
+* Whitespace
+
+Tabs make me sick to my stomach.
+
+#+BEGIN_SRC emacs-lisp
+(setq indent-tabs-mode nil)
+(setq whitespace-style '(face tabs trailing empty missing-newline-at-eof))
+(global-whitespace-mode)
+
+(eval-after-load 'whitespace '(let (( ws-color (catppuccin-get-color 'peach) ))
+  (dolist (face '(whitespace-tab trailing-whitespace))
+    (set-face-attribute face nil
+      :background ws-color :box `(:color ,ws-color)))))
+#+END_SRC
+
+Try to fix some things automatically.
+
+#+BEGIN_SRC emacs-lisp
+(defun my:fix-whitespace ()
+  (save-excursion
+    (untabify 0 (buffer-size))
+    (delete-trailing-whitespace 0 (buffer-size))
+    (flush-lines "^\s-*$" 0 (buffer-size))))
+
+(add-hook 'before-save-hook #'my:fix-whitespace)
+#+END_SRC
+
 * Misc. Packages
 ** Eldoc
 
@@ -1467,26 +1497,6 @@ Eat is a terminal emulator. Works best with [[https://codeberg.org/akib/emacs-ea
 #+BEGIN_SRC emacs-lisp
 (use-package eat
     :ensure t)
-#+END_SRC
-
-** Ethan-wspace
-
-Tabs make me sick to my stomach.
-
-#+BEGIN_SRC emacs-lisp
-(setq indent-tabs-mode nil)
-
-(use-package ethan-wspace
-  :ensure t
-  :config
-  (set-face-background 'ethan-wspace-face (catppuccin-get-color 'peach))
-  (setq require-final-newline nil)
-  (setq mode-require-final-newline nil)
-  (global-ethan-wspace-mode 1))
-
-(global-whitespace-mode)
-(setq whitespace-style '(face tabs))
-(set-face-background 'whitespace-tab (catppuccin-get-color 'peach))
 #+END_SRC
 
 * Languages

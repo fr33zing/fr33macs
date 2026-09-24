@@ -644,6 +644,31 @@ that define hydra(s):
 - [[*Magit][Version Control > Magit]]
 - [[*Rust][Languages > Rust]]
 
+*** Help
+
+#+BEGIN_SRC emacs-lisp
+(pretty-hydra-define hydra:help
+  (:exit t :idle 0.25)
+  ("Describe"
+   (("v" describe-variable "Variable")
+    ("f" describe-function "Function")
+    ("s" describe-face     "Face")
+    ("m" describe-mode     "Mode")
+    ("k" describe-key      "Key"))
+   "Find"
+   (("V" find-variable        "Variable")
+    ("F" find-function        "Function")
+    ("S" find-face-definition "Face"))
+   "Evaluate"
+   (("e" eval-expression "Expression")
+    ("r" eval-region     "Region")
+    ("b" eval-buffer     "Buffer")
+    ("d" eval-defun      "Defun")
+    ("x" eval-last-sexp  "Sexp"))
+   "Set"
+   (("=" set-variable   "Variable"))))
+#+END_SRC
+
 *** Code
 
 #+BEGIN_SRC emacs-lisp
@@ -682,11 +707,13 @@ that define hydra(s):
   (pretty-hydra-define hydra:buffer
     (:exit t :idle 0.25)
     ("Switch"
-     (("b" consult-buffer       "Quick switch")
-      ("i" bufler-list          "List buffers")
-      ("]" next-buffer          "Next buffer"     :exit nil)
-      ("[" previous-buffer      "Previous buffer" :exit nil)
-      ("l" my:last-buffer       "Last buffer"))
+     (("b" consult-buffer                 "Quick switch")
+      ("i" bufler-list                    "List buffers")
+      ("]" next-buffer                    "Next buffer"     :exit nil)
+      ("[" previous-buffer                "Previous buffer" :exit nil)
+      ("l" my:last-buffer                 "Last buffer")
+      ("m" (switch-to-buffer "*Messages") "Messages")
+      ("S" (scratch-buffer)               "Scratch"))
      "Actions"
      (("s" save-buffer         "Save buffer")
       ("k" kill-current-buffer "Kill buffer")
@@ -717,9 +744,9 @@ that define hydra(s):
   (pretty-hydra-define hydra:toggle
     (:exit t :idle 0.25)
     ("Toggle"
-     (("w" whitespace-mode      "Whitespace visualization")
-      ("f" format-all-mode      "Format on save")
-      ("h" lsp-inlay-hints-mode "Inlay hints"))))
+     (("w" visual-line-mode           "Line wrapping" :toggle t)
+      ("h" lsp-inlay-hints-mode       "LSP: Inlay hints" :toggle t)
+      ("p" org-toggle-pretty-entities "Org: Pretty entities" :toggle org-pretty-entities))))
 #+END_SRC
 
 *** Find
@@ -754,7 +781,8 @@ that define hydra(s):
       ("c"     hydra:code/body   "Code")
       ("f"     hydra:file/body   "File")
       ("b"     hydra:buffer/body "Buffer")
-      ("w"     hydra:window/body "Window"))
+      ("w"     hydra:window/body "Window")
+      ("h"     hydra:help/body   "Help & more"))
      "Shortcut"
      (("SPC"   project-find-file       "Find file in project")
       ("`"     eat-other-window        "Terminal")
@@ -1608,7 +1636,7 @@ Change the ~HTML~ export preamble and postamble.
     ("c" org-toggle-checkbox            "Checkbox")
     ("i" org-toggle-inline-images       "Inline images")
     ("n" org-toggle-narrow-to-subtree   "Narrow to subtree")
-    ("p" org-toggle-pretty-entities     "Pretty entities"))
+    ("p" org-toggle-pretty-entities     "Pretty entities" :toggle org-pretty-entities))
    "Insert"
    (("L" org-insert-link             "Link")
     ("s" org-store-link              "(Store link to here)")

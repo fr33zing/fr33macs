@@ -87,13 +87,6 @@
           #   src = inputs.corfuCandidateOverlay;
           #   packageRequires = [ epkgs.corfu ];
           # })
-          (epkgs.trivialBuild {
-            pname = "kisses";
-            version = "0.0.2";
-            src = inputs.kisses;
-            packageRequires = [ epkgs.dash ];
-          })
-
         ];
 
         #
@@ -276,7 +269,7 @@
                 'emacs      => ${emacs}' \
                 'config.org => ${config.output}' \
                 'install    => ${installFiles}' \
-                'Use command `install-emacs` to install on non-NixOS systems.' 
+                'Use command `install-emacs` to install on non-NixOS systems.'
             '';
             installPhase = "install-emacs";
           };

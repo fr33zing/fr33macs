@@ -267,7 +267,7 @@ Enable window dividers
 * Startup screen
 
 #+BEGIN_SRC emacs-lisp
-(setq fr33macs-banner "
+(setq fr33macs-banner (concat "
 -----------------------------------------------------------------------------
 ---@@@@@@@@-@@@@@@@--@@@@@@--@@@@@@--@@@@@@@@@@---@@@@@@---@@@@@@@--@@@@@@---
 ---@@!------@@!--@@@-----@@!-----@@!-@@!-@@!-@@!-@@!--@@@-!@@------!@@-------
@@ -276,15 +276,17 @@ Enable window dividers
 ---:--------:---:-:-:::-::--:::-::---:------:----:---:-:--::-::-:-::::-:-----
 -----------------------------------------------------------------------------
 
-This needs to recenter when the width changes.
+"
+(propertize "PRESS SPACE" 'font-lock-face '(:foreground "#c6a0f6"))
+))
 
-")
 (setq fr33macs-resize-timer nil)
 (setq fr33macs-last-width 0)
 
 (define-derived-mode fr33macs-splash-mode
   special-mode "fr33macs splash"
   "it's my splash screen"
+    (setq major-mode 'fr33macs-splash-mode)
     (hl-line-mode -1)
     (display-line-numbers-mode -1))
 
@@ -296,23 +298,24 @@ This needs to recenter when the width changes.
     (fr33macs-resize-timer-start)
     splash-buffer))
 
-(defun fr33macs-resize-timer-start ()
+(defun fr33macs-resize-timer-stop ()
+  (setq fr33macs-last-width 0)
   (if (and (boundp 'fr33macs-resize-timer)
            (timerp fr33macs-resize-timer))
-    (cancel-timer fr33macs-resize-timer))
+    (cancel-timer fr33macs-resize-timer)))
+
+(defun fr33macs-resize-timer-start ()
+  (fr33macs-resize-timer-stop)
   (setq fr33macs-resize-timer
-        (run-with-timer 1 1 #'fr33macs-resize-timer-tick)))
+        (run-with-timer 2 0.5 #'fr33macs-resize-timer-tick)))
 
 (defun fr33macs-resize-timer-tick ()
   (if (not (string= major-mode "fr33macs-splash-mode"))
-    (if (and (boundp 'fr33macs-resize-timer)
-             (timerp fr33macs-resize-timer))
-      (cancel-timer fr33macs-resize-timer)))
+    (fr33macs-resize-timer-stop))
     (fr33macs-maybe-redraw-splash))
 
 (defun fr33macs-maybe-redraw-splash (&rest _)
   (interactive)
-
   (when-let* ((buffer (get-buffer "*splash*"))
               (width (window-body-width (get-buffer-window buffer)))
               ((not (= fr33macs-last-width width)))
@@ -320,7 +323,7 @@ This needs to recenter when the width changes.
     (setq fr33macs-last-width width)
     (with-current-buffer buffer
       (let ((inhibit-read-only t))
-        (if (string= major-mode "fr33macs-splash-mode") (erase-buffer) nil) ; maybe shorten
+        (erase-buffer)
 
         (setq banner (mapconcat (lambda (line)
           (let* ((len (length line))

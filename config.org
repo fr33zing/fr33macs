@@ -279,60 +279,80 @@ Enable window dividers
 This needs to recenter when the width changes.
 
 ")
+(setq fr33macs-resize-timer nil)
+(setq fr33macs-last-width 0)
 
 (define-derived-mode fr33macs-splash-mode
   special-mode "fr33macs splash"
   "it's my splash screen"
-    ;(cursor-intangible-mode 1)
-   (hl-line-mode -1)
-   (display-line-numbers-mode -1)
-  )
+    (hl-line-mode -1)
+    (display-line-numbers-mode -1))
 
-(defun fr33macs-make-splash-buffer ()
+(defun fr33macs-splash-buffer ()
   (interactive)
-  (let ((inhibit-read-only t))
-  (let* ((splash-buffer (get-buffer-create "*splash*"))
-         (banner fr33macs-banner))
-    (with-current-buffer splash-buffer
-      (if (string= major-mode "fr33macs-splash-mode") (erase-buffer) nil)
+  (let* ((splash-buffer (get-buffer-create "*splash*")))
+    (fr33macs-maybe-redraw-splash)
+    (pop-to-buffer-same-window splash-buffer)
+    (fr33macs-resize-timer-start)
+    splash-buffer))
 
-      (message "%s --- TODO" (window-width (selected-window)))
+(defun fr33macs-resize-timer-start ()
+  (if (and (boundp 'fr33macs-resize-timer)
+           (timerp fr33macs-resize-timer))
+    (cancel-timer fr33macs-resize-timer))
+  (setq fr33macs-resize-timer
+        (run-with-timer 1 1 #'fr33macs-resize-timer-tick)))
 
-      (setq banner (mapconcat (lambda (line)
-        (let ((padding (make-string (/ (- 80 (length line)) 2) ?\s)))
-          (concat ;(propertize "" 'invisible t)
-            padding line padding "\n")))
-        (string-lines banner)))
+(defun fr33macs-resize-timer-tick ()
+  (if (not (string= major-mode "fr33macs-splash-mode"))
+    (if (and (boundp 'fr33macs-resize-timer)
+             (timerp fr33macs-resize-timer))
+      (cancel-timer fr33macs-resize-timer)))
+    (fr33macs-maybe-redraw-splash))
 
-      (let ((banner-chars (string-to-vector banner)))
-        (dotimes (i (length banner))
-          (let* ((c (aref banner-chars i))
-               (colors (cond ((char-equal c ?@) (cons "#a6da95" "#181825"))
-                             ((char-equal c ?!) (cons "#8dc67a" "#181825"))
-                             ((char-equal c ?:) (cons "#5a9049" "#1e2228"))
-                             ((char-equal c ?-) (cons "#181825" "#181825")))))
-          (if colors
-            (put-text-property i (1+ i) 'font-lock-face
-              `(:foreground ,(car colors)
-                :background ,(cdr colors))
-              banner)))))
+(defun fr33macs-maybe-redraw-splash (&rest _)
+  (interactive)
 
-      ;; (insert (propertize banner 'read-only t
-      ;;                            'comment t
-      ;;                            'rear-nonsticky t
-      ;;                            'front-sticky t
-      ;;                            'cursor-intangible t
-      ;;                            'intangible t
-      ;;                            'display-line-numbers-disable t))
+  (when-let* ((buffer (get-buffer "*splash*"))
+              (width (window-body-width (get-buffer-window buffer)))
+              ((not (= fr33macs-last-width width)))
+              (banner fr33macs-banner))
+    (setq fr33macs-last-width width)
+    (with-current-buffer buffer
+      (let ((inhibit-read-only t))
+        (if (string= major-mode "fr33macs-splash-mode") (erase-buffer) nil) ; maybe shorten
 
-      (insert banner)
-      (fr33macs-splash-mode)
+        (setq banner (mapconcat (lambda (line)
+          (let* ((len (length line))
+                 (padding-width (max 0 (floor (/ (- width len) 2))))
+                 (padding (make-string padding-width ?\s)))
+            (if (<= width len)
+              (let (( trim (/ (- len width) 2) ))
+                (setq line (substring line trim (- len 1 trim)))))
+            (concat padding line "\n")))
+          (string-lines banner)))
 
-      (pop-to-buffer-same-window splash-buffer)
-    splash-buffer))))
+        (let ((banner-chars (string-to-vector banner)))
+          (dotimes (i (length banner))
+            (let* ((c (aref banner-chars i))
+                 (colors (cond ((char-equal c ?@) (cons "#a6da95" "#181825"))
+                               ((char-equal c ?!) (cons "#8dc67a" "#181825"))
+                               ((char-equal c ?:) (cons "#5a9049" "#1e2228"))
+                               ((char-equal c ?-) (cons "#181825" "#181825")))))
+            (if colors
+              (put-text-property i (1+ i) 'font-lock-face
+                `(:foreground ,(car colors)
+                  :background ,(cdr colors))
+                banner)))))
 
+        (save-excursion
+          (insert banner))
 
-(setq initial-buffer-choice 'fr33macs-make-splash-buffer)
+        (fr33macs-splash-mode)))))
+
+(add-hook 'window-size-change-functions 'fr33macs-maybe-redraw-splash)
+
+(setq initial-buffer-choice 'fr33macs-splash-buffer)
 #+END_SRC
 
 * My library
@@ -707,13 +727,13 @@ that define hydra(s):
   (pretty-hydra-define hydra:buffer
     (:exit t :idle 0.25)
     ("Switch"
-     (("b" consult-buffer                 "Quick switch")
-      ("i" bufler-list                    "List buffers")
-      ("]" next-buffer                    "Next buffer"     :exit nil)
-      ("[" previous-buffer                "Previous buffer" :exit nil)
-      ("l" my:last-buffer                 "Last buffer")
-      ("m" (switch-to-buffer "*Messages") "Messages")
-      ("S" (scratch-buffer)               "Scratch"))
+     (("b" consult-buffer                  "Quick switch")
+      ("i" bufler-list                     "List buffers")
+      ("]" next-buffer                     "Next buffer"     :exit nil)
+      ("[" previous-buffer                 "Previous buffer" :exit nil)
+      ("l" my:last-buffer                  "Last buffer")
+      ("m" (switch-to-buffer "*Messages*") "Messages")
+      ("S" (scratch-buffer)                "Scratch"))
      "Actions"
      (("s" save-buffer         "Save buffer")
       ("k" kill-current-buffer "Kill buffer")

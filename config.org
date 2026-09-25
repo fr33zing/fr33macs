@@ -266,38 +266,15 @@ Enable window dividers
 * Startup screen
 
 #+BEGIN_SRC emacs-lisp
-(setq fr33macs-banner (concat
-(fr33macs-color-banner "
-_XZZZZZZY__XZZZZZZY__XZZZZZY__XZZZZZY__XZZZZZZZZZY__XZZZZZZY__XZZZZZZY__XZZZZZY_
-A-@@@@@@----@@@@@@----@@@@@----@@@@@----@@@@@@@@@----@@@@@@----@@@@@@----@@@@@-B
--@@@@@@@@--@@@@@@@@--@@@@@@@--@@@@@@@--@@@@@@@@@@@--@@@@@@@@--@@@@@@@@--@@@@@@@-
--@@!-------@@!--@@@------@@@------@@@--@@!-@@!-@@!--@@!--@@@--!@@------!@@------
--!@!-------!@!--@!@------@!@------@!@--!@!-!@!-!@!--!@!--@!@--!@!-------!@!-----
--@!!!:!:---@!@!!@!---@!@!!@---@!@!!@---@!!-!!@-@!@--@!@!@!@!--!@!-------!!@@!!--
--!!!!!::---!!@!@!----!!@!@!---!!@!@!---!@!---!-!@!--!!!@!!!!--!!!--------!!@!!!-
--!!:-------!!:-:!!-------!!:------!!:--!!:-----!!:--!!:--!!!--:!!-----------!:!-
--:!:-------:!:--!:!------:!:------:!:--:!:-----:!:--:!:--!:!--:!:-----------!:!-
--.::--y_x--::.--:::--::.::::--::.::::--:::-y_x-::.--::---:::--.:::..::--::::.::-
--.:.--___--.:.--:.:---:.:.:----:.:.:---.:.-___-:..--.:---:.:---::.::.:--::.:.:-C
-xzzzzy___xzzzzzzzzzy_xzzzzzy__xzzzzzy_xzzzy___xzzzzzzzy_xzzzy_xzzzzzzzzzzzzzzzy_
-")
-"\n"
-(fr33macs-color-banner "XZZZZZZZZZZZZZY")
-"\n"
-(propertize "(o'_')o     " 'face '(:foreground "#c6a0f6"))
-(propertize "  PRESS SPACE  " 'face '(:foreground "#c6a0f6" :background "#2a2a3f" :weight bold))
-(propertize "     t('.'t)" 'face '(:foreground "#c6a0f6"))
-"\n"
-(fr33macs-color-banner "xzzzzzzzzzzzzzy")
-)) (fr33macs-splash-buffer)
-
-(setq fr33macs-resize-timer nil)
+(setq fr33macs-redraw-timer nil)
 (setq fr33macs-last-width 0)
 
 (define-derived-mode fr33macs-splash-mode
   special-mode "fr33macs splash"
   "it's my splash screen"
     (setq major-mode 'fr33macs-splash-mode)
+    (setq-local sublimity-attractive-centering-width 0)
+    (visual-line-mode -1)
     (font-lock-mode -1)
     (hl-line-mode -1)
     (display-line-numbers-mode -1))
@@ -307,25 +284,59 @@ xzzzzy___xzzzzzzzzzy_xzzzzzy__xzzzzzy_xzzzy___xzzzzzzzy_xzzzy_xzzzzzzzzzzzzzzzy_
   (let* ((splash-buffer (get-buffer-create "*splash*")))
     (fr33macs-maybe-redraw-splash)
     (pop-to-buffer-same-window splash-buffer)
-    (fr33macs-resize-timer-start)
+    (fr33macs-redraw-timer-start)
     splash-buffer))
 
-(defun fr33macs-resize-timer-stop ()
+(defun fr33macs-redraw-timer-stop ()
   (setq fr33macs-last-width 0)
-  (if (and (boundp 'fr33macs-resize-timer)
-           (timerp fr33macs-resize-timer))
-    (cancel-timer fr33macs-resize-timer)))
+  (if (and (boundp 'fr33macs-redraw-timer)
+           (timerp fr33macs-redraw-timer))
+    (cancel-timer fr33macs-redraw-timer)))
 
-(defun fr33macs-resize-timer-start ()
-  (fr33macs-resize-timer-stop)
-  (setq fr33macs-resize-timer
-        (run-with-timer 0.5 0.5 #'fr33macs-resize-timer-tick)))
+(defun fr33macs-redraw-timer-start ()
+  (fr33macs-redraw-timer-stop)
+  (setq fr33macs-redraw-timer
+        (run-with-timer 0.5 0.5 #'fr33macs-redraw-timer-tick)))
 
-(defun fr33macs-resize-timer-tick ()
+(defun fr33macs-redraw-timer-tick ()
   (if (not (string= major-mode "fr33macs-splash-mode"))
-    (fr33macs-resize-timer-stop))
+    (fr33macs-redraw-timer-stop))
     (fr33macs-maybe-redraw-splash))
 
+(defun fr33macs-maybe-redraw-splash (&rest _)
+  (interactive)
+  (when-let* ((buffer (get-buffer "*splash*"))
+              (width (window-body-width (get-buffer-window buffer)))
+              ((not (= fr33macs-last-width width)))
+              (banner fr33macs-banner))
+    (setq fr33macs-last-width width)
+    (with-current-buffer buffer
+      (let ((inhibit-read-only t))
+        (erase-buffer)
+
+        (setq banner (mapconcat (lambda (line)
+          (let* ((len (length line))
+                 (padding-width (max 0 (floor (/ (- width len) 2))))
+                 (padding (make-string padding-width ?\s)))
+            (if (<= width len)
+              (let (( trim (/ (- len width) 2) ))
+                (setq line (substring line trim (- len 1 trim)))))
+            (concat padding line "\n")))
+          (string-lines banner)))
+
+        (save-excursion
+          (insert banner))
+
+        (fr33macs-splash-mode)))))
+
+(add-hook 'window-size-change-functions 'fr33macs-maybe-redraw-splash)
+
+(setq initial-buffer-choice 'fr33macs-splash-buffer)
+#+END_SRC
+
+** Utility
+
+#+BEGIN_SRC emacs-lisp
 (defun fr33macs-color-banner (banner)
   (dolist (chars '(("X" . "\U0001FB4A") ("Y" . "\U0001FB3F") ("Z" . "\u2585")
                    ("x" . "\U0001FB65") ("y" . "\U0001FB5A") ("z" . "\U0001FB84")
@@ -364,36 +375,35 @@ xzzzzy___xzzzzzzzzzy_xzzzzzy__xzzzzzy_xzzzy___xzzzzzzzy_xzzzy_xzzzzzzzzzzzzzzzy_
       (if colors
         (put-text-property i (1+ i) 'face colors banner)))))
   banner)
+#+END_SRC
 
-(defun fr33macs-maybe-redraw-splash (&rest _)
-  (interactive)
-  (when-let* ((buffer (get-buffer "*splash*"))
-              (width (window-body-width (get-buffer-window buffer)))
-              ((not (= fr33macs-last-width width)))
-              (banner fr33macs-banner))
-    (setq fr33macs-last-width width)
-    (with-current-buffer buffer
-      (let ((inhibit-read-only t))
-        (erase-buffer)
+** Content
 
-        (setq banner (mapconcat (lambda (line)
-          (let* ((len (length line))
-                 (padding-width (max 0 (floor (/ (- width len) 2))))
-                 (padding (make-string padding-width ?\s)))
-            (if (<= width len)
-              (let (( trim (/ (- len width) 2) ))
-                (setq line (substring line trim (- len 1 trim)))))
-            (concat padding line "\n")))
-          (string-lines banner)))
-
-        (save-excursion
-          (insert banner))
-
-        (fr33macs-splash-mode)))))
-
-(add-hook 'window-size-change-functions 'fr33macs-maybe-redraw-splash)
-
-(setq initial-buffer-choice 'fr33macs-splash-buffer)
+#+BEGIN_SRC emacs-lisp
+(setq fr33macs-banner (concat
+(fr33macs-color-banner "
+_XZZZZZZY__XZZZZZZY__XZZZZZY__XZZZZZY__XZZZZZZZZZY__XZZZZZZY__XZZZZZZY__XZZZZZY_
+A-@@@@@@----@@@@@@----@@@@@----@@@@@----@@@@@@@@@----@@@@@@----@@@@@@----@@@@@-B
+-@@@@@@@@--@@@@@@@@--@@@@@@@--@@@@@@@--@@@@@@@@@@@--@@@@@@@@--@@@@@@@@--@@@@@@@-
+-@@!-------@@!--@@@------@@@------@@@--@@!-@@!-@@!--@@!--@@@--!@@------!@@------
+-!@!-------!@!--@!@------@!@------@!@--!@!-!@!-!@!--!@!--@!@--!@!-------!@!-----
+-@!!!:!:---@!@!!@!---@!@!!@---@!@!!@---@!!-!!@-@!@--@!@!@!@!--!@!-------!!@@!!--
+-!!!!!::---!!@!@!----!!@!@!---!!@!@!---!@!---!-!@!--!!!@!!!!--!!!--------!!@!!!-
+-!!:-------!!:-:!!-------!!:------!!:--!!:-----!!:--!!:--!!!--:!!-----------!:!-
+-:!:-------:!:--!:!------:!:------:!:--:!:-----:!:--:!:--!:!--:!:-----------!:!-
+-.::--y_x--::.--:::--::.::::--::.::::--:::-y_x-::.--::---:::--.:::..::--::::.::-
+-.:.--___--.:.--:.:---:.:.:----:.:.:---.:.-___-:..--.:---:.:---::.::.:--::.:.:-C
+xzzzzy___xzzzzzzzzzy_xzzzzzy__xzzzzzy_xzzzy___xzzzzzzzy_xzzzy_xzzzzzzzzzzzzzzzy_
+")
+"\n"
+(fr33macs-color-banner "XZZZZZZZZZZZZZY")
+"\n"
+(propertize "(o'_')o     " 'face '(:foreground "#c6a0f6"))
+(propertize "  PRESS SPACE  " 'face '(:foreground "#c6a0f6" :background "#2a2a3f" :weight bold))
+(propertize "     t('.'t)" 'face '(:foreground "#c6a0f6"))
+"\n"
+(fr33macs-color-banner "xzzzzzzzzzzzzzy")
+)) (fr33macs-splash-buffer)
 #+END_SRC
 
 * My library

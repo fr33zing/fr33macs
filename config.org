@@ -269,7 +269,7 @@ Enable window dividers
 (setq fr33macs-banner (concat
 (fr33macs-color-banner "
 _XZZZZZZY__XZZZZZZY__XZZZZZY__XZZZZZY__XZZZZZZZZZY__XZZZZZZY__XZZZZZZY__XZZZZZY_
-🭄-@@@@@@----@@@@@@----@@@@@----@@@@@----@@@@@@@@@----@@@@@@----@@@@@@----@@@@@-🭏
+A-@@@@@@----@@@@@@----@@@@@----@@@@@----@@@@@@@@@----@@@@@@----@@@@@@----@@@@@-B
 -@@@@@@@@--@@@@@@@@--@@@@@@@--@@@@@@@--@@@@@@@@@@@--@@@@@@@@--@@@@@@@@--@@@@@@@-
 -@@!-------@@!--@@@------@@@------@@@--@@!-@@!-@@!--@@!--@@@--!@@------!@@------
 -!@!-------!@!--@!@------@!@------@!@--!@!-!@!-!@!--!@!--@!@--!@!-------!@!-----
@@ -278,7 +278,7 @@ _XZZZZZZY__XZZZZZZY__XZZZZZY__XZZZZZY__XZZZZZZZZZY__XZZZZZZY__XZZZZZZY__XZZZZZY_
 -!!:-------!!:-:!!-------!!:------!!:--!!:-----!!:--!!:--!!!--:!!-----------!:!-
 -:!:-------:!:--!:!------:!:------:!:--:!:-----:!:--:!:--!:!--:!:-----------!:!-
 -.::--y_x--::.--:::--::.::::--::.::::--:::-y_x-::.--::---:::--.:::..::--::::.::-
--.:.--___--.:.--:.:---:.:.:----:.:.:---.:.-___-:..--.:---:.:---::.::.:--::.:.:-🭠
+-.:.--___--.:.--:.:---:.:.:----:.:.:---.:.-___-:..--.:---:.:---::.::.:--::.:.:-C
 xzzzzy___xzzzzzzzzzy_xzzzzzy__xzzzzzy_xzzzy___xzzzzzzzy_xzzzy_xzzzzzzzzzzzzzzzy_
 ")
 "\n"
@@ -327,31 +327,40 @@ xzzzzy___xzzzzzzzzzy_xzzzzzy__xzzzzzy_xzzzy___xzzzzzzzy_xzzzy_xzzzzzzzzzzzzzzzy_
     (fr33macs-maybe-redraw-splash))
 
 (defun fr33macs-color-banner (banner)
-  (dolist (chars '(("X" . "🭊") ("Y" . "🬿") ("Z" . "▅")
-                   ("x" . "🭥") ("y" . "🭚") ("z" . "🮄")))
+  (dolist (chars '(("X" . "\U0001FB4A") ("Y" . "\U0001FB3F") ("Z" . "\u2585")
+                   ("x" . "\U0001FB65") ("y" . "\U0001FB5A") ("z" . "\U0001FB84")
+                   ("A" . "\U0001FB44") ("B" . "\U0001FB4F") ("C" . "\U0001FB60")))
     (setq banner (string-replace (car chars) (cdr chars) banner)))
-(message "---%s----" (1- (default-font-height)))
+
   (let ((banner-chars (string-to-vector banner)))
     (dotimes (i (length banner))
       (let* ((c (aref banner-chars i))
-             (colors (cond ((char-equal c ?@) '(:foreground "#c6a0f6" :background "#3e3755"))
-                           ((char-equal c ?!) '(:foreground "#c6a0f6" :background "#37334d" :weight bold))
-                           ((char-equal c ?:) '(:foreground "#c6a0f6" :background "#37334d" :weight bold))
-                           ((char-equal c ?.) '(:foreground "#37334d" :background "#37334d"))
-                           ((char-equal c ?-) '(:foreground "#2a2a3f" :background "#2a2a3f"))
-                           ((char-equal c ?_) '(:foreground "#1e2030" :background "#1e2030"))
-                           ((char-equal c ?🭊) '(:foreground "#2a2a3f" :background "#1e2030" :underline (:position t)))
-                           ((char-equal c ?🬿) '(:foreground "#2a2a3f" :background "#1e2030" :underline (:position t)))
-                           ((char-equal c ?▅) '(:foreground "#2a2a3f" :background "#1e2030" :underline (:position t)))
-                           ((char-equal c ?🭄) '(:foreground "#2a2a3f" :background "#1e2030" :underline (:position t)))
-                           ((char-equal c ?🭏) '(:foreground "#2a2a3f" :background "#1e2030" :underline (:position t)))
-                           ; HACK Magic number should be calculated font height
-                           ((char-equal c ?🭥) '(:foreground "#2a2a3f" :background "#1e2030" :underline (:position 19)))
-                           ((char-equal c ?🭚) '(:foreground "#2a2a3f" :background "#1e2030" :underline (:position 19)))
-                           ((char-equal c ?🮄) '(:foreground "#2a2a3f" :background "#1e2030" :underline (:position 19)))
-                           ((char-equal c ?🮄) '(:foreground "#2a2a3f" :background "#1e2030" :underline (:position 19)))
-                           ((char-equal c ?🭠) '(:foreground "#2a2a3f" :background "#1e2030" :underline (:position 19)))
-                           ('(:foreground "#2a2a3f" :background "#1e2030")))))
+             (default-face '(:foreground "#2a2a3f"
+                             :background "#1e2030"))
+             (box-drawing-face-top '(:foreground "#2a2a3f"
+                                     :background "#1e2030"
+                                     :underline (:position t)))
+             (box-drawing-face-bottom '(:foreground "#2a2a3f"
+                                        :background "#1e2030"
+                                        :underline (:position 19)))
+             ; HACK Magic number (font height - 1)          ^^^^^
+             (colors (cond
+               ((char-equal c ?@) '(:foreground "#c6a0f6" :background "#3e3755"))
+               ((char-equal c ?!) '(:foreground "#c6a0f6" :background "#37334d" :weight bold))
+               ((char-equal c ?:) '(:foreground "#c6a0f6" :background "#37334d" :weight bold))
+               ((char-equal c ?.) '(:foreground "#37334d" :background "#37334d"))
+               ((char-equal c ?-) '(:foreground "#2a2a3f" :background "#2a2a3f"))
+               ((char-equal c ?_) '(:foreground "#1e2030" :background "#1e2030"))
+               ((char-equal c ?\U0001FB4A) box-drawing-face-top)
+               ((char-equal c ?\U0001FB4A) box-drawing-face-top)
+               ((char-equal c ?\u2585)     box-drawing-face-top)
+               ((char-equal c ?\U0001FB44) box-drawing-face-top)
+               ((char-equal c ?\U0001FB4F) box-drawing-face-top)
+               ((char-equal c ?\U0001FB4F) box-drawing-face-bottom)
+               ((char-equal c ?\U0001FB5A) box-drawing-face-bottom)
+               ((char-equal c ?\U0001FB84) box-drawing-face-bottom)
+               ((char-equal c ?\U0001FB60) box-drawing-face-bottom)
+               (default-face))))
       (if colors
         (put-text-property i (1+ i) 'face colors banner)))))
   banner)

@@ -15,17 +15,13 @@ Read this document in this repository's github.io page or in Emacs for the best 
   If open, instead focus it https://wayland.app/protocols/kde-plasma-window-management
   https://github.com/uukelele/waydotool
 
-- use consult-org-heading for SPC TAB TAB in org mode
 - Prevent splitting splash buffer
 
 - Find out why LTEX errors aren't always working with flycheck
 - Find a plugin to show me all my TODOs in all projects when I open Emacs
 - Disable LTEX in read only
-- Ask y/n instead of yes/no
 
-
-- After
-  - Check which external libs are actually needed
+- Check which external libs are actually needed
 
 * Links
 
@@ -896,19 +892,19 @@ that define hydra(s):
 (pretty-hydra-define hydra:find
   (:exit t :idle 0.25)
   ("Consult"
-   (("<tab>" consult-imenu           "Imenu")
-    ("i"     consult-imenu-multi     "Project Imenu")
-    ("o"     consult-outline         "Outline")
-    ("l"     consult-line            "Line")
-    ("L"     consult-line-multi      "Line in project")
-    ("h"     consult-org-heading     "Headings")
-    ("b"     consult-buffer          "Buffer")
-    ("g"     consult-ripgrep         "Ripgrep")
-    ("e"     consult-flycheck        "Flycheck errors")
-    ("r"     consult-recent-file     "Recent files"))
+   (("<tab>" my:consult-imenu-or-org-heading "Imenu / Org headings")
+    ("i"     consult-imenu-multi             "Project Imenu")
+    ("o"     consult-outline                 "Outline")
+    ("l"     consult-line                    "Line")
+    ("L"     consult-line-multi              "Line in project")
+    ("h"     consult-org-heading             "Headings")
+    ("b"     consult-buffer                  "Buffer")
+    ("g"     consult-ripgrep                 "Ripgrep")
+    ("e"     consult-flycheck                "Flycheck errors")
+    ("r"     consult-recent-file             "Recent files"))
   ("Show"
-   (("O"     symbols-outline-show    "Symbols outline")
-    ("I"     imenu-list-smart-toggle "Imenu list")
+   (("O"     symbols-outline-show            "Symbols outline")
+    ("I"     imenu-list-smart-toggle         "Imenu list")
     ))))
 #+END_SRC
 
@@ -1305,6 +1301,12 @@ The default indentation is hardcoded, so I have to replace the relevant function
 (use-package consult-flycheck :ensure t)
 (use-package hl-todo :ensure t)
 (use-package consult-todo :ensure t)
+
+(defun my:consult-imenu-or-org-heading ()
+  (interactive)
+  (if (string= major-mode "org-mode")
+      (consult-org-heading)
+      (consult-imenu)))
 #+END_SRC
 
 * Whitespace

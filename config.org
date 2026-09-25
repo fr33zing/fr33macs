@@ -11,17 +11,17 @@ Read this document in this repository's github.io page or in Emacs for the best 
 
 * TODO ASAP
 
+- Set whitespace highlight box line width to -1 so it doesn't change line heights
 - Create a script that checks if emacsclient is already open.
   If open, instead focus it https://wayland.app/protocols/kde-plasma-window-management
   https://github.com/uukelele/waydotool
-
-- Prevent splitting splash buffer
-
+- Make pressing enter on git diff use existing window if buffer open
 - Find out why LTEX errors aren't always working with flycheck
 - Find a plugin to show me all my TODOs in all projects when I open Emacs
 - Disable LTEX in read only
 
 - Check which external libs are actually needed
+
 
 * Links
 
@@ -151,8 +151,12 @@ Same deal with the ~--experimental-features~ if you don't have flakes enabled.
 Set default frame position and height.
 
 #+BEGIN_SRC emacs-lisp
-(add-to-list 'initial-frame-alist '(fullscreen . maximized))
-(add-to-list 'default-frame-alist '(fullscreen . maximized))
+(let ((frame-options '((fullscreen . maximized)
+                        (min-width . 82)
+                        (min-height . 32))))
+  (dolist (option frame-options)
+    (add-to-list 'initial-frame-alist option)
+    (add-to-list 'default-frame-alist option)))
 #+END_SRC
 
 Disable unwanted UI elements and startup messages.
@@ -282,6 +286,8 @@ Enable window dividers
 (setq fr33macs-last-size (cons 0 0))
 (setq fr33macs-splash-banner "")
 (setq fr33macs-random-quip "")
+;; " *LV*" = pretty-hydra
+(setq fr33macs-splash-safe-buffer-names (list "*splash*" " *LV*"))
 
 (define-derived-mode fr33macs-splash-mode
   special-mode "fr33macs splash"
@@ -294,6 +300,13 @@ Enable window dividers
   (font-lock-mode -1)
   (hl-line-mode -1)
   (display-line-numbers-mode -1))
+
+(defun fr33macs-splash-visible ()
+  (let (( visible nil ))
+    (walk-windows (lambda (w)
+      (when (string-equal (buffer-name (window-buffer w)) "*splash*")
+        (setq visible t))))
+  visible))
 
 (defun fr33macs-splash-buffer ()
   (interactive)
@@ -323,8 +336,9 @@ Enable window dividers
 (defun fr33macs-maybe-redraw-splash (&rest _)
   (interactive)
   (when-let* ((buffer (get-buffer "*splash*"))
-              (width (window-body-width (get-buffer-window buffer)))
-              (height (window-body-height (get-buffer-window buffer)))
+              (window (get-buffer-window buffer))
+              (width (window-body-width window))
+              (height (window-body-height window))
               (size (cons width height))
               ((not (equal fr33macs-last-size size))) ; Early exit
               (banner (string-trim fr33macs-splash-banner))
@@ -355,17 +369,38 @@ Enable window dividers
         ; TODO maybe not call this if already in the mode
         (fr33macs-splash-mode))))
 
-(defun fr33macs-bury-splash-after-buffer-changed (&rest _)
+(defun fr33macs-splash-on-window-buffer-change (_)
+  ;; Dominate the frame when splash is shown
+  (when (fr33macs-splash-visible)
+    (walk-windows
+      (lambda (window)
+        (let ((name (buffer-name (window-buffer window))))
+          (when (not (member name fr33macs-splash-safe-buffer-names))
+            (message "fr33macs-splash killed window with buffer: %s" name)
+            (delete-window window))))
+      -1)) ; Never walk minibuffer
+
+  ;; Bury splash buffer when something else is opened
   (when (eq (window-old-buffer) (get-buffer "*splash*"))
     (bury-buffer "*splash*")))
 #+END_SRC
 
-** Setup / Hooks
+*** Hooks & advice
 
 #+BEGIN_SRC emacs-lisp
 (add-hook 'window-size-change-functions 'fr33macs-maybe-redraw-splash)
-(add-hook 'window-buffer-change-functions 'fr33macs-bury-splash-after-buffer-changed)
+(add-hook 'window-buffer-change-functions 'fr33macs-splash-on-window-buffer-change)
 (setq initial-buffer-choice 'fr33macs-splash-buffer)
+#+END_SRC
+
+#+BEGIN_SRC emacs-lisp
+(defun fr33macs-splash-prevent-splitting (orig-fun &rest args)
+  (if (fr33macs-splash-visible)
+    (message "Cannot split splash screen.")
+    (apply orig-fun args)))
+
+(advice-add 'my:split-window-right :around #'fr33macs-splash-prevent-splitting)
+(advice-add 'my:split-window-below :around #'fr33macs-splash-prevent-splitting)
 #+END_SRC
 
 ** Utility
@@ -397,15 +432,15 @@ Enable window dividers
                ((char-equal c ?.) '(:foreground "#37334d" :background "#37334d"))
                ((char-equal c ?-) '(:foreground "#2a2a3f" :background "#2a2a3f"))
                ((char-equal c ?_) '(:foreground "#1e2030" :background "#1e2030"))
-               ((char-equal c ?\U0001FB4A) box-drawing-face-top)
-               ((char-equal c ?\U0001FB4A) box-drawing-face-top)
-               ((char-equal c ?\u2585)     box-drawing-face-top)
-               ((char-equal c ?\U0001FB44) box-drawing-face-top)
-               ((char-equal c ?\U0001FB4F) box-drawing-face-top)
-               ((char-equal c ?\U0001FB4F) box-drawing-face-bottom)
-               ((char-equal c ?\U0001FB5A) box-drawing-face-bottom)
-               ((char-equal c ?\U0001FB84) box-drawing-face-bottom)
-               ((char-equal c ?\U0001FB60) box-drawing-face-bottom)
+               ((char-equal c ?\U0001FB4A) box-drawing-face-top)    ; X
+               ((char-equal c ?\U0001FB3F) box-drawing-face-top)    ; Y
+               ((char-equal c ?\u2585)     box-drawing-face-top)    ; Z
+               ((char-equal c ?\U0001FB65) box-drawing-face-bottom) ; x
+               ((char-equal c ?\U0001FB5A) box-drawing-face-bottom) ; y
+               ((char-equal c ?\U0001FB84) box-drawing-face-bottom) ; z
+               ((char-equal c ?\U0001FB44) box-drawing-face-top)    ; A
+               ((char-equal c ?\U0001FB4F) box-drawing-face-top)    ; B
+               ((char-equal c ?\U0001FB60) box-drawing-face-bottom) ; C
                (default-face))))
       (if colors
         (put-text-property i (1+ i) 'face colors banner)))))

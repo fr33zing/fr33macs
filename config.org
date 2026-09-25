@@ -11,6 +11,8 @@ Read this document in this repository's github.io page or in Emacs for the best 
 
 * TODO ASAP
 
+- prevent spliting splash buffer
+
 - Find out why LTEX errors aren't always working with flycheck
 - Find a plugin to show me all my TODOs in all projects when I open Emacs
 - Disable LTEX in read only
@@ -265,30 +267,37 @@ Enable window dividers
 
 * Startup screen
 
+** Library
+
 #+BEGIN_SRC emacs-lisp
 (setq fr33macs-redraw-timer nil)
-(setq fr33macs-last-width 0)
+(setq fr33macs-last-size (cons 0 0))
+(setq fr33macs-splash-banner "")
+(setq fr33macs-random-quip "")
 
 (define-derived-mode fr33macs-splash-mode
   special-mode "fr33macs splash"
   "it's my splash screen"
-    (setq major-mode 'fr33macs-splash-mode)
-    (setq-local sublimity-attractive-centering-width 0)
-    (visual-line-mode -1)
-    (font-lock-mode -1)
-    (hl-line-mode -1)
-    (display-line-numbers-mode -1))
+  (setq major-mode 'fr33macs-splash-mode)
+  (setq-local cursor-type nil)
+  (setq-local evil-default-cursor (list nil))
+  (setq-local global-hl-line-mode nil)
+  (setq-local sublimity-attractive-centering-width 0)
+  (font-lock-mode -1)
+  (hl-line-mode -1)
+  (display-line-numbers-mode -1))
 
 (defun fr33macs-splash-buffer ()
   (interactive)
   (let* ((splash-buffer (get-buffer-create "*splash*")))
+    (fr33macs-splash-generate-content)
     (fr33macs-maybe-redraw-splash)
     (pop-to-buffer-same-window splash-buffer)
     (fr33macs-redraw-timer-start)
     splash-buffer))
 
 (defun fr33macs-redraw-timer-stop ()
-  (setq fr33macs-last-width 0)
+  (setq fr33macs-last-size (cons 0 0))
   (if (and (boundp 'fr33macs-redraw-timer)
            (timerp fr33macs-redraw-timer))
     (cancel-timer fr33macs-redraw-timer)))
@@ -307,13 +316,17 @@ Enable window dividers
   (interactive)
   (when-let* ((buffer (get-buffer "*splash*"))
               (width (window-body-width (get-buffer-window buffer)))
-              ((not (= fr33macs-last-width width)))
-              (banner fr33macs-banner))
-    (setq fr33macs-last-width width)
+              (height (window-body-height (get-buffer-window buffer)))
+              (size (cons width height))
+              ((not (equal fr33macs-last-size size))) ; Early exit
+              (banner (string-trim fr33macs-splash-banner))
+              (inhibit-read-only t)
+              (banner-lines (string-lines banner)))
+    (setq fr33macs-last-size size)
     (with-current-buffer buffer
-      (let ((inhibit-read-only t))
         (erase-buffer)
 
+        ;; Horizontal alignment
         (setq banner (mapconcat (lambda (line)
           (let* ((len (length line))
                  (padding-width (max 0 (floor (/ (- width len) 2))))
@@ -322,22 +335,37 @@ Enable window dividers
               (let (( trim (/ (- len width) 2) ))
                 (setq line (substring line trim (- len 1 trim)))))
             (concat padding line "\n")))
-          (string-lines banner)))
+          banner-lines))
+
+        ;; Vertical alignment
+        (let* ((n-lines (length banner-lines))
+               (padding-height (max 0 (floor (/ (- height n-lines) 2))))
+               (padding (make-string padding-height ?\n)))
+          (setq banner (concat padding banner)))
 
         (save-excursion
           (insert banner))
 
-        (fr33macs-splash-mode)))))
+        (fr33macs-splash-mode))))
 
+(defun fr33macs-bury-splash-after-buffer-changed ()
+  (when (eq (window-old-buffer) (get-buffer "*splash*"))
+    (bury-buffer "*splash*")))
+#+END_SRC
+
+** Setup / Hooks
+
+#+BEGIN_SRC emacs-lisp
 (add-hook 'window-size-change-functions 'fr33macs-maybe-redraw-splash)
-
+(add-hook 'window-buffer-change-functions 'fr33macs-bury-splash-after-buffer-changed)
 (setq initial-buffer-choice 'fr33macs-splash-buffer)
 #+END_SRC
 
 ** Utility
 
 #+BEGIN_SRC emacs-lisp
-(defun fr33macs-color-banner (banner)
+(defun fr33macs-color-banner (&rest banner)
+  (setq banner (mapconcat (lambda (b) b) banner "\n"))
   (dolist (chars '(("X" . "\U0001FB4A") ("Y" . "\U0001FB3F") ("Z" . "\u2585")
                    ("x" . "\U0001FB65") ("y" . "\U0001FB5A") ("z" . "\U0001FB84")
                    ("A" . "\U0001FB44") ("B" . "\U0001FB4F") ("C" . "\U0001FB60")))
@@ -380,30 +408,59 @@ Enable window dividers
 ** Content
 
 #+BEGIN_SRC emacs-lisp
-(setq fr33macs-banner (concat
-(fr33macs-color-banner "
-_XZZZZZZY__XZZZZZZY__XZZZZZY__XZZZZZY__XZZZZZZZZZY__XZZZZZZY__XZZZZZZY__XZZZZZY_
-A-@@@@@@----@@@@@@----@@@@@----@@@@@----@@@@@@@@@----@@@@@@----@@@@@@----@@@@@-B
--@@@@@@@@--@@@@@@@@--@@@@@@@--@@@@@@@--@@@@@@@@@@@--@@@@@@@@--@@@@@@@@--@@@@@@@-
--@@!-------@@!--@@@------@@@------@@@--@@!-@@!-@@!--@@!--@@@--!@@------!@@------
--!@!-------!@!--@!@------@!@------@!@--!@!-!@!-!@!--!@!--@!@--!@!-------!@!-----
--@!!!:!:---@!@!!@!---@!@!!@---@!@!!@---@!!-!!@-@!@--@!@!@!@!--!@!-------!!@@!!--
--!!!!!::---!!@!@!----!!@!@!---!!@!@!---!@!---!-!@!--!!!@!!!!--!!!--------!!@!!!-
--!!:-------!!:-:!!-------!!:------!!:--!!:-----!!:--!!:--!!!--:!!-----------!:!-
--:!:-------:!:--!:!------:!:------:!:--:!:-----:!:--:!:--!:!--:!:-----------!:!-
--.::--y_x--::.--:::--::.::::--::.::::--:::-y_x-::.--::---:::--.:::..::--::::.::-
--.:.--___--.:.--:.:---:.:.:----:.:.:---.:.-___-:..--.:---:.:---::.::.:--::.:.:-C
-xzzzzy___xzzzzzzzzzy_xzzzzzy__xzzzzzy_xzzzy___xzzzzzzzy_xzzzy_xzzzzzzzzzzzzzzzy_
-")
-"\n"
-(fr33macs-color-banner "XZZZZZZZZZZZZZY")
-"\n"
-(propertize "(o'_')o     " 'face '(:foreground "#c6a0f6"))
-(propertize "  PRESS SPACE  " 'face '(:foreground "#c6a0f6" :background "#2a2a3f" :weight bold))
-(propertize "     t('.'t)" 'face '(:foreground "#c6a0f6"))
-"\n"
-(fr33macs-color-banner "xzzzzzzzzzzzzzy")
-)) (fr33macs-splash-buffer)
+(defun fr33macs-splash-generate-content ()
+  (setq fr33macs-random-quip
+    (aref fr33macs-splash-quips (random (length fr33macs-splash-quips))))
+  (setq fr33macs-splash-banner (concat
+    (fr33macs-color-banner
+      "_XZZZZZZY__XZZZZZZY__XZZZZZY__XZZZZZY__XZZZZZZZZZY__XZZZZZZY__XZZZZZZY__XZZZZZY_"
+      "A-@@@@@@----@@@@@@----@@@@@----@@@@@----@@@@@@@@@----@@@@@@----@@@@@@----@@@@@-B"
+      "-@@@@@@@@--@@@@@@@@--@@@@@@@--@@@@@@@--@@@@@@@@@@@--@@@@@@@@--@@@@@@@@--@@@@@@@-"
+      "-@@!-------@@!--@@@------@@@------@@@--@@!-@@!-@@!--@@!--@@@--!@@------!@@------"
+      "-!@!-------!@!--@!@------@!@------@!@--!@!-!@!-!@!--!@!--@!@--!@!-------!@!-----"
+      "-@!!!:!:---@!@!!@!---@!@!!@---@!@!!@---@!!-!!@-@!@--@!@!@!@!--!@!-------!!@@!!--"
+      "-!!!!!::---!!@!@!----!!@!@!---!!@!@!---!@!---!-!@!--!!!@!!!!--!!!--------!!@!!!-"
+      "-!!:-------!!:-:!!-------!!:------!!:--!!:-----!!:--!!:--!!!--:!!-----------!:!-"
+      "-:!:-------:!:--!:!------:!:------:!:--:!:-----:!:--:!:--!:!--:!:-----------!:!-"
+      "-.::--y_x--::.--:::--::.::::--::.::::--:::-y_x-::.--::---:::--.:::..::--::::.::-"
+      "-.:.--___--.:.--:.:---:.:.:----:.:.:---.:.-___-:..--.:---:.:---::.::.:--::.:.:-C"
+      "xzzzzy___xzzzzzzzzzy_xzzzzzy__xzzzzzy_xzzzy___xzzzzzzzy_xzzzy_xzzzzzzzzzzzzzzzy_")
+    "\n"
+    "\n"
+    (fr33macs-color-banner "XZZZZZZZZZZZZZY")
+    "\n"
+    (propertize "(o'_')o     " 'face '(:foreground "#c6a0f6"))
+    (propertize "  PRESS SPACE  " 'face '(:foreground "#c6a0f6" :background "#2a2a3f" :weight bold))
+    (propertize "     t('.'t)" 'face '(:foreground "#c6a0f6"))
+    "\n"
+    (fr33macs-color-banner "xzzzzzzzzzzzzzy")
+    "\n\n"
+    (propertize fr33macs-random-quip 'face '(:foreground "#363a4f"))
+)))
+
+(setq fr33macs-splash-quips (vector
+  "WHEN?  WILL?  YOU?  CRACK?"
+  "OPENYOUREYES OPENYOUREYES OPENYOUREYES"
+  "Nothing... nothing... left... in... side..."
+  "Have you noticed we're still waiting?"
+  "You're the only human, everyone's an alien but you."
+  "Head removal specialist - Free consultations!\n1-800-NO-HEAD"
+  "There's no finer sound than when you left off a nine round."
+  "WHERE'S MY CRUCIFIX? I CAN'T DIE WITHOUT IT!"
+  "Born without eyes, hands, and half a brain...\nBe born addicted... TO COCAINE!"
+  "((((((((((((((((((((emac))))))))))))))))))))"
+  "C  Y  K  A    B  L  Y  A  T"
+  "who up %s they %s"
+  "No pain... no pain..."
+  "Jump down, turn around, pick'a bail'a cotton!\nJump down, turn around, pick'a bail'a day!"
+  "This is your baptism."
+  "+6209 -34 | 82 files changed"
+  "git commit -m \"please work\""
+  "I'm always tired, I'm always at least half asleep :)"
+  "Everything's coming to a grinding halt."
+  "Punch in late, and they DOCK YA!"
+  "Come back with a warrant."
+))
 #+END_SRC
 
 * My library
@@ -576,7 +633,7 @@ window will never be considered temporary.
 
 #+BEGIN_SRC emacs-lisp
 (setq my:not-temporary-major-modes
-  '(lisp-interaction-mode eat-mode))
+  '(fr33macs-splash-mode lisp-interaction-mode eat-mode))
 
 (setq my:not-temporary-minor-modes
   '(org-src-mode))

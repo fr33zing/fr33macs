@@ -1648,9 +1648,6 @@ Flycheck is a modern on-the-fly syntax checking extension.
   (global-flycheck-mode)
   (global-flycheck-annotate-mode)
 
-  (add-hook 'flycheck-error-list-mode (lambda ()
-    (setq sublimity-attractive-centering-width 0)))
-
   ;                                     5% opacity
   (my:set-flycheck-color "error"   'red    "#453243")
   (my:set-flycheck-color "warning" 'yellow "#454144")
@@ -1702,7 +1699,9 @@ Centers each buffer horizontally.
 #+BEGIN_SRC emacs-lisp
 (use-package sublimity
   :ensure t
-  :init (sublimity-mode 1))
+  :init (sublimity-mode 1)
+  :config
+  (add-to-list 'sublimity-disabled-major-modes 'flycheck-error-list-mode))
 
 (use-package sublimity-attractive
   :custom

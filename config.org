@@ -11,12 +11,18 @@ Read this document in this repository's github.io page or in Emacs for the best 
 
 * TODO ASAP
 
-- prevent spliting splash buffer
+- Create a script that checks if emacsclient is already open.
+  If open, instead focus it https://wayland.app/protocols/kde-plasma-window-management
+  https://github.com/uukelele/waydotool
+
+- use consult-org-heading for SPC TAB TAB in org mode
+- Prevent splitting splash buffer
 
 - Find out why LTEX errors aren't always working with flycheck
 - Find a plugin to show me all my TODOs in all projects when I open Emacs
 - Disable LTEX in read only
 - Ask y/n instead of yes/no
+
 
 - After
   - Check which external libs are actually needed
@@ -146,6 +152,13 @@ Same deal with the ~--experimental-features~ if you don't have flakes enabled.
 
 * Basic setup
 
+Set default frame position and height.
+
+#+BEGIN_SRC emacs-lisp
+(add-to-list 'initial-frame-alist '(fullscreen . maximized))
+(add-to-list 'default-frame-alist '(fullscreen . maximized))
+#+END_SRC
+
 Disable unwanted UI elements and startup messages.
 
 #+BEGIN_SRC emacs-lisp
@@ -266,7 +279,6 @@ Enable window dividers
 #+END_SRC
 
 * Startup screen
-
 ** Library
 
 #+BEGIN_SRC emacs-lisp
@@ -343,12 +355,11 @@ Enable window dividers
                (padding (make-string padding-height ?\n)))
           (setq banner (concat padding banner)))
 
-        (save-excursion
-          (insert banner))
-
+        (save-excursion (insert banner))
+        ; TODO maybe not call this if already in the mode
         (fr33macs-splash-mode))))
 
-(defun fr33macs-bury-splash-after-buffer-changed ()
+(defun fr33macs-bury-splash-after-buffer-changed (&rest _)
   (when (eq (window-old-buffer) (get-buffer "*splash*"))
     (bury-buffer "*splash*")))
 #+END_SRC
@@ -452,14 +463,16 @@ Enable window dividers
   "C  Y  K  A    B  L  Y  A  T"
   "who up %s they %s"
   "No pain... no pain..."
-  "Jump down, turn around, pick'a bail'a cotton!\nJump down, turn around, pick'a bail'a day!"
-  "This is your baptism."
+  "C-k m s : save-buffer-kill-self"
   "+6209 -34 | 82 files changed"
   "git commit -m \"please work\""
   "I'm always tired, I'm always at least half asleep :)"
   "Everything's coming to a grinding halt."
   "Punch in late, and they DOCK YA!"
   "Come back with a warrant."
+  "Run it into the ground."
+  "Has anyone really been far even as decided to use even go want to do look more like?"
+  "FOR NOTHING  -  AGAINST EVERYTHING"
 ))
 #+END_SRC
 
@@ -886,6 +899,8 @@ that define hydra(s):
    (("<tab>" consult-imenu           "Imenu")
     ("i"     consult-imenu-multi     "Project Imenu")
     ("o"     consult-outline         "Outline")
+    ("l"     consult-line            "Line")
+    ("L"     consult-line-multi      "Line in project")
     ("h"     consult-org-heading     "Headings")
     ("b"     consult-buffer          "Buffer")
     ("g"     consult-ripgrep         "Ripgrep")

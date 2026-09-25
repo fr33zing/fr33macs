@@ -12,7 +12,6 @@ Read this document in this repository's github.io page or in Emacs for the best 
 * TODO ASAP
 
 - Find out why LTEX errors aren't always working with flycheck
-- Find out why recursive load in emacs but not emacsclient
 - Find a plugin to show me all my TODOs in all projects when I open Emacs
 - Disable LTEX in read only
 - Ask y/n instead of yes/no
@@ -267,18 +266,30 @@ Enable window dividers
 * Startup screen
 
 #+BEGIN_SRC emacs-lisp
-(setq fr33macs-banner (concat "
------------------------------------------------------------------------------
----@@@@@@@@-@@@@@@@--@@@@@@--@@@@@@--@@@@@@@@@@---@@@@@@---@@@@@@@--@@@@@@---
----@@!------@@!--@@@-----@@!-----@@!-@@!-@@!-@@!-@@!--@@@-!@@------!@@-------
----@!!!:!---@!@!!@!---@!!!:---@!!!:--@!!-!!@-@!@-@!@!@!@!-!@!-------!@@!!----
----!!:------!!:-:!!------!!:-----!!:-!!:-----!!:-!!:--!!!-:!!----------!:!---
----:--------:---:-:-:::-::--:::-::---:------:----:---:-:--::-::-:-::::-:-----
------------------------------------------------------------------------------
-
-"
-(propertize "PRESS SPACE" 'font-lock-face '(:foreground "#c6a0f6"))
-))
+(setq fr33macs-banner (concat
+(fr33macs-color-banner "
+_XZZZZZZY__XZZZZZZY__XZZZZZY__XZZZZZY__XZZZZZZZZZY__XZZZZZZY__XZZZZZZY__XZZZZZY_
+🭄-@@@@@@----@@@@@@----@@@@@----@@@@@----@@@@@@@@@----@@@@@@----@@@@@@----@@@@@-🭏
+-@@@@@@@@--@@@@@@@@--@@@@@@@--@@@@@@@--@@@@@@@@@@@--@@@@@@@@--@@@@@@@@--@@@@@@@-
+-@@!-------@@!--@@@------@@@------@@@--@@!-@@!-@@!--@@!--@@@--!@@------!@@------
+-!@!-------!@!--@!@------@!@------@!@--!@!-!@!-!@!--!@!--@!@--!@!-------!@!-----
+-@!!!:!:---@!@!!@!---@!@!!@---@!@!!@---@!!-!!@-@!@--@!@!@!@!--!@!-------!!@@!!--
+-!!!!!::---!!@!@!----!!@!@!---!!@!@!---!@!---!-!@!--!!!@!!!!--!!!--------!!@!!!-
+-!!:-------!!:-:!!-------!!:------!!:--!!:-----!!:--!!:--!!!--:!!-----------!:!-
+-:!:-------:!:--!:!------:!:------:!:--:!:-----:!:--:!:--!:!--:!:-----------!:!-
+-.::--y_x--::.--:::--::.::::--::.::::--:::-y_x-::.--::---:::--.:::..::--::::.::-
+-.:.--___--.:.--:.:---:.:.:----:.:.:---.:.-___-:..--.:---:.:---::.::.:--::.:.:-🭠
+xzzzzy___xzzzzzzzzzy_xzzzzzy__xzzzzzy_xzzzy___xzzzzzzzy_xzzzy_xzzzzzzzzzzzzzzzy_
+")
+"\n"
+(fr33macs-color-banner "XZZZZZZZZZZZZZY")
+"\n"
+(propertize "(o'_')o     " 'face '(:foreground "#c6a0f6"))
+(propertize "  PRESS SPACE  " 'face '(:foreground "#c6a0f6" :background "#2a2a3f" :weight bold))
+(propertize "     t('.'t)" 'face '(:foreground "#c6a0f6"))
+"\n"
+(fr33macs-color-banner "xzzzzzzzzzzzzzy")
+)) (fr33macs-splash-buffer)
 
 (setq fr33macs-resize-timer nil)
 (setq fr33macs-last-width 0)
@@ -287,6 +298,7 @@ Enable window dividers
   special-mode "fr33macs splash"
   "it's my splash screen"
     (setq major-mode 'fr33macs-splash-mode)
+    (font-lock-mode -1)
     (hl-line-mode -1)
     (display-line-numbers-mode -1))
 
@@ -307,12 +319,42 @@ Enable window dividers
 (defun fr33macs-resize-timer-start ()
   (fr33macs-resize-timer-stop)
   (setq fr33macs-resize-timer
-        (run-with-timer 2 0.5 #'fr33macs-resize-timer-tick)))
+        (run-with-timer 0.5 0.5 #'fr33macs-resize-timer-tick)))
 
 (defun fr33macs-resize-timer-tick ()
   (if (not (string= major-mode "fr33macs-splash-mode"))
     (fr33macs-resize-timer-stop))
     (fr33macs-maybe-redraw-splash))
+
+(defun fr33macs-color-banner (banner)
+  (dolist (chars '(("X" . "🭊") ("Y" . "🬿") ("Z" . "▅")
+                   ("x" . "🭥") ("y" . "🭚") ("z" . "🮄")))
+    (setq banner (string-replace (car chars) (cdr chars) banner)))
+(message "---%s----" (1- (default-font-height)))
+  (let ((banner-chars (string-to-vector banner)))
+    (dotimes (i (length banner))
+      (let* ((c (aref banner-chars i))
+             (colors (cond ((char-equal c ?@) '(:foreground "#c6a0f6" :background "#3e3755"))
+                           ((char-equal c ?!) '(:foreground "#c6a0f6" :background "#37334d" :weight bold))
+                           ((char-equal c ?:) '(:foreground "#c6a0f6" :background "#37334d" :weight bold))
+                           ((char-equal c ?.) '(:foreground "#37334d" :background "#37334d"))
+                           ((char-equal c ?-) '(:foreground "#2a2a3f" :background "#2a2a3f"))
+                           ((char-equal c ?_) '(:foreground "#1e2030" :background "#1e2030"))
+                           ((char-equal c ?🭊) '(:foreground "#2a2a3f" :background "#1e2030" :underline (:position t)))
+                           ((char-equal c ?🬿) '(:foreground "#2a2a3f" :background "#1e2030" :underline (:position t)))
+                           ((char-equal c ?▅) '(:foreground "#2a2a3f" :background "#1e2030" :underline (:position t)))
+                           ((char-equal c ?🭄) '(:foreground "#2a2a3f" :background "#1e2030" :underline (:position t)))
+                           ((char-equal c ?🭏) '(:foreground "#2a2a3f" :background "#1e2030" :underline (:position t)))
+                           ; HACK Magic number should be calculated font height
+                           ((char-equal c ?🭥) '(:foreground "#2a2a3f" :background "#1e2030" :underline (:position 19)))
+                           ((char-equal c ?🭚) '(:foreground "#2a2a3f" :background "#1e2030" :underline (:position 19)))
+                           ((char-equal c ?🮄) '(:foreground "#2a2a3f" :background "#1e2030" :underline (:position 19)))
+                           ((char-equal c ?🮄) '(:foreground "#2a2a3f" :background "#1e2030" :underline (:position 19)))
+                           ((char-equal c ?🭠) '(:foreground "#2a2a3f" :background "#1e2030" :underline (:position 19)))
+                           ('(:foreground "#2a2a3f" :background "#1e2030")))))
+      (if colors
+        (put-text-property i (1+ i) 'face colors banner)))))
+  banner)
 
 (defun fr33macs-maybe-redraw-splash (&rest _)
   (interactive)
@@ -334,19 +376,6 @@ Enable window dividers
                 (setq line (substring line trim (- len 1 trim)))))
             (concat padding line "\n")))
           (string-lines banner)))
-
-        (let ((banner-chars (string-to-vector banner)))
-          (dotimes (i (length banner))
-            (let* ((c (aref banner-chars i))
-                 (colors (cond ((char-equal c ?@) (cons "#a6da95" "#181825"))
-                               ((char-equal c ?!) (cons "#8dc67a" "#181825"))
-                               ((char-equal c ?:) (cons "#5a9049" "#1e2228"))
-                               ((char-equal c ?-) (cons "#181825" "#181825")))))
-            (if colors
-              (put-text-property i (1+ i) 'font-lock-face
-                `(:foreground ,(car colors)
-                  :background ,(cdr colors))
-                banner)))))
 
         (save-excursion
           (insert banner))

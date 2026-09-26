@@ -148,15 +148,20 @@ Same deal with the ~--experimental-features~ if you don't have flakes enabled.
 
 * Basic setup
 
-Set default frame position and height.
+Set default frame position and height. Changing the frame size via the
+hook is necessary, for some reason. Doing it the typical way doesn't
+seem to have an effect if the frame is resized by dragging the title
+bar out of the maximized state.
 
 #+BEGIN_SRC emacs-lisp
-(let ((frame-options '((fullscreen . maximized)
-                        (min-width . 82)
-                        (min-height . 32))))
+(let ((frame-options '((fullscreen . maximized))))
   (dolist (option frame-options)
     (add-to-list 'initial-frame-alist option)
     (add-to-list 'default-frame-alist option)))
+
+(add-hook 'after-make-frame-functions (lambda (frame)
+  (sleep-for 1)
+  (set-frame-size frame 90 45)))
 #+END_SRC
 
 Disable unwanted UI elements and startup messages.

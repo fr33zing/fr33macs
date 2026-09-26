@@ -201,7 +201,16 @@ Try to always split window vertically.
 (setq split-height-threshold nil)
 #+END_SRC
 
+** MELPA
+
+#+BEGIN_SRC emacs-lisp
+(require 'package)
+(add-to-list 'package-archives
+             '("melpa" . "http://melpa.org/packages/") t)
+#+END_SRC
+
 * External libraries
+
 ** Dash
 
 Dash is a library for dealing with lists.
@@ -554,7 +563,7 @@ The `r',`g',`b' values can range between `0.0..1.0'."
   "Nothing... nothing... left... in... side..."
   "Have you noticed we're still waiting?"
   "You're the only human, everyone's an alien but you."
-  "Head removal specialist - Free consultations!\n1-800-NO-HEAD"
+  "Head removal specialist - Free headectomy consultations!\n1-800-NO-HEAD"
   "There's no finer sound than when you left off a nine round."
   "WHERE'S MY CRUCIFIX? I CAN'T DIE WITHOUT IT!"
   "Born without eyes, hands, and half a brain...\nBe born addicted... TO COCAINE!"
@@ -1017,14 +1026,15 @@ that define hydra(s):
   (pretty-hydra-define hydra:leader
     (:exit t :idle 0.25)
     ("Hydra"
-     (("<tab>" hydra:find/body   "Find")
-      ("m"     major-mode-hydra  "Mode-specific")
-      ("t"     hydra:toggle/body "Toggle")
-      ("c"     hydra:code/body   "Code")
-      ("f"     hydra:file/body   "File")
-      ("b"     hydra:buffer/body "Buffer")
-      ("w"     hydra:window/body "Window")
-      ("h"     hydra:help/body   "Help & more"))
+     (("<tab>" hydra:find/body     "Find")
+      ("m"     major-mode-hydra    "Mode-specific")
+      ("t"     hydra:toggle/body   "Toggle")
+      ("c"     hydra:code/body     "Code")
+      ("f"     hydra:file/body     "File")
+      ("b"     hydra:buffer/body   "Buffer")
+      ("w"     hydra:window/body   "Window")
+      ("h"     hydra:help/body     "Help & more")
+      ("r"     hydra:org-roam/body "Org Roam"))
      "Shortcut"
      (("SPC"   project-find-file       "Find file in project")
       ("`"     eat-other-window        "Terminal")
@@ -1747,12 +1757,10 @@ tree-sitter major modes.
 
 ** Dimmer
 
-Naughty package!
-
 #+BEGIN_SRC emacs-lisp
 (use-package dimmer
-  :vc (:src "https://github.com/chrhansk/dimmer.el.git" :rev :newest)
   :ensure t
+  :vc (:url "https://github.com/chrhansk/dimmer.el" :rev "9a75788")
   :init
   (dimmer-configure-which-key)
   (dimmer-configure-company-box)
@@ -1867,6 +1875,42 @@ Change the ~HTML~ export preamble and postamble.
 
 (setq org-todo-keywords
       '((sequence "TODO" "WIP" "|" "DONE")))
+#+END_SRC
+
+*** Roam
+
+#+BEGIN_SRC emacs-lisp
+(use-package org-roam
+  :ensure t
+  ;:custom
+  ;(org-roam-directory (file-truename "/path/to/org-files/"))
+  :config
+  (make-directory "~/org-roam")
+  (setq org-roam-directory (file-truename "~/org-roam"))
+
+  (setq org-roam-node-display-template (concat "${title:*} "
+                                               (propertize "${tags:10}" 'face 'org-tag)))
+  (org-roam-db-autosync-mode)
+  ;; If using org-roam-protocol
+  (require 'org-roam-protocol))
+#+END_SRC
+
+**** Hydra
+
+#+BEGIN_SRC emacs-lisp
+(pretty-hydra-define hydra:org-roam
+  (:exit t :idle 0.25)
+   ("Org Roam"
+   (("b" org-roam-buffer-toggle       "Toggle buffer")
+    ("g" org-roam-graph  "Graph")
+    ("f" org-roam-node-find               "Find node")
+    ("i" org-roam-node-insert  "Insert node")
+    ("c" org-roam-capture  "Capture")
+
+    ("d" org-roam-dailies-capture-today  "Capture today (dailies?)")
+
+
+    )))
 #+END_SRC
 
 *** Hydra

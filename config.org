@@ -11,7 +11,7 @@ Read this document in this repository's github.io page or in Emacs for the best 
 
 * TODO ASAP
 
-- Set whitespace highlight box line width to -1 so it doesn't change line heights
+- Balance windows when a new one opens
 - Create a script that checks if emacsclient is already open.
   If open, instead focus it https://wayland.app/protocols/kde-plasma-window-management
   https://github.com/uukelele/waydotool
@@ -285,7 +285,6 @@ Enable window dividers
 (setq fr33macs-redraw-timer nil)
 (setq fr33macs-last-size (cons 0 0))
 (setq fr33macs-splash-banner "")
-(setq fr33macs-random-quip "")
 ;; " *LV*" = pretty-hydra
 (setq fr33macs-splash-safe-buffer-names (list "*splash*" " *LV*"))
 
@@ -311,7 +310,7 @@ Enable window dividers
 (defun fr33macs-splash-buffer ()
   (interactive)
   (let* ((splash-buffer (get-buffer-create "*splash*")))
-    (fr33macs-splash-generate-content)
+    (fr33macs-splash-generate-content) ; TODO move this to a custom hook?
     (fr33macs-maybe-redraw-splash)
     (pop-to-buffer-same-window splash-buffer)
     (fr33macs-redraw-timer-start)
@@ -405,7 +404,69 @@ Enable window dividers
 
 ** Utility
 
+If you were going to export this all as a library, you /could/ exclude this stuff.
+
 #+BEGIN_SRC emacs-lisp
+(defun kurecolor-to-8bit (n)
+  "Convert N (`0.0..1.0') to `0-255'."
+  (* n 255.0))
+
+(defun kurecolor-hex-to-rgb (hex)
+  "Convert a `rgb' HEX color to a list `(r g b)'.
+
+The `r',`g',`b' values range between `0.0..1.0'."
+  (setq hex (replace-regexp-in-string "#" "" hex))
+  (mapcar #'(lambda (s) (/ (string-to-number s 16) 255.0))
+          (list (substring hex 0 2)
+                (substring hex 2 4)
+                (substring hex 4 6))))
+
+(defun kurecolor-rgb-to-hex (rgb)
+  "RGB as a list `(r g b)' to `rgb' hex color.
+
+The `r',`g',`b' values can range between `0.0..1.0'."
+  (cl-destructuring-bind
+      (red green blue)
+      (mapcar 'kurecolor-to-8bit rgb)
+    (format "#%02X%02X%02X" red green blue)))
+#+END_SRC
+
+#+BEGIN_SRC emacs-lisp
+(setq fr33macs-random-quip "")
+(setq fr33macs-splash-colors '(nil))
+(setq fr33macs-splash-color-groups (vector
+  (vector 'pink)
+  (vector 'mauve)
+  (vector 'red 'maroon)
+  (vector 'peach)
+  (vector 'yellow)
+  (vector 'green)
+  (vector 'teal 'sky 'sapphire 'blue)))
+
+(require 'color)
+(defun fr33macs-splash-randomize ()
+  (setq fr33macs-random-quip
+    (aref fr33macs-splash-quips (random (length fr33macs-splash-quips))))
+
+  (let* ((color-group (aref fr33macs-splash-color-groups
+                            (random (length fr33macs-splash-color-groups))))
+         (color (aref color-group
+                      (random (length color-group))))
+         (fg (kurecolor-hex-to-rgb (catppuccin-get-color color)))
+         (bg (kurecolor-hex-to-rgb (catppuccin-get-color 'mantle))))
+    (setq fr33macs-splash-colors
+      (mapcar (lambda (rgb) (kurecolor-rgb-to-hex rgb)) (list
+        bg ; bg
+        fg ; text-fg
+        (color-blend fg bg 0.16) ; text-bg
+        (color-blend fg bg 0.08) ; panel
+)))))
+
+(defmacro fr33macs-splash-let-colors (&rest body)
+ `(seq-let (bg text-fg text-bg panel) fr33macs-splash-colors
+     ,@body))
+
+;; TODO inhibit error messages?
 (defun fr33macs-color-banner (&rest banner)
   (setq banner (mapconcat (lambda (b) b) banner "\n"))
   (dolist (chars '(("X" . "\U0001FB4A") ("Y" . "\U0001FB3F") ("Z" . "\u2585")
@@ -414,36 +475,38 @@ Enable window dividers
     (setq banner (string-replace (car chars) (cdr chars) banner)))
 
   (let ((banner-chars (string-to-vector banner)))
-    (dotimes (i (length banner))
-      (let* ((c (aref banner-chars i))
-             (default-face '(:foreground "#2a2a3f"
-                             :background "#1e2030"))
-             (box-drawing-face-top '(:foreground "#2a2a3f"
-                                     :background "#1e2030"
-                                     :underline (:position t)))
-             (box-drawing-face-bottom '(:foreground "#2a2a3f"
-                                        :background "#1e2030"
-                                        :underline (:position 19)))
-             ; HACK Magic number (font height - 1)          ^^^^^
-             (colors (cond
-               ((char-equal c ?@) '(:foreground "#c6a0f6" :background "#3e3755"))
-               ((char-equal c ?!) '(:foreground "#c6a0f6" :background "#37334d" :weight bold))
-               ((char-equal c ?:) '(:foreground "#c6a0f6" :background "#37334d" :weight bold))
-               ((char-equal c ?.) '(:foreground "#37334d" :background "#37334d"))
-               ((char-equal c ?-) '(:foreground "#2a2a3f" :background "#2a2a3f"))
-               ((char-equal c ?_) '(:foreground "#1e2030" :background "#1e2030"))
-               ((char-equal c ?\U0001FB4A) box-drawing-face-top)    ; X
-               ((char-equal c ?\U0001FB3F) box-drawing-face-top)    ; Y
-               ((char-equal c ?\u2585)     box-drawing-face-top)    ; Z
-               ((char-equal c ?\U0001FB65) box-drawing-face-bottom) ; x
-               ((char-equal c ?\U0001FB5A) box-drawing-face-bottom) ; y
-               ((char-equal c ?\U0001FB84) box-drawing-face-bottom) ; z
-               ((char-equal c ?\U0001FB44) box-drawing-face-top)    ; A
-               ((char-equal c ?\U0001FB4F) box-drawing-face-top)    ; B
-               ((char-equal c ?\U0001FB60) box-drawing-face-bottom) ; C
-               (default-face))))
-      (if colors
-        (put-text-property i (1+ i) 'face colors banner)))))
+    (fr33macs-splash-let-colors
+      (message "%s" text-fg)
+      (dotimes (i (length banner))
+        (let* ((c (aref banner-chars i))
+               (default-face `(:foreground ,panel
+                               :background ,bg))
+               (box-drawing-face-top `(:foreground ,panel
+                                       :background ,bg
+                                       :underline (:position t)))
+               (box-drawing-face-bottom `(:foreground ,panel
+                                          :background ,bg
+                                          :underline (:position 19)))
+               ; HACK Magic number (font height - 1)          ^^^^^
+
+               (colors  (cond
+                 ((char-equal c ?@) `(:foreground ,text-fg :background ,text-bg))
+                 ((char-equal c ?!) `(:foreground ,text-fg :background ,text-bg :weight bold))
+                 ((char-equal c ?:) `(:foreground ,text-fg :background ,text-bg :weight bold))
+                 ((char-equal c ?.) `(:foreground ,text-fg :background ,text-bg))
+                 ((char-equal c ?-) `(:foreground ,panel :background ,panel))
+                 ((char-equal c ?_) `(:foreground ,bg :background ,bg))
+                 ((char-equal c ?\U0001FB4A) box-drawing-face-top)    ; X
+                 ((char-equal c ?\U0001FB3F) box-drawing-face-top)    ; Y
+                 ((char-equal c ?\u2585)     box-drawing-face-top)    ; Z
+                 ((char-equal c ?\U0001FB65) box-drawing-face-bottom) ; x
+                 ((char-equal c ?\U0001FB5A) box-drawing-face-bottom) ; y
+                 ((char-equal c ?\U0001FB84) box-drawing-face-bottom) ; z
+                 ((char-equal c ?\U0001FB44) box-drawing-face-top)    ; A
+                 ((char-equal c ?\U0001FB4F) box-drawing-face-top)    ; B
+                 ((char-equal c ?\U0001FB60) box-drawing-face-bottom) ; C
+                 (default-face))))
+          (put-text-property i (1+ i) 'face colors banner)))))
   banner)
 #+END_SRC
 
@@ -451,34 +514,34 @@ Enable window dividers
 
 #+BEGIN_SRC emacs-lisp
 (defun fr33macs-splash-generate-content ()
-  (setq fr33macs-random-quip
-    (aref fr33macs-splash-quips (random (length fr33macs-splash-quips))))
-  (setq fr33macs-splash-banner (concat
-    (fr33macs-color-banner
-      "_XZZZZZZY__XZZZZZZY__XZZZZZY__XZZZZZY__XZZZZZZZZZY__XZZZZZZY__XZZZZZZY__XZZZZZY_"
-      "A-@@@@@@----@@@@@@----@@@@@----@@@@@----@@@@@@@@@----@@@@@@----@@@@@@----@@@@@-B"
-      "-@@@@@@@@--@@@@@@@@--@@@@@@@--@@@@@@@--@@@@@@@@@@@--@@@@@@@@--@@@@@@@@--@@@@@@@-"
-      "-@@!-------@@!--@@@------@@@------@@@--@@!-@@!-@@!--@@!--@@@--!@@------!@@------"
-      "-!@!-------!@!--@!@------@!@------@!@--!@!-!@!-!@!--!@!--@!@--!@!-------!@!-----"
-      "-@!!!:!:---@!@!!@!---@!@!!@---@!@!!@---@!!-!!@-@!@--@!@!@!@!--!@!-------!!@@!!--"
-      "-!!!!!::---!!@!@!----!!@!@!---!!@!@!---!@!---!-!@!--!!!@!!!!--!!!--------!!@!!!-"
-      "-!!:-------!!:-:!!-------!!:------!!:--!!:-----!!:--!!:--!!!--:!!-----------!:!-"
-      "-:!:-------:!:--!:!------:!:------:!:--:!:-----:!:--:!:--!:!--:!:-----------!:!-"
-      "-.::--y_x--::.--:::--::.::::--::.::::--:::-y_x-::.--::---:::--.:::..::--::::.::-"
-      "-.:.--___--.:.--:.:---:.:.:----:.:.:---.:.-___-:..--.:---:.:---::.::.:--::.:.:-C"
-      "xzzzzy___xzzzzzzzzzy_xzzzzzy__xzzzzzy_xzzzy___xzzzzzzzy_xzzzy_xzzzzzzzzzzzzzzzy_")
-    "\n"
-    "\n"
-    (fr33macs-color-banner "XZZZZZZZZZZZZZY")
-    "\n"
-    (propertize "(o'_')o     " 'face '(:foreground "#c6a0f6"))
-    (propertize "  PRESS SPACE  " 'face '(:foreground "#c6a0f6" :background "#2a2a3f" :weight bold))
-    (propertize "     t('.'t)" 'face '(:foreground "#c6a0f6"))
-    "\n"
-    (fr33macs-color-banner "xzzzzzzzzzzzzzy")
-    "\n\n"
-    (propertize fr33macs-random-quip 'face '(:foreground "#363a4f"))
-)))
+  (fr33macs-splash-randomize)
+  (fr33macs-splash-let-colors
+    (setq fr33macs-splash-banner (concat
+      (fr33macs-color-banner
+        "_XZZZZZZY__XZZZZZZY__XZZZZZY__XZZZZZY__XZZZZZZZZZY__XZZZZZZY__XZZZZZZY__XZZZZZY_"
+        "A-@@@@@@----@@@@@@----@@@@@----@@@@@----@@@@@@@@@----@@@@@@----@@@@@@----@@@@@-B"
+        "-@@@@@@@@--@@@@@@@@--@@@@@@@--@@@@@@@--@@@@@@@@@@@--@@@@@@@@--@@@@@@@@--@@@@@@@-"
+        "-@@!-------@@!--@@@------@@@------@@@--@@!-@@!-@@!--@@!--@@@--!@@------!@@------"
+        "-!@!-------!@!--@!@------@!@------@!@--!@!-!@!-!@!--!@!--@!@--!@!-------!@!-----"
+        "-@!!!:!:---@!@!!@!---@!@!!@---@!@!!@---@!!-!!@-@!@--@!@!@!@!--!@!-------!!@@!!--"
+        "-!!!!!::---!!@!@!----!!@!@!---!!@!@!---!@!---!-!@!--!!!@!!!!--!!!--------!!@!!!-"
+        "-!!:-------!!:-:!!-------!!:------!!:--!!:-----!!:--!!:--!!!--:!!-----------!:!-"
+        "-:!:-------:!:--!:!------:!:------:!:--:!:-----:!:--:!:--!:!--:!:-----------!:!-"
+        "-.::--y_x--::.--:::--::.::::--::.::::--:::-y_x-::.--::---:::--.:::..::--::::.::-"
+        "-.:.--___--.:.--:.:---:.:.:----:.:.:---.:.-___-:..--.:---:.:---::.::.:--::.:.:-C"
+        "xzzzzy___xzzzzzzzzzy_xzzzzzy__xzzzzzy_xzzzy___xzzzzzzzy_xzzzy_xzzzzzzzzzzzzzzzy_")
+      "\n"
+      "\n"
+      (fr33macs-color-banner "XZZZZZZZZZZZZZY")
+      "\n"
+      (propertize "(o'_')o     " 'face `(:foreground ,text-fg))
+      (propertize "  PRESS SPACE  " 'face `(:foreground ,text-fg :background ,panel :weight bold))
+      (propertize "     t('.'t)" 'face `(:foreground ,text-fg))
+      "\n"
+      (fr33macs-color-banner "xzzzzzzzzzzzzzy")
+      "\n\n"
+      (propertize fr33macs-random-quip 'face `(:foreground ,(catppuccin-get-color 'surface0)))
+))))
 
 (setq fr33macs-splash-quips (vector
   "WHEN?  WILL?  YOU?  CRACK?"
@@ -1356,7 +1419,9 @@ Tabs make me sick to my stomach.
 (eval-after-load 'whitespace '(let (( ws-color (catppuccin-get-color 'peach) ))
   (dolist (face '(whitespace-tab trailing-whitespace))
     (set-face-attribute face nil
-      :background ws-color :box `(:color ,ws-color)))))
+      :background ws-color
+      :box `(:color ,ws-color
+             :line-width (-1 . -1))))))
 #+END_SRC
 
 Try to fix some things automatically.

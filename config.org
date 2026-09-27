@@ -204,6 +204,12 @@ Try to always split window vertically.
 (setq split-height-threshold nil)
 #+END_SRC
 
+Balance windows automatically.
+
+#+BEGIN_SRC emacs-lisp
+(setq window-combination-resize t)
+#+END_SRC
+
 Remove secondary selection with mouse.
 
 #+BEGIN_SRC emacs-lisp

@@ -316,14 +316,6 @@ Enable window dividers
 (defvar fr33splash-content-fn nil
   "Function used to generate content.")
 
-(defvar fr33splash--yield-to-buffer-modes
-  '(magit-status-mode)
-  "Major modes to yield to when splash screen is visible.")
-
-(defvar fr33splash--yield-to-buffer-names
-  (list "*Help*")
-  "Buffer names to yield to when splash screen is visible.")
-
 (defvar fr33splash--allow-overlap-buffer-names
   ;; " *LV*" = pretty-hydra
   (list fr33splash-buffer-name " *LV*" "*Warnings*")
@@ -342,16 +334,17 @@ Enable window dividers
   (setq-local global-hl-line-mode nil)
   (font-lock-mode -1)
   (hl-line-mode -1)
-  (display-line-numbers-mode -1)
-  (fr33splash--apply-fixes))
+  (display-line-numbers-mode -1))
 
 (defun fr33splash--apply-fixes ()
   "Fix issues caused by other packages."
-  (when ((boundp 'sublimity-mode)) (sublimity-mode -1)))
+  (when (boundp 'sublimity-mode)
+    (sublimity-mode -1)))
 
 (defun fr33splash--remove-fixes ()
   "Removes fixes for issues caused by other packages."
-  (when ((boundp 'sublimity-mode)) (sublimity-mode 1)))
+  (when (boundp 'sublimity-mode)
+    (sublimity-mode 1)))
 
 (defun fr33splash-initial-buffer ()
   "Function to use as initial-buffer-choice."
@@ -364,6 +357,7 @@ Enable window dividers
     (when (or (not fr33splash--content)
               (not initial))
       (fr33splash-regenerate-content))
+    (fr33splash--apply-fixes)
     (fr33splash--redraw)
     (pop-to-buffer-same-window buffer)
     buffer))
@@ -418,22 +412,26 @@ Enable window dividers
 
 (defun fr33splash--on-window-buffer-change (_)
   "Dominate the window or bury, depending on if splash is visible."
-  (let ((kill-own-buffer nil))
+  (let ((kill-own-window nil))
+       ((kill-own-buffer nil))
     (when-let* ((buffer (fr33splash--get-buffer)))
-    (if (fr33splash--visible)
-      (walk-windows (lambda (window)
-        (when-let* (((not kill-own-buffer))
-                    (other-buffer (window-buffer window))
-                    ((not (eq buffer other-buffer)))
-                    ((not (minibufferp other-buffer)))
-                    (name (buffer-name other-buffer)))
-          (when (not (member name fr33splash--allow-overlap-buffer-names))
-            (setq kill-own-buffer t)
-            (delete-window (get-buffer-window buffer))))))
-      (setq kill-own-buffer (eq (window-old-buffer) buffer)))
-    (when kill-own-buffer
-      (kill-buffer buffer)
-      (fr33splash--remove-fixes)))))
+      (if (fr33splash--visible)
+        (walk-windows (lambda (window)
+          (when-let* (((not kill-own-buffer))
+                      (other-buffer (window-buffer window))
+                      ((not (eq buffer other-buffer)))
+                      ((not (minibufferp other-buffer)))
+                      (name (buffer-name other-buffer)))
+            (when (not (member name fr33splash--allow-overlap-buffer-names))
+              (setq kill-own-buffer t)
+              (setq kill-own-window t)))))
+        (fr33splash--remove-fixes)
+        (when (eq (window-old-buffer) buffer)
+          (setq kill-own-buffer t)))
+      (when kill-own-window
+        (delete-window (get-buffer-window buffer)))
+      (when kill-own-buffer
+        (kill-buffer buffer)))))
 
 (add-hook 'window-size-change-functions 'fr33splash--redraw)
 (add-hook 'window-buffer-change-functions 'fr33splash--on-window-buffer-change)
@@ -625,6 +623,8 @@ The `r',`g',`b' values can range between `0.0..1.0'."
   "Has anyone really been far even as decided to use even go want to do look more like?"
   "FOR NOTHING  -  AGAINST EVERYTHING"
   "!  TERROR LEVEL INCREASED  !"
+  "No human being deserves to get what's coming to them."
+  "0.1 + 0.2 = 0.30000000000000004"
 ))
 #+END_SRC
 

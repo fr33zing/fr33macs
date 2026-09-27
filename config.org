@@ -1844,19 +1844,22 @@ tree-sitter major modes.
   :init (rainbow-delimiters-mode))
 #+END_SRC
 
-** Dimmer
+** TODO Dimmer
+
+Gone until it's fixed:
+https://github.com/gonewest818/dimmer.el/pull/88
 
 #+BEGIN_SRC emacs-lisp
-(use-package dimmer
-  :ensure t
-  :vc (:url "https://github.com/chrhansk/dimmer.el" :rev "9a75788")
-  :init
-  (dimmer-configure-which-key)
-  (dimmer-configure-company-box)
-  (dimmer-configure-hydra)
-  (dimmer-configure-magit)
-  (dimmer-configure-org)
-  (dimmer-mode t))
+;; (use-package dimmer
+;;   :ensure t
+;;   :vc (:url "https://github.com/chrhansk/dimmer.el" :rev "9a75788")
+;;   :init
+;;   (dimmer-configure-which-key)
+;;   (dimmer-configure-company-box)
+;;   (dimmer-configure-hydra)
+;;   (dimmer-configure-magit)
+;;   (dimmer-configure-org)
+;;   (dimmer-mode t))
 #+END_SRC
 
 ** Sublimity

@@ -1472,14 +1472,14 @@ Tabs make me sick to my stomach.
 
 #+BEGIN_SRC emacs-lisp
 (setq indent-tabs-mode nil)
-(setq whitespace-style '(face tabs trailing empty missing-newline-at-eof))
+(setq whitespace-style '(face tabs trailing empty))
 (global-whitespace-mode)
 
-(eval-after-load 'whitespace '(let (( ws-color (catppuccin-get-color 'peach) ))
+(eval-after-load 'whitespace '(let ((color (catppuccin-get-color 'peach)))
   (dolist (face '(whitespace-tab trailing-whitespace))
     (set-face-attribute face nil
-      :background ws-color
-      :box `(:color ,ws-color
+      :background color
+      :box `(:color ,color
              :line-width (-1 . -1))))))
 #+END_SRC
 

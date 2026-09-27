@@ -160,8 +160,7 @@ bar out of the maximized state.
     (add-to-list 'default-frame-alist option)))
 
 (add-hook 'after-make-frame-functions (lambda (frame)
-  (sleep-for 1)
-  (set-frame-size frame 90 45)))
+  (run-with-timer 1 nil 'set-frame-size frame 90 45)))
 #+END_SRC
 
 Disable unwanted UI elements and startup messages.
@@ -309,6 +308,7 @@ Enable window dividers
   (setq-local evil-default-cursor (list nil))
   (setq-local global-hl-line-mode nil)
   (setq-local sublimity-attractive-centering-width 0)
+  (sublimity-mode -1)
   (font-lock-mode -1)
   (hl-line-mode -1)
   (display-line-numbers-mode -1))

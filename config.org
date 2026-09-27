@@ -321,10 +321,13 @@ Enable window dividers
         (setq visible t))))
   visible))
 
-(defun fr33macs-splash-buffer ()
+(defun fr33macs-splash-initial-buffer ()
+   (fr33macs-splash-buffer t))
+
+(defun fr33macs-splash-buffer (&optional initial)
   (interactive)
   (let* ((splash-buffer (get-buffer-create "*splash*")))
-    (fr33macs-splash-generate-content) ; TODO move this to a custom hook?
+    (when (not initial) (fr33macs-splash-generate-content))
     (fr33macs-maybe-redraw-splash)
     (pop-to-buffer-same-window splash-buffer)
     (fr33macs-redraw-timer-start)
@@ -404,7 +407,7 @@ Enable window dividers
 #+BEGIN_SRC emacs-lisp
 (add-hook 'window-size-change-functions 'fr33macs-maybe-redraw-splash)
 (add-hook 'window-buffer-change-functions 'fr33macs-splash-on-window-buffer-change)
-(setq initial-buffer-choice 'fr33macs-splash-buffer)
+(setq initial-buffer-choice 'fr33macs-splash-initial-buffer)
 #+END_SRC
 
 #+BEGIN_SRC emacs-lisp
@@ -583,6 +586,7 @@ The `r',`g',`b' values can range between `0.0..1.0'."
   "Has anyone really been far even as decided to use even go want to do look more like?"
   "FOR NOTHING  -  AGAINST EVERYTHING"
 ))
+(fr33macs-splash-generate-content)
 #+END_SRC
 
 * My library

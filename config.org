@@ -344,44 +344,49 @@ Enable window dividers
               (banner-lines (string-lines banner)))
     (setq fr33macs-last-size size)
     (with-current-buffer buffer
-        (erase-buffer)
+      (erase-buffer)
 
-        ;; Horizontal alignment
-        (setq banner (mapconcat (lambda (line)
-          (let* ((len (length line))
-                 (padding-width (max 0 (floor (/ (- width len) 2))))
-                 (padding (make-string padding-width ?\s)))
-            (if (<= width len)
-              (let (( trim (/ (- len width) 2) ))
-                (setq line (substring line trim (- len 1 trim)))))
-            (concat padding line "\n")))
-          banner-lines))
+      ;; Horizontal alignment
+      (setq banner (mapconcat (lambda (line)
+        (let* ((len (length line))
+               (padding-width (max 0 (floor (/ (- width len) 2))))
+               (padding (make-string padding-width ?\s)))
+          (if (<= width len)
+            (let (( trim (/ (- len width) 2) ))
+              (setq line (substring line trim (- len 1 trim)))))
+          (concat padding line "\n")))
+        banner-lines))
 
-        ;; Vertical alignment
-        (let* ((n-lines (length banner-lines))
-               (padding-height (max 0 (floor (/ (- height n-lines) 2))))
-               (padding (make-string padding-height ?\n)))
-          (setq banner (concat padding banner)))
+      ;; Vertical alignment
+      (let* ((n-lines (length banner-lines))
+             (padding-height (max 0 (floor (/ (- height n-lines) 2))))
+             (padding (make-string padding-height ?\n)))
+        (setq banner (concat padding banner)))
 
-        (save-excursion (insert banner))
-        ; TODO maybe not call this if already in the mode
-        (fr33macs-splash-mode))))
+      (save-excursion (insert banner))
+      ; TODO maybe not call this if already in the mode
+      (fr33macs-splash-mode))))
+
+(defun fr33macs-splash-dominate-window ()
+  (walk-windows (lambda (window)
+    (if-let* ((buffer (window-buffer window))
+             (name (buffer-name buffer)))
+      (when (and (not (member name fr33macs-splash-safe-buffer-names))
+                 (not (minibufferp buffer)))
+        (message "fr33macs-splash killed window with buffer: %s" name)
+        (delete-window window)))))
+  (sublimity-mode -1))
+
+(defun fr33macs-splash-bury-self ()
+  (when-let* ((buffer (get-buffer "*splash*"))
+              (eq (window-old-buffer)))
+    (sublimity-mode 1)
+    (bury-buffer buffer)))
 
 (defun fr33macs-splash-on-window-buffer-change (_)
-  ;; Dominate the frame when splash is shown
-  (when (fr33macs-splash-visible)
-    (walk-windows
-      (lambda (window)
-        (if-let* ((buffer (window-buffer window))
-                 (name (buffer-name buffer)))
-          (when (and (not (member name fr33macs-splash-safe-buffer-names))
-                     (not (minibufferp buffer)))
-            (message "fr33macs-splash killed window with buffer: %s" name)
-            (delete-window window))))))
-
-  ;; Bury splash buffer when something else is opened
-  (when (eq (window-old-buffer) (get-buffer "*splash*"))
-    (bury-buffer "*splash*")))
+  (if (fr33macs-splash-visible)
+    (fr33macs-splash-dominate-window)
+    (fr33macs-splash-bury-self)))
 #+END_SRC
 
 *** Hooks & advice

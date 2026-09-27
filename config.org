@@ -309,6 +309,13 @@ Enable window dividers
 (add-to-list 'default-frame-alist `(cursor-color . ,my:cursor-color))
 (set-face-attribute 'region nil
                     :background (catppuccin-get-color 'surface2))
+
+(set-face-attribute 'show-paren-match nil
+                    :background (catppuccin-get-color 'pink)
+                    :foreground "black")
+(set-face-attribute 'show-paren-mismatch nil
+                    :background (catppuccin-get-color 'yellow)
+                    :foreground "black")
 #+END_SRC
 
 * Splash screen

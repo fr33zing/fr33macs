@@ -387,11 +387,12 @@ Enable window dividers
   (when (fr33macs-splash-visible)
     (walk-windows
       (lambda (window)
-        (let ((name (buffer-name (window-buffer window))))
-          (when (not (member name fr33macs-splash-safe-buffer-names))
+        (if-let* ((buffer (window-buffer window))
+                 (name (buffer-name buffer)))
+          (when (and (not (member name fr33macs-splash-safe-buffer-names))
+                     (not (minibufferp buffer)))
             (message "fr33macs-splash killed window with buffer: %s" name)
-            (delete-window window))))
-      -1)) ; Never walk minibuffer
+            (delete-window window))))))
 
   ;; Bury splash buffer when something else is opened
   (when (eq (window-old-buffer) (get-buffer "*splash*"))

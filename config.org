@@ -318,7 +318,7 @@ Enable window dividers
   (display-line-numbers-mode -1))
 
 (defun fr33macs-splash-visible ()
-  (let (( visible nil ))
+  (let ((visible nil))
     (walk-windows (lambda (w)
       (when (string-equal (buffer-name (window-buffer w)) "*splash*")
         (setq visible t))))
@@ -576,6 +576,7 @@ The `r',`g',`b' values can range between `0.0..1.0'."
   "Run it into the ground."
   "Has anyone really been far even as decided to use even go want to do look more like?"
   "FOR NOTHING  -  AGAINST EVERYTHING"
+  "!  TERROR LEVEL INCREASED  !"
 ))
 (fr33macs-splash-generate-content)
 #+END_SRC

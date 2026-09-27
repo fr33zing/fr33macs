@@ -1003,63 +1003,64 @@ that define hydra(s):
 *** File
 
 #+BEGIN_SRC emacs-lisp
-  (pretty-hydra-define hydra:file
-    (:exit t :idle 0.25)
-    ("Switch"
-     (("f" find-file         "Find file")
-      ("p" project-find-file "Find file in project"))))
+(pretty-hydra-define hydra:file
+  (:exit t :idle 0.25)
+  ("Switch"
+   (("f" find-file         "Find file")
+    ("p" project-find-file "Find file in project"))))
 #+END_SRC
 
 *** Buffer
 
 #+BEGIN_SRC emacs-lisp
-  (defun my:last-buffer ()
-    (interactive)
-    (switch-to-buffer (other-buffer (current-buffer) 1)))
+(defun my:last-buffer ()
+  (interactive)
+  (switch-to-buffer (other-buffer (current-buffer) 1)))
 
-  (pretty-hydra-define hydra:buffer
-    (:exit t :idle 0.25)
-    ("Switch"
-     (("b" consult-buffer                  "Quick switch")
-      ("i" bufler-list                     "List buffers")
-      ("]" next-buffer                     "Next buffer"     :exit nil)
-      ("[" previous-buffer                 "Previous buffer" :exit nil)
-      ("l" my:last-buffer                  "Last buffer")
-      ("m" (switch-to-buffer "*Messages*") "Messages")
-      ("S" (scratch-buffer)                "Scratch"))
-     "Actions"
-     (("s" save-buffer         "Save buffer")
-      ("k" kill-current-buffer "Kill buffer")
-      ("K" kill-buffer         "Kill other buffer")
-      ("X" my:kill-all-buffers "Kill all buffers")
-      ("r" revert-buffer       "Revert current buffer")
-      ("R" rename-buffer       "Rename current buffer"))))
+(pretty-hydra-define hydra:buffer
+  (:exit t :idle 0.25)
+  ("Switch"
+   (("b" consult-buffer                  "Quick switch")
+    ("i" bufler-list                     "List buffers")
+    ("]" next-buffer                     "Next buffer"     :exit nil)
+    ("[" previous-buffer                 "Previous buffer" :exit nil)
+    ("l" my:last-buffer                  "Last buffer")
+    ("m" (switch-to-buffer "*Messages*") "Messages")
+    ("S" (scratch-buffer)                "Scratch"))
+   "Actions"
+   (("s" save-buffer         "Save buffer")
+    ("k" kill-current-buffer "Kill buffer")
+    ("K" kill-buffer         "Kill other buffer")
+    ("X" my:kill-all-buffers "Kill all buffers")
+    ("r" revert-buffer       "Revert current buffer")
+    ("R" rename-buffer       "Rename current buffer"))))
 #+END_SRC
 
 *** Window
 
 #+BEGIN_SRC emacs-lisp
-  (pretty-hydra-define hydra:window
-    (:exit t :idle 0.25)
-    ("Switch"
-     (("w" my:switch-window "Quick switch"))
-     "Actions"
-     (("k" delete-window             "Kill window")
-      ("K" switch-window-then-delete "Kill other window")
-      ("b" balance-windows           "Balance windows")
-      ("s" my:split-window-below     "Split window horizontally")
-      ("v" my:split-window-right     "Split window vertically"))))
+(pretty-hydra-define hydra:window
+  (:exit t :idle 0.25)
+  ("Switch"
+   (("w" my:switch-window "Quick switch"))
+   "Actions"
+   (("k" delete-window             "Kill window")
+    ("K" switch-window-then-delete "Kill other window")
+    ("X" delete-other-windows      "Kill all other windows")
+    ("b" balance-windows           "Balance windows")
+    ("s" my:split-window-below     "Split window horizontally")
+    ("v" my:split-window-right     "Split window vertically"))))
 #+END_SRC
 
 *** Toggle
 
 #+BEGIN_SRC emacs-lisp
-  (pretty-hydra-define hydra:toggle
-    (:exit t :idle 0.25)
-    ("Toggle"
-     (("w" visual-line-mode           "Line wrapping" :toggle t)
-      ("h" lsp-inlay-hints-mode       "LSP: Inlay hints" :toggle t)
-      ("p" org-toggle-pretty-entities "Org: Pretty entities" :toggle org-pretty-entities))))
+(pretty-hydra-define hydra:toggle
+  (:exit t :idle 0.25)
+  ("Toggle"
+   (("w" visual-line-mode           "Line wrapping" :toggle t)
+    ("h" lsp-inlay-hints-mode       "LSP: Inlay hints" :toggle t)
+    ("p" org-toggle-pretty-entities "Org: Pretty entities" :toggle org-pretty-entities))))
 #+END_SRC
 
 *** Find
@@ -1080,36 +1081,36 @@ that define hydra(s):
     ("r"     consult-recent-file             "Recent files"))
   ("Show"
    (("O"     symbols-outline-show            "Symbols outline")
-    ("I"     imenu-list-smart-toggle         "Imenu list")
-    ))))
+    ("I"     imenu-list-smart-toggle         "Imenu list")))))
 #+END_SRC
 
 *** Leader key
 
 #+BEGIN_SRC emacs-lisp
-  (pretty-hydra-define hydra:leader
-    (:exit t :idle 0.25)
-    ("Hydra"
-     (("<tab>" hydra:find/body     "Find")
-      ("m"     major-mode-hydra    "Mode-specific")
-      ("t"     hydra:toggle/body   "Toggle")
-      ("c"     hydra:code/body     "Code")
-      ("f"     hydra:file/body     "File")
-      ("b"     hydra:buffer/body   "Buffer")
-      ("w"     hydra:window/body   "Window")
-      ("h"     hydra:help/body     "Help & more")
-      ("r"     hydra:org-roam/body "Org Roam"))
-     "Shortcut"
-     (("SPC"   project-find-file       "Find file in project")
-      ("`"     eat-other-window        "Terminal")
-      ("/"     comment-dwim            "Comment code")
-      ("."     my:choose-point-action  "Code actions at point")
-      (">"     my:fix-next-error       "Fix next error")
-      ("<"     my:fix-previous-error   "Fix previous error")
-      ("g"     magit                   "Open Magit")
-      ("s"     save-buffer             "Save buffer")
-      ("q"     save-buffers-kill-emacs "Save & quit")))))
-;; </config>
+(pretty-hydra-define hydra:leader
+  (:exit t :idle 0.25)
+  ("Hydra"
+   (("<tab>" hydra:find/body     "Find")
+    ("m"     major-mode-hydra    "Mode-specific")
+    ("t"     hydra:toggle/body   "Toggle")
+    ("a"     hydra:avy/body      "Avy")
+    ("c"     hydra:code/body     "Code")
+    ("f"     hydra:file/body     "File")
+    ("b"     hydra:buffer/body   "Buffer")
+    ("w"     hydra:window/body   "Window")
+    ("h"     hydra:help/body     "Help & more")
+    ("r"     hydra:org-roam/body "Org Roam"))
+   "Shortcut"
+   (("SPC"   project-find-file       "Find file in project")
+    ("`"     eat-other-window        "Terminal")
+    ("/"     comment-dwim            "Comment code")
+    ("."     my:choose-point-action  "Code actions at point")
+    (">"     my:fix-next-error       "Fix next error")
+    ("<"     my:fix-previous-error   "Fix previous error")
+    ("g"     magit                   "Open Magit")
+    ("s"     save-buffer             "Save buffer")
+    ("q"     save-buffers-kill-emacs "Save & quit"))))
+) ;; </config>
 #+END_SRC
 
 ** General

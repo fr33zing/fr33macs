@@ -302,7 +302,7 @@ Enable window dividers
 (setq fr33macs-last-size (cons 0 0))
 (setq fr33macs-splash-banner "")
 ;; " *LV*" = pretty-hydra
-(setq fr33macs-splash-safe-buffer-names (list "*splash*" " *LV*"))
+(setq fr33macs-splash-safe-buffer-names (list "*splash*" " *LV*" "*Warnings*"))
 
 (define-derived-mode fr33macs-splash-mode
   special-mode "fr33macs splash"
@@ -1883,16 +1883,15 @@ Change the ~HTML~ export preamble and postamble.
 #+BEGIN_SRC emacs-lisp
 (use-package org-roam
   :ensure t
-  ;:custom
-  ;(org-roam-directory (file-truename "/path/to/org-files/"))
+  :custom (org-roam-directory (file-truename "~/org-roam"))
   :config
-  (make-directory "~/org-roam")
-  (setq org-roam-directory (file-truename "~/org-roam"))
+  (when (not (file-directory-p org-roam-directory))
+    (make-directory org-roam-directory))
 
-  (setq org-roam-node-display-template (concat "${title:*} "
-                                               (propertize "${tags:10}" 'face 'org-tag)))
+  (setq org-roam-node-display-template
+        (concat "${title:*} " (propertize "${tags:10}" 'face 'org-tag)))
+
   (org-roam-db-autosync-mode)
-  ;; If using org-roam-protocol
   (require 'org-roam-protocol))
 #+END_SRC
 

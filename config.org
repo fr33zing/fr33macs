@@ -11,6 +11,10 @@ Read this document in this repository's github.io page or in Emacs for the best 
 
 * TODO ASAP
 
+- SUBLIMITY MODE NEEDS TO GO
+  Replace with something from here:
+  https://stackoverflow.com/questions/24955253/centre-emacs-buffer-within-window
+
 - Balance windows when a new one opens
 - Create a script that checks if emacsclient is already open.
   If open, instead focus it https://wayland.app/protocols/kde-plasma-window-management
@@ -1762,9 +1766,9 @@ tree-sitter major modes.
   (dimmer-mode t))
 #+END_SRC
 
-** Sublimity-attractive
+** Sublimity
 
-Centers each buffer horizontally.
+Centers each buffer horizontally and add smooth scroll.
 
 #+BEGIN_SRC emacs-lisp
 (use-package sublimity
@@ -1774,8 +1778,12 @@ Centers each buffer horizontally.
   (add-to-list 'sublimity-disabled-major-modes 'flycheck-error-list-mode))
 
 (use-package sublimity-attractive
+  :after sublimity
   :custom
   (sublimity-attractive-centering-width 110))
+
+(use-package sublimity-scroll
+  :after sublimity)
 #+END_SRC
 
 ** Eat

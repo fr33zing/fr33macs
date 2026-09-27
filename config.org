@@ -296,7 +296,6 @@ Enable window dividers
 ** Library
 
 #+BEGIN_SRC emacs-lisp
-(setq fr33macs-redraw-timer nil)
 (setq fr33macs-last-size (cons 0 0))
 (setq fr33macs-splash-banner "")
 ;; " *LV*" = pretty-hydra
@@ -330,24 +329,7 @@ Enable window dividers
     (when (not initial) (fr33macs-splash-generate-content))
     (fr33macs-maybe-redraw-splash)
     (pop-to-buffer-same-window splash-buffer)
-    (fr33macs-redraw-timer-start)
     splash-buffer))
-
-(defun fr33macs-redraw-timer-stop ()
-  (setq fr33macs-last-size (cons 0 0))
-  (if (and (boundp 'fr33macs-redraw-timer)
-           (timerp fr33macs-redraw-timer))
-    (cancel-timer fr33macs-redraw-timer)))
-
-(defun fr33macs-redraw-timer-start ()
-  (fr33macs-redraw-timer-stop)
-  (setq fr33macs-redraw-timer
-        (run-with-timer 0.5 0.5 #'fr33macs-redraw-timer-tick)))
-
-(defun fr33macs-redraw-timer-tick ()
-  (if (not (string= major-mode "fr33macs-splash-mode"))
-    (fr33macs-redraw-timer-stop))
-    (fr33macs-maybe-redraw-splash))
 
 (defun fr33macs-maybe-redraw-splash (&rest _)
   (interactive)

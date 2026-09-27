@@ -412,8 +412,8 @@ Enable window dividers
 
 (defun fr33splash--on-window-buffer-change (_)
   "Dominate the window or bury, depending on if splash is visible."
-  (let ((kill-own-window nil))
-       ((kill-own-buffer nil))
+  (let ((kill-own-window nil)
+        (kill-own-buffer nil))
     (when-let* ((buffer (fr33splash--get-buffer)))
       (if (fr33splash--visible)
         (walk-windows (lambda (window)

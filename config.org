@@ -204,6 +204,16 @@ Try to always split window vertically.
 (setq split-height-threshold nil)
 #+END_SRC
 
+Remove secondary selection with mouse.
+
+#+BEGIN_SRC emacs-lisp
+(global-unset-key (kbd "<M-drag-mouse-1>"))   ; was mouse-set-secondary
+(global-unset-key (kbd "<M-down-mouse-1>"))   ; was mouse-drag-secondary
+(global-unset-key (kbd "<M-mouse-1>"))        ; was mouse-start-secondary
+(global-unset-key (kbd "<M-mouse-2>"))        ; was mouse-yank-secondary
+(global-unset-key (kbd "<M-mouse-3>"))        ; was mouse-secondary-save-then-kill
+#+END_SRC
+
 ** MELPA
 
 #+BEGIN_SRC emacs-lisp
@@ -989,6 +999,7 @@ that define hydra(s):
   (:exit t :idle 0.25)
   ("Action"
    (("c" project-compile              "Compile project")
+    ("C" project-recompile            "Recompile project")
     ("." my:choose-point-action       "Code actions at point")
     ("/" comment-dwim                 "Comment code")
     ("o" lsp-organize-imports         "Organize imports")

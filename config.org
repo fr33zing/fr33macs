@@ -915,6 +915,7 @@ discoverability and reduce cognitive load.
 
 (use-package pretty-hydra
   :ensure t
+  :custom (lv-use-padding t)
   :config
   (set-face-attribute 'hydra-face-red nil
     :foreground (catppuccin-get-color 'red))
@@ -936,6 +937,25 @@ that define hydra(s):
 - [[*Org][Languages > Org]]
 - [[*Magit][Version Control > Magit]]
 - [[*Rust][Languages > Rust]]
+
+#+BEGIN_SRC emacs-lisp
+(defun my:fix-hydras ()
+  (setq-local sublimity-attractive-centering-width 0)
+  (setq-local cursor-type nil)
+  (setq-local evil-default-cursor (list nil)))
+(add-hook 'lv-window-hook 'my:fix-hydras)
+
+(defun my:pad-hydras (orig-fun format-string &rest args)
+  (let* ((len (length (car (string-lines format-string))))
+        (padding (make-string len ?\s)))
+    (apply orig-fun
+           (concat padding
+                   "\n"
+                   format-string
+                   (propertize "." 'face `(:foreground ,(catppuccin-get-color 'mantle))))
+           args)))
+(advice-add 'lv-message :around #'my:pad-hydras)
+#+END_SRC
 
 *** Help
 

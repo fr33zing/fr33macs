@@ -381,6 +381,7 @@ Enable window dividers
               (not initial))
       (fr33splash-regenerate-content))
     (fr33splash--apply-fixes)
+    (setq fr33splash--last-size nil)
     (fr33splash--redraw)
     (pop-to-buffer-same-window buffer)
     buffer))

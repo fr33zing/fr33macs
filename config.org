@@ -394,7 +394,7 @@ Enable window dividers
   (when-let* ((buffer (fr33splash--get-buffer))
               (window (get-buffer-window buffer))
               (width (window-body-width window))
-              (height (window-body-height window))
+              (height (frame-height))
               (size (cons width height))
               ((not (equal fr33splash--last-size size))) ; Early exit
               (content (string-trim fr33splash--content))

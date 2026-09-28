@@ -433,8 +433,13 @@ Enable window dividers
         (setq visible t))))
   visible))
 
+(defun fr33splash--create-automatically-p ()
+  (when-let* ((buffers (seq-remove (lambda (b) (string-prefix-p " " (buffer-name b)))
+                             (buffer-list))))
+    (<= (length buffers) 1)))
+
 (defun fr33splash--on-window-buffer-change (_)
-  "Dominate the window or bury, depending on if splash is visible."
+  "Dominate the window or bury, depending on if splash is visible. Create a new splash screen if needed."
   (let ((kill-own-window nil)
         (kill-own-buffer nil))
     (when-let* ((buffer (fr33splash--get-buffer)))
@@ -454,7 +459,10 @@ Enable window dividers
       (when kill-own-window
         (delete-window (get-buffer-window buffer)))
       (when kill-own-buffer
-        (kill-buffer buffer)))))
+        (kill-buffer buffer))))
+  ;; Create a new splash screen if needed.
+  (when (fr33splash--create-automatically-p)
+    (fr33splash-create-buffer)))
 
 (add-hook 'window-size-change-functions 'fr33splash--redraw)
 (add-hook 'window-buffer-change-functions 'fr33splash--on-window-buffer-change)
@@ -1083,6 +1091,7 @@ that define hydra(s):
   (:exit t :idle 0.25)
   ("Toggle"
    (("w" visual-line-mode           "Line wrapping" :toggle t)
+    ("r" rainbow-delimiters-mode    "Rainbow delimiters" :toggle t)
     ("h" lsp-inlay-hints-mode       "LSP: Inlay hints" :toggle t)
     ("p" org-toggle-pretty-entities "Org: Pretty entities" :toggle org-pretty-entities))))
 #+END_SRC
@@ -1841,7 +1850,10 @@ tree-sitter major modes.
 #+BEGIN_SRC emacs-lisp
 (use-package rainbow-delimiters
   :ensure t
-  :init (rainbow-delimiters-mode))
+  :config
+  (set-face-attribute 'rainbow-delimiters-mismatched-face nil
+                      :background (catppuccin-get-color 'peach)
+                      :foreground "black"))
 #+END_SRC
 
 ** TODO Dimmer

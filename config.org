@@ -1247,6 +1247,19 @@ Emacs that Evil does not cover properly by default.
   (evil-collection-init))
 #+END_SRC
 
+** Fringe mark
+
+#+BEGIN_SRC emacs-lisp
+(use-package evil-fringe-mark
+  :ensure t
+  :custom
+  (evil-fringe-mark-show-special t)
+  (evil-fringe-mark-side 'right-fringe)
+  (evil-fringe-mark-margin 'right-margin)
+  :init (global-evil-fringe-mark-mode)
+  :config (setq-default right-fringe-width 22))
+#+END_SRC
+
 * Completion
 ** Orderless
 
@@ -1435,7 +1448,9 @@ by flashing the current line.
   :hook
   (magit-post-refresh-hook . diff-hl-magit-post-refresh)
   (after-save-hook . magit-after-save-refresh-status)
-  :init (global-diff-hl-mode))
+  :init
+  (diff-hl-dired-mode)
+  (global-diff-hl-mode))
 #+END_SRC
 
 * Search

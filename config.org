@@ -1,13 +1,13 @@
-#+TITLE: Fr33macs, my Nix flake Emacs config
-#+AUTHOR: fr33zing
-#+PROPERTY: header-args :tangle yes
-#+OPTIONS: num:nil H:5 toc:2
-#+EXPORT_FILE_NAME: index.html
+#+title: Fr33macs, my Nix flake Emacs config
+#+author: fr33zing
+#+property: header-args :tangle yes
+#+options: num:nil H:5 toc:2
+#+export_file_name: index.html
 
-#+ATTR_HTML: :style display:none;
-#+BEGIN_EXAMPLE
+#+attr_html: :style display:none;
+#+begin_example
 Read this document in this repository's github.io page or in Emacs for the best experience.
-#+END_EXAMPLE
+#+end_example
 
 * TODO ASAP
 
@@ -25,7 +25,6 @@ Read this document in this repository's github.io page or in Emacs for the best 
 - Disable LTEX in read only
 
 - Check which external libs are actually needed
-
 
 * Links
 
@@ -98,20 +97,20 @@ visibility cycling to work as expected.
 While reading this document you may see what look to be XML tags,
 e.g.:
 
-#+BEGIN_SRC emacs-lisp :tangle no
+#+begin_src emacs-lisp :tangle no
 (defun something-spanning-multiple-src-blocks ()
   (beginning-of-the-defun))
 ;; <defun>
-#+END_SRC
+#+end_src
 
-#+BEGIN_SRC emacs-lisp :tangle no
+#+begin_src emacs-lisp :tangle no
   (middle-of-the-defun)
-#+END_SRC
+#+end_src
 
-#+BEGIN_SRC emacs-lisp :tangle no
+#+begin_src emacs-lisp :tangle no
   (end-of-the-defun)) ; <-- closes the defun
 ;; </defun>
-#+END_SRC
+#+end_src
 
 These tags are not parsed. They are only used to indicate to the
 reader that code in the same scope may be spread across multiple src
@@ -130,23 +129,23 @@ If you don't have Nix installed, [[https://nixos.org/download.html][click here]]
 
 If you have the experimental features [[https://nixos.wiki/wiki/Nix_command][nix-command]] and [[https://nixos.wiki/wiki/Flakes][flakes]] enabled:
 
-#+BEGIN_SRC shell :tangle no
+#+begin_src shell :tangle no
 nix run github:fr33zing/fr33macs
-#+END_SRC
+#+end_src
 
 If you don't have them enabled, but you want to enable them, [[https://nixos.wiki/wiki/Flakes#Enable_flakes][click here]].
 
-#+BEGIN_SRC shell :tangle no
+#+begin_src shell :tangle no
 nix --experimental-features 'nix-command flakes' run github:fr33zing/fr33macs
-#+END_SRC
+#+end_src
 
 ** Permanent installation (Non-NixOS)
 
 If you have an existing Emacs installation... say goodbye.
 
-#+BEGIN_SRC shell :tangle no
+#+begin_src shell :tangle no
 nix develop github:fr33zing/fr33macs --install
-#+END_SRC
+#+end_src
 
 Same deal with the ~--experimental-features~ if you don't have flakes enabled.
 
@@ -157,7 +156,7 @@ hook is necessary, for some reason. Doing it the typical way doesn't
 seem to have an effect if the frame is resized by dragging the title
 bar out of the maximized state.
 
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
 (let ((frame-options '((fullscreen . maximized))))
   (dolist (option frame-options)
     (add-to-list 'initial-frame-alist option)
@@ -165,21 +164,21 @@ bar out of the maximized state.
 
 (add-hook 'after-make-frame-functions (lambda (frame)
   (run-with-timer 1 nil 'set-frame-size frame 90 45)))
-#+END_SRC
+#+end_src
 
 Disable unwanted UI elements and startup messages.
 
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
 (menu-bar-mode -1)
 (tool-bar-mode -1)
 (scroll-bar-mode -1)
 (setq inhibit-startup-message t
       use-dialog-box nil)
-#+END_SRC
+#+end_src
 
 Enable some things which should probably be default
 
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
 (setq require-final-newline t)
 (setq frame-inhibit-implied-resize t)
 (global-hl-line-mode)
@@ -188,45 +187,45 @@ Enable some things which should probably be default
 (recentf-mode 1)
 (setq recentf-max-menu-items 10)
 (setq recentf-max-saved-items 10)
-#+END_SRC
+#+end_src
 
 Enable relative line numbers globally.
 
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
 (setq display-line-numbers-type 'relative)
 (global-display-line-numbers-mode)
-#+END_SRC
+#+end_src
 
 Try to always split window vertically.
 
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
 (setq split-width-threshold 0)
 (setq split-height-threshold nil)
-#+END_SRC
+#+end_src
 
 Balance windows automatically.
 
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
 (setq window-combination-resize t)
-#+END_SRC
+#+end_src
 
 Remove secondary selection with mouse.
 
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
 (global-unset-key (kbd "<M-drag-mouse-1>"))   ; was mouse-set-secondary
 (global-unset-key (kbd "<M-down-mouse-1>"))   ; was mouse-drag-secondary
 (global-unset-key (kbd "<M-mouse-1>"))        ; was mouse-start-secondary
 (global-unset-key (kbd "<M-mouse-2>"))        ; was mouse-yank-secondary
 (global-unset-key (kbd "<M-mouse-3>"))        ; was mouse-secondary-save-then-kill
-#+END_SRC
+#+end_src
 
 ** MELPA
 
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
 (require 'package)
 (add-to-list 'package-archives
              '("melpa" . "http://melpa.org/packages/") t)
-#+END_SRC
+#+end_src
 
 * External libraries
 
@@ -234,30 +233,30 @@ Remove secondary selection with mouse.
 
 Dash is a library for dealing with lists.
 
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
 (use-package dash :ensure t)
-#+END_SRC
+#+end_src
 
 ** Map
 
 Map provides generic map-manipulation functions that work on alists,
 plists, hash-tables, and arrays.
 
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
 (use-package map)
-#+END_SRC
+#+end_src
 
 ** Subr-x
 
 Less commonly used functions that complement basic APIs.
 
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
 (use-package subr-x)
-#+END_SRC
+#+end_src
 
 * Theme
 
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
 (use-package catppuccin-theme :ensure t)
 (load-theme 'catppuccin t)
 (setq catppuccin-flavor (getnix "themeVariant"))
@@ -272,11 +271,11 @@ Less commonly used functions that complement basic APIs.
   :foreground (catppuccin-get-color 'text))
 (set-face-attribute 'font-lock-function-call-face nil
   :foreground (catppuccin-get-color 'text))
-#+END_SRC
+#+end_src
 
 Enable window dividers
 
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
 (set-face-foreground 'window-divider (catppuccin-get-color 'crust))
 (set-face-foreground 'window-divider-first-pixel nil)
 (set-face-foreground 'window-divider-last-pixel nil)
@@ -284,11 +283,11 @@ Enable window dividers
       window-divider-default-right-width 2
       window-divider-default-bottom-width 2)
 (window-divider-mode t)
-#+END_SRC
+#+end_src
 
 ** Variable definitions
 
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
 (defvar my:cursor-color (catppuccin-get-color 'sapphire)
   "Default cursor color.")
 
@@ -297,13 +296,13 @@ Enable window dividers
 
 (defvar my:code-color (catppuccin-get-color 'text)
   "Default color for text that is considered code.")
-#+END_SRC
+#+end_src
 
 ** Customization
 
 *Notice*: Not all theming is done in this section.
 
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
 (set-face-attribute 'default t :font (getnix "font"))
 
 (add-to-list 'default-frame-alist `(cursor-color . ,my:cursor-color))
@@ -316,12 +315,12 @@ Enable window dividers
 (set-face-attribute 'show-paren-mismatch nil
                     :background (catppuccin-get-color 'yellow)
                     :foreground "black")
-#+END_SRC
+#+end_src
 
 * Splash screen
 ** Library
 
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
 (defgroup fr33splash nil
   "fr33macs splash screen."
   :group 'applications
@@ -467,7 +466,7 @@ Enable window dividers
 
 (add-hook 'window-size-change-functions 'fr33splash--redraw)
 (add-hook 'window-buffer-change-functions 'fr33splash--on-window-buffer-change)
-#+END_SRC
+#+end_src
 
 ** Extra
 
@@ -476,7 +475,7 @@ exclude this stuff.
 
 *** Setup
 
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
 (setq fr33splash-content-fn #'fr33splash-generate-content)
 (setq initial-buffer-choice 'fr33splash-initial-buffer)
 
@@ -486,13 +485,13 @@ exclude this stuff.
     (apply orig-fun args)))
 (advice-add 'my:split-window-right :around #'fr33splash-advice-prevent-splitting)
 (advice-add 'my:split-window-below :around #'fr33splash-advice-prevent-splitting)
-#+END_SRC
+#+end_src
 
 *** Color functions
 
 Ripped off from kurecolor, obviously.
 
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
 (defun kurecolor-to-8bit (n)
   "Convert N (`0.0..1.0') to `0-255'."
   (* n 255.0))
@@ -515,11 +514,11 @@ The `r',`g',`b' values can range between `0.0..1.0'."
       (red green blue)
       (mapcar 'kurecolor-to-8bit rgb)
     (format "#%02X%02X%02X" red green blue)))
-#+END_SRC
+#+end_src
 
 *** Utility
 
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
 (setq fr33splash-random-quip "")
 (setq fr33splash--colors '(nil))
 (setq fr33splash--color-groups (vector
@@ -595,11 +594,11 @@ The `r',`g',`b' values can range between `0.0..1.0'."
                  (default-face))))
           (put-text-property i (1+ i) 'face colors banner)))))
   banner)
-#+END_SRC
+#+end_src
 
 ** Content
 
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
 (defun fr33splash-generate-content ()
   (fr33splash-randomize)
   (fr33splash-let-colors
@@ -658,7 +657,7 @@ The `r',`g',`b' values can range between `0.0..1.0'."
   "No human being deserves to get what's coming to them."
   "0.1 + 0.2 = 0.30000000000000004"
 ))
-#+END_SRC
+#+end_src
 
 * My library
 
@@ -668,7 +667,7 @@ around with no particular rhyme or reason.
 
 ** Advice
 
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
 (defun my:advice:be-quiet (orig-fun &rest args)
   "Advice function: Suppress messages in ORIG-FUN.
 
@@ -678,9 +677,9 @@ Example:
   (let ((inhibit-message t)
         (message-log-max nil))
     (apply orig-fun args)))
-#+END_SRC
+#+end_src
 
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
 (defun my:advice:nav-flash-show (&rest _)
   "Advice function: Call `nav-flash-show' after a command.
 
@@ -688,24 +687,24 @@ Example:
 
 (advice-add 'avy-goto-char :after #'my:advice:nav-flash-show)"
   (nav-flash-show))
-#+END_SRC
+#+end_src
 
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
 (defun my:advice:always-force-save (&rest _)
   (my:fix-whitespace)
   (set-buffer-modified-p t))
 
 (advice-add 'save-buffer :before #'my:advice:always-force-save)
-#+END_SRC
+#+end_src
 
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
 (defun my:advice:save-after-code-actions (&rest _)
   (save-buffer))
 
 (advice-add 'lsp-ui-sideline-apply-code-actions :after #'my:advice:save-after-code-actions)
-#+END_SRC
+#+end_src
 
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
 (defun my:advice:bufler-list-center-header (&rest _)
   (with-current-buffer (get-buffer-create "*Bufler*")
     (let (( n (max (/ (- (frame-width) sublimity-attractive-centering-width) 2) 0)))
@@ -714,21 +713,21 @@ Example:
             (concat (make-string n (string-to-char " ")) header-line-format)))))
 
 (advice-add 'bufler-list :after #'my:advice:bufler-list-center-header)
-#+END_SRC
+#+end_src
 
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
 (defun my:advice:imenu-list-close-after-goto (&rest _)
   (with-current-buffer (get-buffer-create "*Ilist*")
     (kill-buffer-and-window)))
 
 (advice-add #'imenu-list--goto-entry :after 'my:advice:imenu-list-close-after-goto)
-#+END_SRC
+#+end_src
 
 ** Timing
 
 - TODO Add ~debounce-eval-immediately~
 
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
 (setq my:debounce-timers (make-hash-table :test 'equal))
 (defun my:debounce (name secs form)
   "Begin a timer for SECS seconds named NAME to delay the evaluation
@@ -746,13 +745,13 @@ Example:
           (eval ,form)))
          (new-timer (run-with-timer secs nil 'eval new-timer-fn)))
         (map-put! my:debounce-timers name new-timer)))
-#+END_SRC
+#+end_src
 
 ** Windows
 
 This function was adapted from [[https://stackoverflow.com/questions/1832597][a Stack Overflow answer]] by [[https://stackoverflow.com/users/1762276/zhro][Zhro]].
 
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
 (defun my:delete-window-maybe-kill-buffer (&optional window)
   "Delete the window.
 If WINDOW is nil, delete the current window.
@@ -763,11 +762,11 @@ If no other window shows its buffer, kill the buffer too."
         (delete-window window)
       (unless (get-buffer-window buf 'visible) (kill-buffer buf))
       (kill-buffer buf))))
-#+END_SRC
+#+end_src
 
 Switch to new window after split.
 
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
 (defun my:split-window-right ()
   (interactive)
   (split-window-right)
@@ -777,13 +776,13 @@ Switch to new window after split.
   (interactive)
   (split-window-below)
   (other-window 1))
-#+END_SRC
+#+end_src
 
 It's irritating to need to switch to a temporary window to close
 it. These functions are used to make closing temporary windows more
 convenient.
 
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
 (defun my:temporary-window-p (&optional window)
   "Decide if the window is temporary.
 If WINDOW is nil, use the current window."
@@ -823,32 +822,32 @@ and delete it. If there is none, send keyboard-quit instead."
   (if-let ((window (my:next-temporary-window)))
     (my:delete-window window)
     (keyboard-quit)))
-#+END_SRC
+#+end_src
 
 When a window's major or minor mode matches any in these lists, that
 window will never be considered temporary.
 
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
 (setq my:not-temporary-major-modes
   '(fr33splash-mode lisp-interaction-mode eat-mode))
 
 (setq my:not-temporary-minor-modes
   '(org-src-mode))
-#+END_SRC
+#+end_src
 
 ** Buffers
 
 Working on a project with a lot of files can get annoying.
 
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
 (defun my:kill-all-buffers ()
   (interactive)
   (mapc 'kill-buffer (buffer-list)))
-#+END_SRC
+#+end_src
 
 ** Errors
 
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
 (defun my:fix-next-error ()
   "Jump to the next error and open code actions"
   (interactive)
@@ -862,23 +861,23 @@ Working on a project with a lot of files can get annoying.
   (previous-error)
   (call-interactively 'my:choose-point-action)
   (save-buffer))
-#+END_SRC
+#+end_src
 
 ** Major-mode setup
 
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
 (defmacro my:set-formatter (major-mode lang-name formatter)
   (let ((hook (intern (concat (symbol-name major-mode) "-hook"))))
   `(add-hook ',hook (lambda ()
      (setq-local format-all-formatters '((,lang-name ,formatter)))))))
-#+END_SRC
+#+end_src
 
 ** Code actions
 
 Code actions are provided by ~lsp-mode~ and ~lsp-ltex-plus~ via
 different commands, this bridges the gap between them.
 
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
 (setq my:point-action-sources
    '((:name "English (ltex-ls-plus)"
       :action lsp-ltex-plus-actions
@@ -902,36 +901,36 @@ different commands, this bridges the gap between them.
           (dolist (src sources)
             (if (string-equal choice (plist-get src :name))
               (call-interactively (plist-get src :action)))))))))
-#+END_SRC
+#+end_src
 
 * Backups
 
 Prevent clobbering symlinks.
 
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
 (setq backup-by-copying t)
-#+END_SRC
+#+end_src
 
 Use versioned backups.
 
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
 (setq version-control t)
-#+END_SRC
+#+end_src
 
 Prevent backup files from being littered all over the place.
 
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
 (setq backup-directory-alist
       '(("." . "~/.emacs-backups/")))
-#+END_SRC
+#+end_src
 
 Delete excess backup versions silently.
 
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
 (setq delete-old-versions t
       kept-new-versions 6
       kept-old-versions 2)
-#+END_SRC
+#+end_src
 
 * Key bindings
 
@@ -941,7 +940,7 @@ Pretty-hydra is used to create action menus. I've chosen to use hydras
 as the foundation for my custom keybind scheme to improve
 discoverability and reduce cognitive load.
 
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
 (use-package major-mode-hydra
   :ensure t)
 
@@ -960,7 +959,7 @@ discoverability and reduce cognitive load.
   (set-face-attribute 'hydra-face-amaranth nil
     :foreground (catppuccin-get-color 'mauve))
     ;; <config>
-#+END_SRC
+#+end_src
 
 *Notice*: Not all hydras are defined in this section. Other sections
 that define hydra(s):
@@ -970,7 +969,7 @@ that define hydra(s):
 - [[*Magit][Version Control > Magit]]
 - [[*Rust][Languages > Rust]]
 
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
 (defun my:fix-hydras ()
   (setq-local sublimity-attractive-centering-width 0)
   (setq-local cursor-type nil)
@@ -987,11 +986,11 @@ that define hydra(s):
                    (propertize "." 'face `(:foreground ,(catppuccin-get-color 'mantle))))
            args)))
 (advice-add 'lv-message :around #'my:pad-hydras)
-#+END_SRC
+#+end_src
 
 *** Help
 
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
 (pretty-hydra-define hydra:help
   (:exit t :idle 0.25)
   ("Describe"
@@ -1012,11 +1011,11 @@ that define hydra(s):
     ("x" eval-last-sexp  "Sexp"))
    "Set"
    (("=" set-variable   "Variable"))))
-#+END_SRC
+#+end_src
 
 *** Code
 
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
 (pretty-hydra-define hydra:code
   (:exit t :idle 0.25)
   ("Action"
@@ -1031,21 +1030,21 @@ that define hydra(s):
     ("p" previous-error               "Previous error" :exit nil)
     ("d" lsp-ui-peek-find-definitions "Definitions")
     ("R" lsp-ui-peek-find-references  "References"))))
-#+END_SRC
+#+end_src
 
 *** File
 
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
 (pretty-hydra-define hydra:file
   (:exit t :idle 0.25)
   ("Switch"
    (("f" find-file         "Find file")
     ("p" project-find-file "Find file in project"))))
-#+END_SRC
+#+end_src
 
 *** Buffer
 
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
 (defun my:last-buffer ()
   (interactive)
   (switch-to-buffer (other-buffer (current-buffer) 1)))
@@ -1067,11 +1066,11 @@ that define hydra(s):
     ("X" my:kill-all-buffers "Kill all buffers")
     ("r" revert-buffer       "Revert current buffer")
     ("R" rename-buffer       "Rename current buffer"))))
-#+END_SRC
+#+end_src
 
 *** Window
 
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
 (pretty-hydra-define hydra:window
   (:exit t :idle 0.25)
   ("Switch"
@@ -1083,11 +1082,11 @@ that define hydra(s):
     ("b" balance-windows           "Balance windows")
     ("s" my:split-window-below     "Split window horizontally")
     ("v" my:split-window-right     "Split window vertically"))))
-#+END_SRC
+#+end_src
 
 *** Toggle
 
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
 (pretty-hydra-define hydra:toggle
   (:exit t :idle 0.25)
   ("Toggle"
@@ -1095,11 +1094,11 @@ that define hydra(s):
     ("r" rainbow-delimiters-mode    "Rainbow delimiters" :toggle t)
     ("h" lsp-inlay-hints-mode       "LSP: Inlay hints" :toggle t)
     ("p" org-toggle-pretty-entities "Org: Pretty entities" :toggle org-pretty-entities))))
-#+END_SRC
+#+end_src
 
 *** Find
 
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
 (pretty-hydra-define hydra:find
   (:exit t :idle 0.25)
   ("Consult"
@@ -1116,11 +1115,11 @@ that define hydra(s):
   ("Show"
    (("O"     symbols-outline-show            "Symbols outline")
     ("I"     imenu-list-smart-toggle         "Imenu list")))))
-#+END_SRC
+#+end_src
 
 *** Leader key
 
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
 (pretty-hydra-define hydra:leader
   (:exit t :idle 0.25)
   ("Hydra"
@@ -1145,13 +1144,13 @@ that define hydra(s):
     ("s"     save-buffer             "Save buffer")
     ("q"     save-buffers-kill-emacs "Save & quit"))))
 ) ;; </config>
-#+END_SRC
+#+end_src
 
 ** General
 
 General provides a convenient way to bind keys.
 
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
 (use-package general
   :ensure t
   :init
@@ -1159,11 +1158,11 @@ General provides a convenient way to bind keys.
         '(insert emacs hybrid normal visual motion operator replace))
   :config
   ;; <config>
-#+END_SRC
+#+end_src
 
 Use escape to close temporary windows.
 
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
   (general-define-key
     :keymaps 'minibuffer-mode-map
     (kbd "<escape>") 'abort-minibuffers)
@@ -1172,36 +1171,36 @@ Use escape to close temporary windows.
     :states '(normal)
     :keymaps 'override
     (kbd "<escape>") 'my:delete-next-temporary-window)
-#+END_SRC
+#+end_src
 
 Use spacebar to open the [[*Leader key][Leader key hydra]].
 
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
   (general-define-key
     :states '(normal visual motion)
     :keymaps 'override
     "SPC" 'hydra:leader/body))
 ;; </config>
-#+END_SRC
+#+end_src
 
 ** Which-key
 
 Which-key shows all the possible completions of a partially-input
 keybind.
 
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
 (use-package which-key
   :ensure t
   :delight
   :config
   (which-key-mode))
-#+END_SRC
+#+end_src
 
 * Evil
 
 Evil (extensible vi layer) emulates the main features of Vim.
 
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
 (use-package evil
   :ensure t
   :init
@@ -1212,11 +1211,11 @@ Evil (extensible vi layer) emulates the main features of Vim.
   :config
   (evil-mode 1)
 ;; <config>
-#+END_SRC
+#+end_src
 
 Prevent shifting text from clearing selection:
 
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
   (define-key evil-visual-state-map (kbd ">") 'my:evil-shift-right-visual)
   (define-key evil-visual-state-map (kbd "<") 'my:evil-shift-left-visual)
 
@@ -1232,12 +1231,12 @@ Prevent shifting text from clearing selection:
     (evil-normal-state)
     (evil-visual-restore)))
 ;; </config>
-#+END_SRC
+#+end_src
 
 Evil collection is a collection of Evil bindings for the parts of
 Emacs that Evil does not cover properly by default.
 
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
 (use-package evil-collection
   :ensure t
   :after evil
@@ -1245,11 +1244,11 @@ Emacs that Evil does not cover properly by default.
   (evil-collection-want-unimpaired-p nil)
   :init
   (evil-collection-init))
-#+END_SRC
+#+end_src
 
 ** Fringe mark
 
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
 (use-package evil-fringe-mark
   :ensure t
   :custom
@@ -1258,7 +1257,7 @@ Emacs that Evil does not cover properly by default.
   (evil-fringe-mark-margin 'right-margin)
   :init (global-evil-fringe-mark-mode)
   :config (setq-default right-fringe-width 22))
-#+END_SRC
+#+end_src
 
 * Completion
 ** Orderless
@@ -1266,17 +1265,17 @@ Emacs that Evil does not cover properly by default.
 The orderless completion style divides the pattern into
 space-separated components and matches candidates that match all the components in any order.
 
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
 (use-package orderless
   :ensure t
   :custom
   (completion-styles '(orderless basic))
   (completion-category-overrides '((file (styles partial-completion)))))
-#+END_SRC
+#+end_src
 
 ** Company
 
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
 (use-package company
   :ensure t
   :delight company-mode
@@ -1285,11 +1284,11 @@ space-separated components and matches candidates that match all the components 
   (company-backends '((company-capf company-yasnippet)))
   (company-inhibit-inside-symbols t)
   (company-idle-delay 0.1))
-#+END_SRC
+#+end_src
 
 ** Yasnippet
 
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
 (use-package yasnippet
   :ensure t
   :delight yas-minor-mode
@@ -1297,14 +1296,14 @@ space-separated components and matches candidates that match all the components 
 
 (use-package yasnippet-snippets
   :ensure t)
-#+END_SRC
+#+end_src
 
 * Minibuffer
 ** Vertico
 
 Vertico is a minibuffer completion interface.
 
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
 (use-package vertico
   :ensure t
   :init
@@ -1315,36 +1314,36 @@ Vertico is a minibuffer completion interface.
          ("C-j" . vertico-next)
          ("C-k" . vertico-previous)
          ("TAB" . vertico-insert)))
-#+END_SRC
+#+end_src
 
 Persist history over Emacs restarts. Vertico sorts by history
 position.
 
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
 (use-package savehist
   :init
   (savehist-mode))
-#+END_SRC
+#+end_src
 
 Do not allow the cursor in the minibuffer prompt.
 
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
 (use-package emacs
   :init
   (setq minibuffer-prompt-properties
         '(read-only t cursor-intangible t face minibuffer-prompt))
   (add-hook 'minibuffer-setup-hook #'cursor-intangible-mode)
   ;; <init>
-#+END_SRC
+#+end_src
 
 Hide commands in M-x which do not work in the current mode. Vertico
 commands are hidden in normal buffers.
 
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
   (setq read-extended-command-predicate
         #'command-completion-default-include-p))
 ;; </init>
-#+END_SRC
+#+end_src
 
 ** Marginalia
 
@@ -1352,18 +1351,18 @@ Marginalia adds helpful information to entries in Vertico. For
 example, if you type ~M-x~, Vertico will open a list of usable
 commands. Marginalia will add each command's description next to it.
 
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
 (use-package marginalia
   :ensure t
   :init
   (marginalia-mode))
-#+END_SRC
+#+end_src
 
 * Mode line
 
 For unknown reasons, mini-modeline-enhance-visual breaks theming on emacsclient.
 
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
 (use-package mini-modeline
   :ensure t
   :delight mini-modeline-mode
@@ -1379,7 +1378,7 @@ For unknown reasons, mini-modeline-enhance-visual breaks theming on emacsclient.
 
 (use-package autorevert
   :delight auto-revert-mode)
-#+END_SRC
+#+end_src
 
 * Motion
 ** Avy
@@ -1387,7 +1386,7 @@ For unknown reasons, mini-modeline-enhance-visual breaks theming on emacsclient.
 Avy is a convenient tool to jump around and perform some actions based
 on a short filter.
 
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
 (use-package avy
   :ensure t
   :after evil
@@ -1411,14 +1410,14 @@ on a short filter.
     ("Y" avy-copy-region               "Copy region")
     ("d" avy-kill-whole-line           "Delete line")
     ("D" avy-kill-region               "Delete region"))))
-#+END_SRC
+#+end_src
 
 ** Nav-flash
 
 Nav-flash makes it easier to track the cursor across large movements
 by flashing the current line.
 
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
 (use-package nav-flash
   :ensure t
   :config
@@ -1429,12 +1428,12 @@ by flashing the current line.
 
   (--map (advice-add it :after #'my:advice:nav-flash-show)
          '(evil-scroll-up evil-scroll-down)))
-#+END_SRC
+#+end_src
 
 * Version control
 ** Magit
 
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
 (use-package magit
   :ensure t
   :init
@@ -1448,11 +1447,11 @@ by flashing the current line.
   (add-hook 'git-commit-setup-hook (lambda ()
     (whitespace-mode -1)
     (lsp-ltex-plus-mode -1))))
-#+END_SRC
+#+end_src
 
 ** diff-hl
 
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
 (use-package diff-hl
   :ensure t
   :hook
@@ -1461,7 +1460,7 @@ by flashing the current line.
   :init
   (diff-hl-dired-mode)
   (global-diff-hl-mode))
-#+END_SRC
+#+end_src
 
 * Search
 ** Symbols Outline
@@ -1469,7 +1468,7 @@ by flashing the current line.
 Show an outline of all the symbols in a code file.
 The default indentation is hardcoded, so I have to replace the relevant function entirely.
 
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
 (use-package symbols-outline
   :ensure t
   :init
@@ -1514,11 +1513,11 @@ The default indentation is hardcoded, so I have to replace the relevant function
                           'line-prefix lp))))
 
    (advice-add 'symbols-outline--insert-line :around #'my:advice:symbols-outline--insert-line))
-#+END_SRC
+#+end_src
 
 ** imenu-list
 
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
 (use-package imenu-list
   :ensure t
   :custom
@@ -1528,11 +1527,11 @@ The default indentation is hardcoded, so I have to replace the relevant function
   (set-face-foreground 'imenu-list-entry-face-0 (catppuccin-get-color 'mauve))
   (set-face-foreground 'imenu-list-entry-subalist-face-0 (catppuccin-get-color 'mauve))
   (set-face-foreground 'imenu-list-entry-face-1 (catppuccin-get-color 'text)))
-#+END_SRC
+#+end_src
 
 ** Consult
 
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
 (use-package consult :ensure t)
 (use-package consult-flycheck :ensure t)
 (use-package hl-todo :ensure t)
@@ -1543,13 +1542,13 @@ The default indentation is hardcoded, so I have to replace the relevant function
   (if (string= major-mode "org-mode")
       (consult-org-heading)
       (consult-imenu)))
-#+END_SRC
+#+end_src
 
 * Whitespace
 
 Tabs make me sick to my stomach.
 
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
 (setq-default indent-tabs-mode nil)
 (setq-default electric-indent-inhibit t)
 (setq whitespace-style '(face tabs trailing empty))
@@ -1561,11 +1560,11 @@ Tabs make me sick to my stomach.
       :background color
       :box `(:color ,color
              :line-width (-1 . -1))))))
-#+END_SRC
+#+end_src
 
 Try to fix some things automatically.
 
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
 (defun my:fix-whitespace ()
   (save-excursion
     (untabify 0 (buffer-size))
@@ -1573,12 +1572,12 @@ Try to fix some things automatically.
     (flush-lines "^\s-*$" 0 (buffer-size))))
 
 (add-hook 'before-save-hook #'my:fix-whitespace)
-#+END_SRC
+#+end_src
 
 * Misc. Packages
 ** Eldoc
 
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
 (use-package markdown-mode)
 
 (defun my:open-docs ()
@@ -1593,15 +1592,15 @@ Try to fix some things automatically.
   (global-eldoc-mode t)
   (eldoc-echo-area-use-multiline-p nil)
   (evil-lookup-func 'my:open-docs))
-#+END_SRC
+#+end_src
 
 ** Try
 
 Try allows you to try Emacs packages without installing them.
 
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
 (use-package try :ensure t)
-#+END_SRC
+#+end_src
 
 ** Switch-window
 
@@ -1610,7 +1609,7 @@ when there are more than two windows. When a switch-window command is
 used, a number character appears in the corner of each window. Typing
 one of the characters then switches focus to that window.
 
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
 (use-package switch-window
   :ensure t
   :init
@@ -1633,7 +1632,7 @@ one of the characters then switches focus to that window.
   (setq switch-window-threshold 2))
 
 (advice-add 'switch-window-then-delete :around #'my:advice:always-show-switch-window-overlay)
-#+END_SRC
+#+end_src
 
 ** Solaire mode
 
@@ -1641,19 +1640,19 @@ Solaire mode helps to visually distinguish "real" buffers (code
 buffers) from "unreal" buffers (popups, sidebars, log buffers,
 terminals, etc.) by giving the latter a different background.
 
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
 (use-package solaire-mode
   :ensure t
   :after general
   :config
   (solaire-global-mode +1))
-#+END_SRC
+#+end_src
 
 ** Bufler
 
 Bufler is an ibuffer alternative.
 
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
 (use-package bufler
   :ensure t
   :after evil
@@ -1666,24 +1665,24 @@ Bufler is an ibuffer alternative.
     (kbd "C-s") 'bufler-list-buffer-save
     "d" 'bufler-list-buffer-kill
     "x" 'bufler-list-buffer-kill))
-#+END_SRC
+#+end_src
 
 ** WIP SVG tag mode
 
 SVG tag mode replaces keywords or regular expression with SVG tags. It
 can be used as an extra-fancy alternative to ~hl-todo~.
 
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
 (use-package svg-tag-mode
   :ensure t
   :config
   ;; <config>
-#+END_SRC
+#+end_src
 
 Define some simple SVG tags. The regular expressions are
 case-sensitive, so there's going to be some redundant patterns.
 
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
   (defconst my:svg-tags '(
     ("\\(Example\\(?:s\\| [[:digit:]]+\\)?:?\\)" . blue)
     ; Example Examples Example: Examples: Example 16 Example 32:
@@ -1701,7 +1700,7 @@ case-sensitive, so there's going to be some redundant patterns.
     ("\\(Important[:!]?\\)" . peach)    ; Important Important! Important:
     ("WARN"                 . yellow)   ; WARN
     ("\\(Warning[:!]?\\)"   . yellow))) ; Warning Warning! Warning:
-#+END_SRC
+#+end_src
 
 Example
 
@@ -1709,7 +1708,7 @@ Define the default style. It's necessary to use
 ~(getnix "tagsFontFamily")~ instead of ~(getnix "fontFamily")~ because my default
 font causes some strange kerning issues.
 
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
   (setq svg-lib-style-default `(
     :background ,(catppuccin-get-color 'text)
     :foreground ,(catppuccin-get-color 'base)
@@ -1726,30 +1725,30 @@ font causes some strange kerning issues.
     :scale 1.0
     :ascent center
     :collection "material"))
-#+END_SRC
+#+end_src
 
 Create the tags by mapping the previously defined alist of patterns
 and color.
 
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
   (setq svg-tag-tags (--map
     `(,(car it) . ((lambda (tag) (svg-lib-tag tag svg-lib-style-default
       :background ,(catppuccin-get-color (cdr it))))))
     my:svg-tags))
-#+END_SRC
+#+end_src
 
 Add advice to suppress the constant "SVG tag mode on" messages.
 
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
   (advice-add 'svg-tag-mode-on :around #'my:advice:be-quiet)
-#+END_SRC
+#+end_src
 
 Finally, enable the SVG tags globally.
 
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
   (global-svg-tag-mode))
 ;; </config>
-#+END_SRC
+#+end_src
 
 *** TODO Add progress bar, tags, priority
 
@@ -1757,17 +1756,17 @@ Finally, enable the SVG tags globally.
 
 ** Format-all
 
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
 (use-package format-all
   :ensure t
   :delight
   :hook (prog-mode . format-all-mode)
   :custom
   (format-all-show-errors 'never))
-#+END_SRC
+#+end_src
 
 ** LSP
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
 (use-package lsp-mode
   :ensure t
   :delight
@@ -1813,13 +1812,13 @@ Finally, enable the SVG tags globally.
                        (catppuccin-get-color 'surface2))
   (define-key evil-normal-state-map (kbd "K") 'lsp-ui-doc-glance))
 
-#+END_SRC
+#+end_src
 
 ** Flycheck
 
 Flycheck is a modern on-the-fly syntax checking extension.
 
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
 (defun my:flycheck-annotate-format (err &optional include-snippet)
   (car (split-string
     (or (flycheck-error-message err)
@@ -1856,38 +1855,38 @@ Flycheck is a modern on-the-fly syntax checking extension.
   (my:set-flycheck-color "error"   'red    "#453243")
   (my:set-flycheck-color "warning" 'yellow "#454144")
   (my:set-flycheck-color "info"    'mauve  "#3c3653"))
-#+END_SRC
+#+end_src
 
 ** Treesit-auto
 
 Treesit-auto provides an easy way to automatically install and use
 tree-sitter major modes.
 
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
 (use-package treesit-auto
   :ensure t
   :config
   (setq treesit-auto-install t)
   (global-treesit-auto-mode))
-#+END_SRC
+#+end_src
 
 ** Rainbow-delimiters
 
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
 (use-package rainbow-delimiters
   :ensure t
   :config
   (set-face-attribute 'rainbow-delimiters-mismatched-face nil
                       :background (catppuccin-get-color 'peach)
                       :foreground "black"))
-#+END_SRC
+#+end_src
 
 ** TODO Dimmer
 
 Gone until it's fixed:
 https://github.com/gonewest818/dimmer.el/pull/88
 
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
 ;; (use-package dimmer
 ;;   :ensure t
 ;;   :vc (:url "https://github.com/chrhansk/dimmer.el" :rev "9a75788")
@@ -1898,13 +1897,13 @@ https://github.com/gonewest818/dimmer.el/pull/88
 ;;   (dimmer-configure-magit)
 ;;   (dimmer-configure-org)
 ;;   (dimmer-mode t))
-#+END_SRC
+#+end_src
 
 ** Sublimity
 
 Centers each buffer horizontally and add smooth scroll.
 
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
 (use-package sublimity
   :ensure t
   :init (sublimity-mode 1)
@@ -1918,21 +1917,21 @@ Centers each buffer horizontally and add smooth scroll.
 
 (use-package sublimity-scroll
   :after sublimity)
-#+END_SRC
+#+end_src
 
 ** Eat
 
 Eat is a terminal emulator. Works best with [[https://codeberg.org/akib/emacs-eat#:~:text=shell integration,-for][shell integration]].
 
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
 (use-package eat
     :ensure t)
-#+END_SRC
+#+end_src
 
 * Languages
 ** English
 
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
 (use-package lsp-ltex-plus
   :ensure t
   :vc (:url "https://github.com/ltex-plus/emacs-ltex-plus" :rev :newest)
@@ -1940,24 +1939,24 @@ Eat is a terminal emulator. Works best with [[https://codeberg.org/akib/emacs-ea
   :custom
   (lsp-ltex-plus-check-programming-languages t)
   (lsp-ltex-plus-diagnostics-provider 'flycheck))
-#+END_SRC
+#+end_src
 
 ** Emacs Lisp
 
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
 (use-package elisp-def :ensure t)
 
 (use-package highlight-quoted
   :ensure t
   :config
   (add-hook 'emacs-lisp-mode-hook 'highlight-quoted-mode))
-#+END_SRC
+#+end_src
 
 ** Org
 
 Org is like Markdown but a lot better.
 
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
 (use-package htmlize :ensure t)
 (use-package org
   :ensure t
@@ -1966,19 +1965,19 @@ Org is like Markdown but a lot better.
   (org-mode . company-mode)
   :config
   ;; <config>
-#+END_SRC
+#+end_src
 
 Append custom ~css~ to make exporting from ~org~ into ~html~ match our
 editor theme.
 
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
 (setq org-html-head
     (concat "<style>" (getnix "exportCSS") "</style>"))
-#+END_SRC
+#+end_src
 
 Change the default appearance of org documents.
 
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
 (setq org-indent-mode-turns-on-hiding-stars nil
       org-startup-indented t
       org-startup-folded 'nofold)
@@ -1986,20 +1985,20 @@ Change the default appearance of org documents.
 (set-face-attribute 'org-block nil
   :foreground my:code-color))
 ;; </config>
-#+END_SRC
+#+end_src
 
 Fix odd indentation behavior in src blocks.
 
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
 (setq org-src-preserve-indentation t
       org-edit-src-content-indentation 0)
-#+END_SRC
+#+end_src
 
 Change the ~HTML~ export preamble and postamble.
 
 - TODO Figure out how to hide the title for HTML exports only.
 
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
 (setq org-export-with-title nil)
 (setq org-html-preamble-format
       '(("en" "<h1 class=\"title\">%t</h1>\n<p class=\"author\">by %a</p>")))
@@ -2009,11 +2008,11 @@ Change the ~HTML~ export preamble and postamble.
 
 (setq org-todo-keywords
       '((sequence "TODO" "WIP" "|" "DONE")))
-#+END_SRC
+#+end_src
 
 *** Roam
 
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
 (use-package org-roam
   :ensure t
   :custom (org-roam-directory (file-truename "~/org-roam"))
@@ -2026,11 +2025,11 @@ Change the ~HTML~ export preamble and postamble.
 
   (org-roam-db-autosync-mode)
   (require 'org-roam-protocol))
-#+END_SRC
+#+end_src
 
 **** Hydra
 
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
 (pretty-hydra-define hydra:org-roam
   (:exit t :idle 0.25)
    ("Org Roam"
@@ -2044,11 +2043,11 @@ Change the ~HTML~ export preamble and postamble.
 
 
     )))
-#+END_SRC
+#+end_src
 
 *** Hydra
 
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
 (defun my:org-toggle-emphasis-markers ()
   "Toggle emphasis markers [*/_=~+]"
   (interactive)
@@ -2096,29 +2095,29 @@ Change the ~HTML~ export preamble and postamble.
     ("=" (org-emphasize ?=)  "Verbatim")
     ("~" (org-emphasize ?~)  "Code")
     ("+" (org-emphasize ?+)  "Strike-through"))))
-#+END_SRC
+#+end_src
 
 ** LaTeX
 
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
 (use-package auctex :ensure t)
 (use-package cdlatex
   :ensure t)
-#+END_SRC
+#+end_src
 
 Automatically render LaTeX fragments, toggle them when the cursor enters them.
 
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
 (use-package org-fragtog
   :ensure t
   :hook (org-mode . org-fragtog-mode))
 
 (setq org-startup-with-latex-preview t)
-#+END_SRC
+#+end_src
 
 ** Nix
 
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
 (use-package nix-mode
   :ensure t
   :mode "\\.nix\\'"
@@ -2126,37 +2125,37 @@ Automatically render LaTeX fragments, toggle them when the cursor enters them.
 
 (defun my:nix-mode-hook ()
   (setq-local format-all-formatters '(("Nix" nixfmt))))
-#+END_SRC
+#+end_src
 
 ** Shell script
 *** Sh, bash, zsh
 
 Syntax checking and linting is provided by Shellcheck via flycheck.
 
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
 (add-hook 'sh-mode-hook 'flycheck-mode)
 (setq bash-ts-mode-hook sh-mode-hook)
-#+END_SRC
+#+end_src
 
 *** Fish
 
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
 (use-package fish-mode
   :ensure t
   :hook (fish-mode . flycheck-mode))
-#+END_SRC
+#+end_src
 
 ** Python
 
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
 (my:set-formatter python-mode "Python" black)
 (setq python-ts-mode-hook python-mode-hook)
 (add-hook 'python-ts-mode-hook 'lsp)
-#+END_SRC
+#+end_src
 
 ** Rust
 
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
 (use-package rustic
   :ensure t
   :hook (rustic-mode . company-mode)
@@ -2176,23 +2175,23 @@ Syntax checking and linting is provided by Shellcheck via flycheck.
   (lsp-rust-analyzer-display-closure-return-type-hints t)
   (lsp-rust-analyzer-display-parameter-hints t)
   (lsp-rust-analyzer-display-reborrow-hints t))
-#+END_SRC
+#+end_src
 
 For some unknown reason, ~format-all-mode~ does not work with
 rustic. Setting ~rustic-format-trigger~ enables formatting on save,
 but it needs to check for ~format-all-mode~ in order to respect the
 "Format on save" option in the [[*Toggle][Toggle hydra]].
 
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
 (defun my:rust-format-on-save ()
   "Format the file, respecting format-all-mode"
   (if format-all-mode
     (rustic-format-file)))
-#+END_SRC
+#+end_src
 
 *** Hydra
 
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
 (major-mode-hydra-define rustic-mode
   (:exit t :idle 0.25 :quit-key "<escape>")
   ("Cargo"
@@ -2200,16 +2199,16 @@ but it needs to check for ~format-all-mode~ in order to respect the
     ("m" rustic-cargo-add-missing-dependencies "Add missing dependencies")
     ("a" rustic-cargo-add                      "Add dependency")
     ("r" rustic-cargo-rm                       "Remove dependency"))))
-#+END_SRC
+#+end_src
 
 ** WGSL
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
 (use-package wgsl-mode
   :ensure t)
-#+END_SRC
+#+end_src
 ** Web
 
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
 (use-package web-mode
   :ensure t
   :hook (html-ts-mode . web-mode))
@@ -2240,13 +2239,13 @@ but it needs to check for ~format-all-mode~ in order to respect the
   (add-hook 'typescript-mode-hook (lambda ()
     (setq format-all-formatters
       '(("TypeScript" (prettier))))))))
-#+END_SRC
+#+end_src
 
 *** Tera / Jinja2
 
 Use Jinja2 stuff for Tera. It's close enough.
 
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
 (use-package jinja2-mode :ensure t)
 
 (eval-after-load 'format-all '(progn
@@ -2259,4 +2258,4 @@ Use Jinja2 stuff for Tera. It's close enough.
   (add-hook 'jinja2-mode-hook (lambda ()
     (setq format-all-formatters
       '(("HTML" (djlint))))))))
-#+END_SRC
+#+end_src

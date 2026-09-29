@@ -860,7 +860,11 @@ window will never be considered temporary.
 
 #+begin_src emacs-lisp
 (setq my:not-temporary-major-modes
-  '(fr33splash-mode lisp-interaction-mode eat-mode))
+  '(fr33splash-mode
+    messages-buffer-mode
+    debugger-mode
+    lisp-interaction-mode
+    eat-mode))
 
 (setq my:not-temporary-minor-modes
   '(org-src-mode))
@@ -1060,8 +1064,8 @@ that define hydra(s):
 (pretty-hydra-define hydra:code
   (:exit t :idle 0.25)
   ("Action"
-   (("c" project-compile              "Compile project")
-    ("C" project-recompile            "Recompile project")
+   (("c" project-recompile            "Recompile project")
+    ("C" project-compile              "Compile project")
     ("." my:choose-point-action       "Code actions at point")
     ("/" comment-dwim                 "Comment code")
     ("o" lsp-organize-imports         "Organize imports")
@@ -1305,8 +1309,8 @@ Emacs that Evil does not cover properly by default.
 #+begin_src emacs-lisp
 (defvar my:overlay-priority 666666)
 (defvar my:overlays (list))
-(defvar my:yank-overlay-duration 0.8)
-(defvar my:yank-overlay-timer nil)
+(defvar my:overlay-duration 0.8)
+(defvar my:overlay-timer nil)
 (defvar my:paste-beg nil)
 
 (let ((background (catppuccin-get-color 'base))
@@ -1339,7 +1343,6 @@ Emacs that Evil does not cover properly by default.
                                         blend-factor)))
   "Face for highlighting evil-yank-rectangle operations.")
 
-
   (defface my:paste-overlay-face
     `((((class color) (min-colors 88))
        :extend t
@@ -1349,20 +1352,20 @@ Emacs that Evil does not cover properly by default.
                                         blend-factor)))
   "Face for highlighting evil-paste-* operations."))
 
-(defun my:remove-overlays ()
+(defun my:remove-overlays (&rest _)
   (when my:overlays
     (dolist (overlay my:overlays)
       (delete-overlay overlay))
     (setq my:overlays (list)))
-  (when my:yank-overlay-timer
-    (cancel-timer my:yank-overlay-timer)
-    (setq my:yank-overlay-timer nil)))
+  (when my:overlay-timer
+    (cancel-timer my:overlay-timer)
+    (setq my:overlay-timer nil)))
 
-(defun my:start-yank-overlay-timer ()
-  (when my:yank-overlay-timer
-    (cancel-timer my:yank-overlay-timer))
-  (setq my:yank-overlay-timer
-    (run-with-timer my:yank-overlay-duration nil #'my:remove-overlays)))
+(defun my:start-overlay-timer (&rest _)
+  (when my:overlay-timer
+    (cancel-timer my:overlay-timer))
+  (setq my:overlay-timer
+    (run-with-timer my:overlay-duration nil #'my:remove-overlays)))
 
 (defun my:make-overlay (beg end face)
   (let ((overlay (make-overlay beg end)))
@@ -1374,7 +1377,7 @@ Emacs that Evil does not cover properly by default.
   `(progn
      (my:remove-overlays)
      ,@body
-     (my:start-yank-overlay-timer)))
+     (my:start-overlay-timer)))
 
 (defun my:highlight-yank-characters (beg end &rest _)
   (my:set-overlays
@@ -1384,36 +1387,41 @@ Emacs that Evil does not cover properly by default.
   (my:set-overlays
    (my:make-overlay beg end 'my:yank-lines-overlay-face)))
 
+(defvar my:yank-rectangle nil)
 (defun my:highlight-yank-rectangle (beg end &rest _)
   (my:set-overlays
+    (setq my:yank-rectangle (cons beg end))
     (evil-apply-on-block
       (lambda (beg end)
         (my:make-overlay beg end 'my:yank-rectangle-overlay-face))
       beg end nil)))
 
-(defun my:highlight-paste (string &rest _)
-  (my:set-overlays
-   (let* ((beg (point))
-          (end (+ beg (length string))))
-     (my:make-overlay beg end 'my:paste-overlay-face))))
-
 (defun my:save-paste-beg (string)
   (setq my:paste-beg (point))
   string)
 
-(defun my:highlight-paste (orig-fun string &rest args)
-  (apply orig-fun string args)
+(defun my:highlight-paste (count &optional register _)
   (my:set-overlays
-    (let* ((beg my:paste-beg)
-           (end (+ beg (length string))))
-      (my:make-overlay beg end 'my:paste-overlay-face))))
+    (let* ((beg (evil-get-marker ?\[))
+           (end (1+ (evil-get-marker ?\])))
+           (regval (get-register (or register 48)))
+           (empty-line (= (point) (pos-bol))))
+      ;; HACK Figure out a better way to determine if it's a block paste.
+      (if (cl-search "(yank-handler (evil-yank-block-handler (#("
+                     (format "%S" regval))
+        (evil-apply-on-block
+          (lambda (beg end)
+            (my:make-overlay beg end 'my:paste-overlay-face))
+          (if empty-line beg (1+ beg))
+          end
+          nil)
+        (my:make-overlay beg end 'my:paste-overlay-face)))))
 
 (advice-add 'evil-yank-characters :before #'my:highlight-yank-characters)
 (advice-add 'evil-yank-lines :before #'my:highlight-yank-lines)
 (advice-add 'evil-yank-rectangle :before #'my:highlight-yank-rectangle)
 
-(add-hook 'yank-transform-functions 'my:save-paste-beg)
-(advice-add 'insert-for-yank :around #'my:highlight-paste)
+(advice-add 'evil-paste-after :after #'my:highlight-paste)
 #+end_src
 
 * Completion

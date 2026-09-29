@@ -466,6 +466,10 @@ Enable window dividers
 
 (add-hook 'window-size-change-functions 'fr33splash--redraw)
 (add-hook 'window-buffer-change-functions 'fr33splash--on-window-buffer-change)
+
+(add-hook 'kill-buffer-hook (lambda ()
+  (when (string-equal fr33splash-buffer-name (buffer-name))
+    (fr33splash--remove-fixes))))
 #+end_src
 
 ** Extra

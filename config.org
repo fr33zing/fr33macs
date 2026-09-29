@@ -244,6 +244,42 @@ Fringe marks ----------------------
 
 * External libraries
 
+** Kurecolor
+
+Kurecolor provides color manipulation and conversion functions.
+There's some weird thing about ~kurecolor.el~ missing a lexical
+binding cookie, so I just copied the functions I need.
+
+#+begin_src emacs-lisp
+(defun kurecolor-to-8bit (n)
+  "Convert N (`0.0..1.0') to `0-255'."
+  (* n 255.0))
+
+(defun kurecolor-hex-to-rgb (hex)
+  "Convert a `rgb' HEX color to a list `(r g b)'.
+
+The `r',`g',`b' values range between `0.0..1.0'."
+  (setq hex (replace-regexp-in-string "#" "" hex))
+  (mapcar #'(lambda (s) (/ (string-to-number s 16) 255.0))
+          (list (substring hex 0 2)
+                (substring hex 2 4)
+                (substring hex 4 6))))
+
+(defun kurecolor-rgb-to-hex (rgb)
+  "RGB as a list `(r g b)' to `rgb' hex color.
+
+The `r',`g',`b' values can range between `0.0..1.0'."
+  (cl-destructuring-bind
+      (red green blue)
+      (mapcar 'kurecolor-to-8bit rgb)
+    (format "#%02X%02X%02X" red green blue)))
+#+end_src
+
+
+#+begin_src emacs-lisp
+
+#+end_src
+
 ** Dash
 
 Dash is a library for dealing with lists.
@@ -509,31 +545,6 @@ exclude this stuff.
 *** Color functions
 
 Ripped off from kurecolor, obviously.
-
-#+begin_src emacs-lisp
-(defun kurecolor-to-8bit (n)
-  "Convert N (`0.0..1.0') to `0-255'."
-  (* n 255.0))
-
-(defun kurecolor-hex-to-rgb (hex)
-  "Convert a `rgb' HEX color to a list `(r g b)'.
-
-The `r',`g',`b' values range between `0.0..1.0'."
-  (setq hex (replace-regexp-in-string "#" "" hex))
-  (mapcar #'(lambda (s) (/ (string-to-number s 16) 255.0))
-          (list (substring hex 0 2)
-                (substring hex 2 4)
-                (substring hex 4 6))))
-
-(defun kurecolor-rgb-to-hex (rgb)
-  "RGB as a list `(r g b)' to `rgb' hex color.
-
-The `r',`g',`b' values can range between `0.0..1.0'."
-  (cl-destructuring-bind
-      (red green blue)
-      (mapcar 'kurecolor-to-8bit rgb)
-    (format "#%02X%02X%02X" red green blue)))
-#+end_src
 
 *** Utility
 
@@ -923,6 +934,16 @@ different commands, this bridges the gap between them.
               (call-interactively (plist-get src :action)))))))))
 #+end_src
 
+** Color manipulation
+
+#+begin_src emacs-lisp
+(defun my:color-blend-hex (color1 color2 factor)
+  (kurecolor-rgb-to-hex
+    (color-blend (kurecolor-hex-to-rgb color1)
+                 (kurecolor-hex-to-rgb color2)
+                 factor)))
+#+end_src
+
 * Backups
 
 Prevent clobbering symlinks.
@@ -1277,6 +1298,68 @@ Emacs that Evil does not cover properly by default.
   (evil-fringe-mark-margin 'right-margin)
   :init (global-evil-fringe-mark-mode)
   :config (setq-default right-fringe-width 22))
+#+end_src
+
+** Highlight yank
+
+#+begin_src emacs-lisp
+(defvar my:yank-overlays (list))
+(defvar my:yank-overlay-duration 0.4)
+(defvar my:yank-overlay-timer nil)
+(defcustom my:yank-overlay-foreground (catppuccin-get-color 'pink)
+  "Evil yank overlay foreground")
+(defcustom my:yank-overlay-background
+  (my:color-blend-hex my:yank-overlay-foreground (catppuccin-get-color 'base) 0.2)
+  "Evil yank overlay background")
+
+(defun my:remove-yank-overlays ()
+  (when my:yank-overlays
+    (dolist (overlay my:yank-overlays)
+      (delete-overlay overlay))
+    (setq my:yank-overlays (list)))
+  (when my:yank-overlay-timer
+    (cancel-timer my:yank-overlay-timer)
+    (setq my:yank-overlay-timer nil)))
+
+(defun my:start-yank-overlay-timer ()
+  (when my:yank-overlay-timer
+    (cancel-timer my:yank-overlay-timer))
+  (setq my:yank-overlay-timer
+    (run-with-timer my:yank-overlay-duration nil #'my:remove-yank-overlays)))
+
+(defun my:make-yank-overlay (beg end &optional extend)
+  (let ((overlay (make-overlay beg end)))
+    (push overlay my:yank-overlays)
+    (overlay-put overlay 'priority 666666)
+    (overlay-put overlay 'face `(:background ,my:yank-overlay-background
+                                 :foreground ,my:yank-overlay-foreground
+                                 :weight bold
+                                 :extend ,extend))))
+
+(defmacro my:set-yank-overlays (&rest body)
+  `(progn
+     (my:remove-yank-overlays)
+     ,@body
+     (my:start-yank-overlay-timer)))
+
+(defun my:highlight-yank-characters (beg end &rest _)
+  (my:set-yank-overlays
+   (my:make-yank-overlay beg end t)))
+
+(defun my:highlight-yank-lines (beg end &rest _)
+  (my:set-yank-overlays
+   (my:make-yank-overlay beg end t)))
+
+(defun my:highlight-yank-rectangle (beg end &rest _)
+  (my:set-yank-overlays
+    (evil-apply-on-block
+      (lambda (beg end)
+        (my:make-yank-overlay beg end))
+      beg end nil)))
+
+(advice-add 'evil-yank-characters :before #'my:highlight-yank-characters)
+(advice-add 'evil-yank-lines :before #'my:highlight-yank-lines)
+(advice-add 'evil-yank-rectangle :before #'my:highlight-yank-rectangle)
 #+end_src
 
 * Completion

@@ -227,6 +227,21 @@ Remove secondary selection with mouse.
              '("melpa" . "http://melpa.org/packages/") t)
 #+end_src
 
+* Help
+
+Display some actually helpful information in the scratch buffer.
+
+#+begin_src emacs-lisp
+(setq initial-scratch-message "; -*- lexical-binding: nil; -*-
+\"
+
+Fringe marks ----------------------
+< > Last selection   [ ] Last paste
+{ } Paragraph         ^  Insertion
+
+\"")
+#+end_src
+
 * External libraries
 
 ** Dash
@@ -658,6 +673,7 @@ The `r',`g',`b' values can range between `0.0..1.0'."
   "Has anyone really been far even as decided to use even go want to do look more like?"
   "FOR NOTHING  -  AGAINST EVERYTHING"
   "!  TERROR LEVEL INCREASED  !"
+  "Dawn breaks but it isn't a new day."
   "No human being deserves to get what's coming to them."
   "0.1 + 0.2 = 0.30000000000000004"
 ))
@@ -1933,7 +1949,7 @@ Eat is a terminal emulator. Works best with [[https://codeberg.org/akib/emacs-ea
 #+end_src
 
 * Languages
-** English
+** English (LTEX+)
 
 #+begin_src emacs-lisp
 (use-package lsp-ltex-plus

@@ -1350,7 +1350,16 @@ Emacs that Evil does not cover properly by default.
        :background ,(my:color-blend-hex paste-color
                                         (catppuccin-get-color 'base)
                                         blend-factor)))
-  "Face for highlighting evil-paste-* operations."))
+  "Face for highlighting evil-paste-* operations when pasting characters or lines.")
+
+  (defface my:paste-block-overlay-face
+    `((((class color) (min-colors 88))
+       :foreground ,paste-color
+       :background ,(my:color-blend-hex paste-color
+                                        (catppuccin-get-color 'base)
+                                        blend-factor)))
+  "Face for highlighting evil-paste-* operations when pasting a block."))
+
 
 (defun my:remove-overlays (&rest _)
   (when my:overlays
@@ -1400,28 +1409,52 @@ Emacs that Evil does not cover properly by default.
   (setq my:paste-beg (point))
   string)
 
-(defun my:highlight-paste (count &optional register _)
+(defun my:register-block-p (&optional register)
+  (let* ((regval (evil-get-register (or register 48)))
+         (needle "(yank-handler (evil-yank-block-handler (#(")
+         (register-text (format "%s" regval))
+         (hack-magic-number 16)
+         (hack-regval-dump (format "%S" regval))
+         (sub-from (length register-text))
+         (sub-to (+ hack-magic-number
+                    (length register-text)
+                    (length needle))))
+    ;; HACK: Instead of searching for a substring, this should
+    ;; actually look at the struct slot `insert-func'. Lexical binding
+    ;; is making it tricky.
+    (cl-search needle (substring hack-regval-dump sub-from sub-to))))
+
+(defun my:highlight-paste (beg beg-offset end &optional register)
   (my:set-overlays
-    (let* ((beg (evil-get-marker ?\[))
-           (end (1+ (evil-get-marker ?\])))
-           (regval (get-register (or register 48)))
-           (empty-line (= (point) (pos-bol))))
-      ;; HACK Figure out a better way to determine if it's a block paste.
-      (if (cl-search "(yank-handler (evil-yank-block-handler (#("
-                     (format "%S" regval))
+    (setq end (1+ end))
+    (let* ((regval (get-register (or register 48))))
+      (if (my:register-block-p register)
         (evil-apply-on-block
           (lambda (beg end)
-            (my:make-overlay beg end 'my:paste-overlay-face))
-          (if empty-line beg (1+ beg))
+            (my:make-overlay beg end 'my:paste-block-overlay-face))
+          (+ beg beg-offset)
           end
           nil)
         (my:make-overlay beg end 'my:paste-overlay-face)))))
+
+(defun my:highlight-paste-after (_ &optional register _)
+  (let* ((empty-line (= (point) (pos-bol)))
+         (beg (evil-get-marker ?\[))
+         (beg-offset (if empty-line 0 1))
+         (end (evil-get-marker ?\])))
+    (my:highlight-paste beg beg-offset end register)))
+
+(defun my:highlight-paste-before (_ &optional register _)
+  (let* ((beg (evil-get-marker ?\[))
+         (end (evil-get-marker ?\])))
+    (my:highlight-paste beg 0 end register)))
 
 (advice-add 'evil-yank-characters :before #'my:highlight-yank-characters)
 (advice-add 'evil-yank-lines :before #'my:highlight-yank-lines)
 (advice-add 'evil-yank-rectangle :before #'my:highlight-yank-rectangle)
 
-(advice-add 'evil-paste-after :after #'my:highlight-paste)
+(advice-add 'evil-paste-after :after #'my:highlight-paste-after)
+(advice-add 'evil-paste-before :after #'my:highlight-paste-before)
 #+end_src
 
 * Completion

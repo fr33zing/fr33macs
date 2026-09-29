@@ -1300,23 +1300,60 @@ Emacs that Evil does not cover properly by default.
   :config (setq-default right-fringe-width 22))
 #+end_src
 
-** Highlight yank
+** Highlight yank & paste
 
 #+begin_src emacs-lisp
-(defvar my:yank-overlays (list))
-(defvar my:yank-overlay-duration 0.4)
+(defvar my:overlay-priority 666666)
+(defvar my:overlays (list))
+(defvar my:yank-overlay-duration 0.8)
 (defvar my:yank-overlay-timer nil)
-(defcustom my:yank-overlay-foreground (catppuccin-get-color 'pink)
-  "Evil yank overlay foreground")
-(defcustom my:yank-overlay-background
-  (my:color-blend-hex my:yank-overlay-foreground (catppuccin-get-color 'base) 0.2)
-  "Evil yank overlay background")
+(defvar my:paste-beg nil)
 
-(defun my:remove-yank-overlays ()
-  (when my:yank-overlays
-    (dolist (overlay my:yank-overlays)
+(let ((background (catppuccin-get-color 'base))
+      (yank-color (catppuccin-get-color 'mauve))
+      (paste-color (catppuccin-get-color 'green))
+      (blend-factor 0.2))
+  (defface my:yank-characters-overlay-face
+    `((((class color) (min-colors 88))
+       :extend t
+       :foreground ,yank-color
+       :background ,(my:color-blend-hex yank-color
+                                        background
+                                        blend-factor)))
+  "Face for highlighting evil-yank-characters operations.")
+
+  (defface my:yank-lines-overlay-face
+    `((((class color) (min-colors 88))
+       :extend t
+       :foreground ,yank-color
+       :background ,(my:color-blend-hex yank-color
+                                        background
+                                        blend-factor)))
+  "Face for highlighting evil-yank-lines operations.")
+
+  (defface my:yank-rectangle-overlay-face
+    `((((class color) (min-colors 88))
+       :foreground ,yank-color
+       :background ,(my:color-blend-hex yank-color
+                                        background
+                                        blend-factor)))
+  "Face for highlighting evil-yank-rectangle operations.")
+
+
+  (defface my:paste-overlay-face
+    `((((class color) (min-colors 88))
+       :extend t
+       :foreground ,paste-color
+       :background ,(my:color-blend-hex paste-color
+                                        (catppuccin-get-color 'base)
+                                        blend-factor)))
+  "Face for highlighting evil-paste-* operations."))
+
+(defun my:remove-overlays ()
+  (when my:overlays
+    (dolist (overlay my:overlays)
       (delete-overlay overlay))
-    (setq my:yank-overlays (list)))
+    (setq my:overlays (list)))
   (when my:yank-overlay-timer
     (cancel-timer my:yank-overlay-timer)
     (setq my:yank-overlay-timer nil)))
@@ -1325,41 +1362,58 @@ Emacs that Evil does not cover properly by default.
   (when my:yank-overlay-timer
     (cancel-timer my:yank-overlay-timer))
   (setq my:yank-overlay-timer
-    (run-with-timer my:yank-overlay-duration nil #'my:remove-yank-overlays)))
+    (run-with-timer my:yank-overlay-duration nil #'my:remove-overlays)))
 
-(defun my:make-yank-overlay (beg end &optional extend)
+(defun my:make-overlay (beg end face)
   (let ((overlay (make-overlay beg end)))
-    (push overlay my:yank-overlays)
-    (overlay-put overlay 'priority 666666)
-    (overlay-put overlay 'face `(:background ,my:yank-overlay-background
-                                 :foreground ,my:yank-overlay-foreground
-                                 :weight bold
-                                 :extend ,extend))))
+    (push overlay my:overlays)
+    (overlay-put overlay 'priority my:overlay-priority)
+    (overlay-put overlay 'face face)))
 
-(defmacro my:set-yank-overlays (&rest body)
+(defmacro my:set-overlays (&rest body)
   `(progn
-     (my:remove-yank-overlays)
+     (my:remove-overlays)
      ,@body
      (my:start-yank-overlay-timer)))
 
 (defun my:highlight-yank-characters (beg end &rest _)
-  (my:set-yank-overlays
-   (my:make-yank-overlay beg end t)))
+  (my:set-overlays
+   (my:make-overlay beg end 'my:yank-characters-overlay-face)))
 
 (defun my:highlight-yank-lines (beg end &rest _)
-  (my:set-yank-overlays
-   (my:make-yank-overlay beg end t)))
+  (my:set-overlays
+   (my:make-overlay beg end 'my:yank-lines-overlay-face)))
 
 (defun my:highlight-yank-rectangle (beg end &rest _)
-  (my:set-yank-overlays
+  (my:set-overlays
     (evil-apply-on-block
       (lambda (beg end)
-        (my:make-yank-overlay beg end))
+        (my:make-overlay beg end 'my:yank-rectangle-overlay-face))
       beg end nil)))
+
+(defun my:highlight-paste (string &rest _)
+  (my:set-overlays
+   (let* ((beg (point))
+          (end (+ beg (length string))))
+     (my:make-overlay beg end 'my:paste-overlay-face))))
+
+(defun my:save-paste-beg (string)
+  (setq my:paste-beg (point))
+  string)
+
+(defun my:highlight-paste (orig-fun string &rest args)
+  (apply orig-fun string args)
+  (my:set-overlays
+    (let* ((beg my:paste-beg)
+           (end (+ beg (length string))))
+      (my:make-overlay beg end 'my:paste-overlay-face))))
 
 (advice-add 'evil-yank-characters :before #'my:highlight-yank-characters)
 (advice-add 'evil-yank-lines :before #'my:highlight-yank-lines)
 (advice-add 'evil-yank-rectangle :before #'my:highlight-yank-rectangle)
+
+(add-hook 'yank-transform-functions 'my:save-paste-beg)
+(advice-add 'insert-for-yank :around #'my:highlight-paste)
 #+end_src
 
 * Completion
@@ -2053,6 +2107,45 @@ Eat is a terminal emulator. Works best with [[https://codeberg.org/akib/emacs-ea
   :ensure t
   :config
   (add-hook 'emacs-lisp-mode-hook 'highlight-quoted-mode))
+
+(use-package paredit
+  :ensure t
+  :commands paredit-mode
+  :hook
+  (emacs-lisp-mode . paredit-mode))
+
+(use-package enhanced-evil-paredit
+  :ensure t
+  :commands enhanced-evil-paredit-mode
+  :hook (paredit-mode . enhanced-evil-paredit-mode))
+
+(defun my:enable-evil-move-beyond-eol ()
+  (setq-local evil-move-beyond-eol t))
+
+(add-hook 'paredit-mode-hook #'my:enable-evil-move-beyond-eol)
+#+end_src
+
+*** Hydra
+
+#+begin_src emacs-lisp
+(major-mode-hydra-define emacs-lisp-mode
+  (:exit t :idle 0.25 :quit-key "<escape>")
+  ("Edit"
+    (("s" paredit-forward-slurp-sexp  "Slurp forward")
+     ("S" paredit-backward-slurp-sexp "Slurp backward")
+     ("b" paredit-forward-barf-sexp   "Barf forward")
+     ("B" paredit-backward-barf-sexp  "Barf backward")
+     ("w" paredit-wrap-sexp           "Wrap")
+     ("j" paredit-join-sexps          "Join")
+     ("x" paredit-split-sexp          "Split")
+     ("X" paredit-splice-sexp         "Splice"))
+    "Motion"
+    (("n" paredit-forward       "Forward")
+     ("u" paredit-forward-up    "Forward up")
+     ("d" paredit-forward-down  "Forward down")
+     ("N" paredit-backward      "Backward")
+     ("U" paredit-backward-up   "Backward up")
+     ("D" paredit-backward-down "Backward down"))))
 #+end_src
 
 ** Org
@@ -2136,16 +2229,12 @@ Change the ~HTML~ export preamble and postamble.
 (pretty-hydra-define hydra:org-roam
   (:exit t :idle 0.25)
    ("Org Roam"
-   (("b" org-roam-buffer-toggle       "Toggle buffer")
-    ("g" org-roam-graph  "Graph")
-    ("f" org-roam-node-find               "Find node")
-    ("i" org-roam-node-insert  "Insert node")
-    ("c" org-roam-capture  "Capture")
-
-    ("d" org-roam-dailies-capture-today  "Capture today (dailies?)")
-
-
-    )))
+     (("b" org-roam-buffer-toggle "Toggle buffer")
+      ("g" org-roam-graph         "Graph")
+      ("f" org-roam-node-find     "Find node")
+      ("i" org-roam-node-insert   "Insert node")
+      ("c" org-roam-capture       "Capture")
+      ("d" org-roam-dailies-capture-today "Capture today (dailies?)"))))
 #+end_src
 
 *** Hydra
@@ -2178,8 +2267,9 @@ Change the ~HTML~ export preamble and postamble.
     ("C" org-table-insert-column "Insert column" :exit nil)
     ("k" org-table-kill-row      "Kill row")
     ("K" org-table-kill-column   "Kill column"))
-   "Hydra"
-   (("e" hydra:org-emphasize/body "Emphasize"))))
+   "Edit"
+   (("e" hydra:org-emphasize/body "Emphasize")
+    ("'" org-edit-special         "Edit element at point"))))
 
 (pretty-hydra-define hydra:org-emphasize
   (:exit t :idle 0.25)
@@ -2309,6 +2399,7 @@ but it needs to check for ~format-all-mode~ in order to respect the
 (use-package wgsl-mode
   :ensure t)
 #+end_src
+
 ** Web
 
 #+begin_src emacs-lisp

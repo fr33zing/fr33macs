@@ -6,11 +6,6 @@
       url = "github:Bunogi/cargo-makedocs";
       flake = false;
     };
-
-    kisses = {
-      url = "github:jsilve24/kisses";
-      flake = false;
-    };
   };
 
   outputs =
@@ -140,17 +135,7 @@
           jdk17
 
           # LaTeX
-          (pkgs.texliveBasic.withPackages (
-            ps: with ps; [
-              dvisvgm
-              dvipng
-              wrapfig
-              amsmath
-              ulem
-              hyperref
-              capt-of
-            ]
-          ))
+          texliveFull
 
           # English
           ltex-ls-plus
@@ -199,12 +184,7 @@
               });
               config = config.output;
               defaultInitFile = true;
-              extraEmacsPackages =
-                epkgs:
-                [
-                  epkgs.use-package
-                ]
-                ++ (customEmacsPackages epkgs);
+              extraEmacsPackages = epkgs: (customEmacsPackages epkgs);
             }).overrideAttrs
               (_: {
                 meta.mainProgram = "emacs";

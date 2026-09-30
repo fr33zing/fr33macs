@@ -997,8 +997,7 @@ as the foundation for my custom keybind scheme to improve
 discoverability and reduce cognitive load.
 
 #+begin_src emacs-lisp
-(use-package major-mode-hydra
-  :ensure t)
+(use-package major-mode-hydra :ensure t)
 
 (use-package pretty-hydra
   :ensure t
@@ -1355,8 +1354,7 @@ space-separated components and matches candidates that match all the components 
   :delight yas-minor-mode
   :init (yas-global-mode 1))
 
-(use-package yasnippet-snippets
-  :ensure t)
+(use-package yasnippet-snippets :ensure t)
 #+end_src
 
 * Minibuffer
@@ -1434,11 +1432,8 @@ For unknown reasons, mini-modeline-enhance-visual breaks theming on emacsclient.
   (mini-modeline-enhance-visual nil)
   (mini-modeline-right-padding 6))
 
-(use-package delight
-  :ensure t)
-
-(use-package autorevert
-  :delight auto-revert-mode)
+(use-package delight :ensure t)
+(use-package autorevert :delight auto-revert-mode)
 #+end_src
 
 * Motion
@@ -1912,7 +1907,7 @@ Flycheck is a modern on-the-fly syntax checking extension.
   (global-flycheck-mode)
   (global-flycheck-annotate-mode)
 
-  ;                                     5% opacity
+  ;                                        5% opacity
   (my:set-flycheck-color "error"   'red    "#453243")
   (my:set-flycheck-color "warning" 'yellow "#454144")
   (my:set-flycheck-color "info"    'mauve  "#3c3653"))
@@ -1957,16 +1952,17 @@ Gone until it's fixed:
 https://github.com/gonewest818/dimmer.el/pull/88
 
 #+begin_src emacs-lisp
-;; (use-package dimmer
-;;   :ensure t
-;;   :vc (:url "https://github.com/chrhansk/dimmer.el" :rev "9a75788")
-;;   :init
-;;   (dimmer-configure-which-key)
-;;   (dimmer-configure-company-box)
-;;   (dimmer-configure-hydra)
-;;   (dimmer-configure-magit)
-;;   (dimmer-configure-org)
-;;   (dimmer-mode t))
+(use-package dimmer
+  :disabled ; TODO
+  :ensure t
+  :vc (:url "https://github.com/chrhansk/dimmer.el" :rev "9a75788")
+  :init
+  (dimmer-configure-which-key)
+  (dimmer-configure-company-box)
+  (dimmer-configure-hydra)
+  (dimmer-configure-magit)
+  (dimmer-configure-org)
+  (dimmer-mode t))
 #+end_src
 
 ** Sublimity
@@ -2221,8 +2217,6 @@ Change the ~HTML~ export preamble and postamble.
 
 *** Hydra
 
-*Test*
-
 #+begin_src emacs-lisp
 (defun my:org-toggle-emphasis-markers ()
   "Toggle emphasis markers [*/_=~+]"
@@ -2283,8 +2277,7 @@ Change the ~HTML~ export preamble and postamble.
 
 #+begin_src emacs-lisp
 (use-package auctex :ensure t)
-(use-package cdlatex
-  :ensure t)
+(use-package cdlatex :ensure t)
 #+end_src
 
 Automatically render LaTeX fragments, toggle them when the cursor enters them.
@@ -2385,8 +2378,7 @@ but it needs to check for ~format-all-mode~ in order to respect the
 
 ** WGSL
 #+begin_src emacs-lisp
-(use-package wgsl-mode
-  :ensure t)
+(use-package wgsl-mode :ensure t)
 #+end_src
 
 ** Web

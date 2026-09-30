@@ -279,11 +279,6 @@ The `r',`g',`b' values can range between `0.0..1.0'."
     (format "#%02X%02X%02X" red green blue)))
 #+end_src
 
-
-#+begin_src emacs-lisp
-
-#+end_src
-
 ** Dash
 
 Dash is a library for dealing with lists.
@@ -1989,9 +1984,6 @@ Centers each buffer horizontally and add smooth scroll.
   :after sublimity
   :custom
   (sublimity-attractive-centering-width 110))
-
-(use-package sublimity-scroll
-  :after sublimity)
 #+end_src
 
 ** Eat
@@ -2000,7 +1992,8 @@ Eat is a terminal emulator. Works best with [[https://codeberg.org/akib/emacs-ea
 
 #+begin_src emacs-lisp
 (use-package eat
-    :ensure t)
+  :ensure t
+  :config)
 #+end_src
 
 ** Volatile Highlights
@@ -2028,7 +2021,7 @@ color support.
   (vhl/animation-style 'static)
   (vhl/highlight-zero-width-ranges nil)
   :config
-  (volatile-highlights-mode 1)
+  (volatile-highlights-mode 1
 
   (defun my:vhl:reset (&rest _)
     (when my:vhl-default-face-attrs
@@ -2047,12 +2040,7 @@ color support.
   (advice-add 'evil-yank-characters :before #'my:vhl:hl-yank)
   (advice-add 'evil-yank-lines :before #'my:vhl:hl-yank)
   (advice-add 'evil-yank-rectangle :before #'my:vhl:hl-yank-rectangle)
-;; <config>
-#+end_src
 
-Here's the actual configuration.
-
-#+begin_src emacs-lisp
   (vhl/define-extension 'my:vhl:evil-extension
     'evil-yank
     'evil-paste-before

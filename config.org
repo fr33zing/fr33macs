@@ -14,16 +14,10 @@ Read this document in this repository's github.io page or in Emacs for the best 
 - SUBLIMITY MODE NEEDS TO GO
   Replace with something from here:
   https://stackoverflow.com/questions/24955253/centre-emacs-buffer-within-window
-
-- Balance windows when a new one opens
-- Create a script that checks if emacsclient is already open.
-  If open, instead focus it https://wayland.app/protocols/kde-plasma-window-management
-  https://github.com/uukelele/waydotool
 - Make pressing enter on git diff use existing window if buffer open
 - Find out why LTEX errors aren't always working with flycheck
 - Find a plugin to show me all my TODOs in all projects when I open Emacs
 - Disable LTEX in read only
-
 - Check which external libs are actually needed
 
 * Links
@@ -1304,157 +1298,9 @@ Emacs that Evil does not cover properly by default.
   :config (setq-default right-fringe-width 22))
 #+end_src
 
-** Highlight yank & paste
+** Highlight yank
 
 #+begin_src emacs-lisp
-(defvar my:overlay-priority 666666)
-(defvar my:overlays (list))
-(defvar my:overlay-duration 0.8)
-(defvar my:overlay-timer nil)
-(defvar my:paste-beg nil)
-
-(let ((background (catppuccin-get-color 'base))
-      (yank-color (catppuccin-get-color 'mauve))
-      (paste-color (catppuccin-get-color 'green))
-      (blend-factor 0.2))
-  (defface my:yank-characters-overlay-face
-    `((((class color) (min-colors 88))
-       :extend t
-       :foreground ,yank-color
-       :background ,(my:color-blend-hex yank-color
-                                        background
-                                        blend-factor)))
-  "Face for highlighting evil-yank-characters operations.")
-
-  (defface my:yank-lines-overlay-face
-    `((((class color) (min-colors 88))
-       :extend t
-       :foreground ,yank-color
-       :background ,(my:color-blend-hex yank-color
-                                        background
-                                        blend-factor)))
-  "Face for highlighting evil-yank-lines operations.")
-
-  (defface my:yank-rectangle-overlay-face
-    `((((class color) (min-colors 88))
-       :foreground ,yank-color
-       :background ,(my:color-blend-hex yank-color
-                                        background
-                                        blend-factor)))
-  "Face for highlighting evil-yank-rectangle operations.")
-
-  (defface my:paste-overlay-face
-    `((((class color) (min-colors 88))
-       :extend t
-       :foreground ,paste-color
-       :background ,(my:color-blend-hex paste-color
-                                        (catppuccin-get-color 'base)
-                                        blend-factor)))
-  "Face for highlighting evil-paste-* operations when pasting characters or lines.")
-
-  (defface my:paste-block-overlay-face
-    `((((class color) (min-colors 88))
-       :foreground ,paste-color
-       :background ,(my:color-blend-hex paste-color
-                                        (catppuccin-get-color 'base)
-                                        blend-factor)))
-  "Face for highlighting evil-paste-* operations when pasting a block."))
-
-
-(defun my:remove-overlays (&rest _)
-  (when my:overlays
-    (dolist (overlay my:overlays)
-      (delete-overlay overlay))
-    (setq my:overlays (list)))
-  (when my:overlay-timer
-    (cancel-timer my:overlay-timer)
-    (setq my:overlay-timer nil)))
-
-(defun my:start-overlay-timer (&rest _)
-  (when my:overlay-timer
-    (cancel-timer my:overlay-timer))
-  (setq my:overlay-timer
-    (run-with-timer my:overlay-duration nil #'my:remove-overlays)))
-
-(defun my:make-overlay (beg end face)
-  (let ((overlay (make-overlay beg end)))
-    (push overlay my:overlays)
-    (overlay-put overlay 'priority my:overlay-priority)
-    (overlay-put overlay 'face face)))
-
-(defmacro my:set-overlays (&rest body)
-  `(progn
-     (my:remove-overlays)
-     ,@body
-     (my:start-overlay-timer)))
-
-(defun my:highlight-yank-characters (beg end &rest _)
-  (my:set-overlays
-   (my:make-overlay beg end 'my:yank-characters-overlay-face)))
-
-(defun my:highlight-yank-lines (beg end &rest _)
-  (my:set-overlays
-   (my:make-overlay beg end 'my:yank-lines-overlay-face)))
-
-(defvar my:yank-rectangle nil)
-(defun my:highlight-yank-rectangle (beg end &rest _)
-  (my:set-overlays
-    (setq my:yank-rectangle (cons beg end))
-    (evil-apply-on-block
-      (lambda (beg end)
-        (my:make-overlay beg end 'my:yank-rectangle-overlay-face))
-      beg end nil)))
-
-(defun my:save-paste-beg (string)
-  (setq my:paste-beg (point))
-  string)
-
-(defun my:register-block-p (&optional register)
-  (let* ((regval (evil-get-register (or register 48)))
-         (needle "(yank-handler (evil-yank-block-handler (#(")
-         (register-text (format "%s" regval))
-         (hack-magic-number 16)
-         (hack-regval-dump (format "%S" regval))
-         (sub-from (length register-text))
-         (sub-to (+ hack-magic-number
-                    (length register-text)
-                    (length needle))))
-    ;; HACK: Instead of searching for a substring, this should
-    ;; actually look at the struct slot `insert-func'. Lexical binding
-    ;; is making it tricky.
-    (cl-search needle (substring hack-regval-dump sub-from sub-to))))
-
-(defun my:highlight-paste (beg beg-offset end &optional register)
-  (my:set-overlays
-    (setq end (1+ end))
-    (let* ((regval (get-register (or register 48))))
-      (if (my:register-block-p register)
-        (evil-apply-on-block
-          (lambda (beg end)
-            (my:make-overlay beg end 'my:paste-block-overlay-face))
-          (+ beg beg-offset)
-          end
-          nil)
-        (my:make-overlay beg end 'my:paste-overlay-face)))))
-
-(defun my:highlight-paste-after (_ &optional register _)
-  (let* ((empty-line (= (point) (pos-bol)))
-         (beg (evil-get-marker ?\[))
-         (beg-offset (if empty-line 0 1))
-         (end (evil-get-marker ?\])))
-    (my:highlight-paste beg beg-offset end register)))
-
-(defun my:highlight-paste-before (_ &optional register _)
-  (let* ((beg (evil-get-marker ?\[))
-         (end (evil-get-marker ?\])))
-    (my:highlight-paste beg 0 end register)))
-
-(advice-add 'evil-yank-characters :before #'my:highlight-yank-characters)
-(advice-add 'evil-yank-lines :before #'my:highlight-yank-lines)
-(advice-add 'evil-yank-rectangle :before #'my:highlight-yank-rectangle)
-
-(advice-add 'evil-paste-after :after #'my:highlight-paste-after)
-(advice-add 'evil-paste-before :after #'my:highlight-paste-before)
 #+end_src
 
 * Completion
@@ -2125,6 +1971,84 @@ Eat is a terminal emulator. Works best with [[https://codeberg.org/akib/emacs-ea
 (use-package eat
     :ensure t)
 #+end_src
+
+** Volatile Highlights
+
+Highlights buffer changes to make the effects of your commands more
+readily apparent. I've added a macro to hack in per-command highlight
+color support.
+
+#+begin_src emacs-lisp
+(defvar my:vhl-default-face-attrs nil)
+(defmacro my:vhl:color (fun fg &optional extend)
+  `(advice-add ,fun :before (lambda (&rest _)
+     (setq my:vhl-default-face-attrs (face-all-attributes 'vhl/default-face))
+     (let* ((buffer-bg (catppuccin-get-color 'base))
+            (fg (catppuccin-get-color ,fg))
+            (bg (my:color-blend-hex fg buffer-bg 0.2)))
+       (set-face-attribute 'vhl/default-face nil
+                           :extend ,extend
+                           :foreground fg
+                           :background bg)))))
+
+(use-package volatile-highlights
+  :ensure t
+  :custom
+  (vhl/animation-style 'static)
+  (vhl/highlight-zero-width-ranges nil)
+  :config
+  (volatile-highlights-mode 1)
+
+  (defun my:vhl:reset (&rest _)
+    (when my:vhl-default-face-attrs
+      (set-face-attribute 'vhl/default-face nil
+                          :extend (plist-get my:vhl-default-face-attrs :extend)
+                          :foreground (plist-get my:vhl-default-face-attrs :foreground)
+                          :background (plist-get my:vhl-default-face-attrs :background))))
+
+  (defun my:vhl:hl-yank (beg end &rest _)
+    (vhl/add-range beg end))
+
+  (defun my:vhl:hl-yank-rectangle (beg end &rest _)
+    (evil-apply-on-block #'vhl/add-range beg end nil))
+
+  (advice-add 'vhl/clear-all :after #'my:vhl:reset)
+  (advice-add 'evil-yank-characters :before #'my:vhl:hl-yank)
+  (advice-add 'evil-yank-lines :before #'my:vhl:hl-yank)
+  (advice-add 'evil-yank-rectangle :before #'my:vhl:hl-yank-rectangle)
+;; <config>
+#+end_src
+
+Here's the actual configuration.
+
+#+begin_src emacs-lisp
+  (vhl/define-extension 'my:vhl:evil-extension
+    'evil-yank
+    'evil-paste-before
+    'evil-paste-after
+    'evil-paste-pop
+    'evil-undo
+    'evil-redo
+    'evil-change
+    'evil-delete
+    'evil-move)
+  (vhl/install-extension 'my:vhl:evil-extension)
+
+  (my:vhl:color 'evil-yank-lines      'yellow t)
+  (my:vhl:color 'evil-yank-characters 'yellow t)
+  (my:vhl:color 'evil-yank-rectangle  'yellow nil)
+  (my:vhl:color 'evil-paste-before    'mauve  t)
+  (my:vhl:color 'evil-paste-after     'mauve  t)
+  (my:vhl:color 'evil-paste-pop       'mauve  t)
+  (my:vhl:color 'evil-undo            'green  t)
+  (my:vhl:color 'evil-redo            'peach  t)
+  (my:vhl:color 'evil-move            'blue   t)
+  (my:vhl:color 'evil-change          'red    t)
+  (my:vhl:color 'evil-delete          'red    t)
+) ; </config>
+#+end_src
+
+
 
 * Languages
 ** English (LTEX+)

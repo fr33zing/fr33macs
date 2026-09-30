@@ -856,6 +856,7 @@ window will never be considered temporary.
 (setq my:not-temporary-major-modes
   '(fr33splash-mode
     messages-buffer-mode
+    backtrace-mode
     debugger-mode
     lisp-interaction-mode
     eat-mode))

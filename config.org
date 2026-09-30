@@ -299,6 +299,265 @@ Less commonly used functions that complement basic APIs.
 (use-package subr-x)
 #+end_src
 
+* My library
+
+*Notice*: Not all functions are defined in this section. There are
+some less general / more context-specific functions that are scattered
+around with no particular rhyme or reason.
+
+** Advice
+
+#+begin_src emacs-lisp
+(defun my:advice:be-quiet (orig-fun &rest args)
+  "Advice function: Suppress messages in ORIG-FUN.
+
+Example:
+
+(advice-add 'svg-tag-mode-on :around #'my:advice:be-quiet)"
+  (let ((inhibit-message t)
+        (message-log-max nil))
+    (apply orig-fun args)))
+#+end_src
+
+#+begin_src emacs-lisp
+(defun my:advice:nav-flash-show (&rest _)
+  "Advice function: Call `nav-flash-show' after a command.
+
+Example:
+
+(advice-add 'avy-goto-char :after #'my:advice:nav-flash-show)"
+  (nav-flash-show))
+#+end_src
+
+#+begin_src emacs-lisp
+(defun my:advice:always-force-save (&rest _)
+  (my:fix-whitespace)
+  (set-buffer-modified-p t))
+
+(advice-add 'save-buffer :before #'my:advice:always-force-save)
+#+end_src
+
+#+begin_src emacs-lisp
+(defun my:advice:save-after-code-actions (&rest _)
+  (save-buffer))
+
+(advice-add 'lsp-ui-sideline-apply-code-actions :after #'my:advice:save-after-code-actions)
+#+end_src
+
+#+begin_src emacs-lisp
+(defun my:advice:bufler-list-center-header (&rest _)
+  (with-current-buffer (get-buffer-create "*Bufler*")
+    (let (( n (max (/ (- (frame-width) sublimity-attractive-centering-width) 2) 0)))
+      (message "bufler-list called with args %s" n)
+      (setf header-line-format
+            (concat (make-string n (string-to-char " ")) header-line-format)))))
+
+(advice-add 'bufler-list :after #'my:advice:bufler-list-center-header)
+#+end_src
+
+#+begin_src emacs-lisp
+(defun my:advice:imenu-list-close-after-goto (&rest _)
+  (with-current-buffer (get-buffer-create "*Ilist*")
+    (kill-buffer-and-window)))
+
+(advice-add #'imenu-list--goto-entry :after 'my:advice:imenu-list-close-after-goto)
+#+end_src
+
+** Timing
+
+- TODO Add ~debounce-eval-immediately~
+
+#+begin_src emacs-lisp
+(setq my:debounce-timers (make-hash-table :test 'equal))
+(defun my:debounce (name secs form)
+  "Begin a timer for SECS seconds named NAME to delay the evaluation
+of FORM, typically to prevent something expensive from running
+too frequently. If a pending debounce timer exists with the same
+NAME it is cancelled and replaced.
+
+Example:
+
+(my:debounce \"print-it\" 0.5 '(print \"it\"))"
+  (if-let ((old-timer (map-elt my:debounce-timers name)))
+          (cancel-timer old-timer))
+  (let* ((new-timer-fn `(progn
+          (setq my:debounce-timers (map-delete my:debounce-timers ,name))
+          (eval ,form)))
+         (new-timer (run-with-timer secs nil 'eval new-timer-fn)))
+        (map-put! my:debounce-timers name new-timer)))
+#+end_src
+
+** Windows
+
+This function was adapted from [[https://stackoverflow.com/questions/1832597][a Stack Overflow answer]] by [[https://stackoverflow.com/users/1762276/zhro][Zhro]].
+
+#+begin_src emacs-lisp
+(defun my:delete-window-maybe-kill-buffer (&optional window)
+  "Delete the window.
+If WINDOW is nil, delete the current window.
+If no other window shows its buffer, kill the buffer too."
+  (interactive)
+  (let ((buf (window-buffer window)))
+    (if (> (length (window-list)) 1)
+        (delete-window window)
+      (unless (get-buffer-window buf 'visible) (kill-buffer buf))
+      (kill-buffer buf))))
+#+end_src
+
+Switch to new window after split.
+
+#+begin_src emacs-lisp
+(defun my:split-window-right ()
+  (interactive)
+  (split-window-right)
+  (other-window 1))
+
+(defun my:split-window-below ()
+  (interactive)
+  (split-window-below)
+  (other-window 1))
+#+end_src
+
+It's irritating to need to switch to a temporary window to close
+it. These functions are used to make closing temporary windows more
+convenient.
+
+#+begin_src emacs-lisp
+(defun my:temporary-window-p (&optional window)
+  "Decide if the window is temporary.
+If WINDOW is nil, use the current window."
+  (let ((buffer (window-buffer window)))
+    (with-current-buffer buffer
+      (not (or (buffer-file-name buffer)
+               (-contains? my:not-temporary-major-modes major-mode)
+               (--some (-contains? my:not-temporary-minor-modes it)
+                       local-minor-modes))))))
+
+(defun my:delete-window (window)
+  "Delete WINDOW or abort if WINDOW is a minibuffer."
+  (if (window-minibuffer-p window)
+      (abort-recursive-edit)
+      (my:delete-window-maybe-kill-buffer window)))
+
+(defun my:next-temporary-window ()
+  "Attempt to find a minibuffer first. If no minibuffer is found,
+then starting at the current window, find the next temporary
+window."
+  (interactive)
+  (if-let ((minibuffer (active-minibuffer-window)))
+    minibuffer
+    (-first #'my:temporary-window-p (window-list))))
+
+(defun my:delete-next-temporary-window ()
+  "Starting at the current window, find the next temporary window
+and delete it."
+  (interactive)
+  (if-let ((window (my:next-temporary-window)))
+    (my:delete-window window)))
+
+(defun my:delete-next-temporary-window-or-kb-quit ()
+  "Starting at the current window, find the next temporary window
+and delete it. If there is none, send keyboard-quit instead."
+  (interactive)
+  (if-let ((window (my:next-temporary-window)))
+    (my:delete-window window)
+    (keyboard-quit)))
+#+end_src
+
+When a window's major or minor mode matches any in these lists, that
+window will never be considered temporary.
+
+#+begin_src emacs-lisp
+(setq my:not-temporary-major-modes
+  '(fr33splash-mode
+    messages-buffer-mode
+    backtrace-mode
+    debugger-mode
+    lisp-interaction-mode
+    eat-mode))
+
+(setq my:not-temporary-minor-modes
+  '(org-src-mode))
+#+end_src
+
+** Buffers
+
+Working on a project with a lot of files can get annoying.
+
+#+begin_src emacs-lisp
+(defun my:kill-all-buffers ()
+  (interactive)
+  (mapc 'kill-buffer (buffer-list)))
+#+end_src
+
+** Errors
+
+#+begin_src emacs-lisp
+(defun my:fix-next-error ()
+  "Jump to the next error and open code actions"
+  (interactive)
+  (next-error)
+  (call-interactively 'my:choose-point-action)
+  (save-buffer))
+
+(defun my:fix-previous-error ()
+  "Jump to the previous error and open code actions"
+  (interactive)
+  (previous-error)
+  (call-interactively 'my:choose-point-action)
+  (save-buffer))
+#+end_src
+
+** Major-mode setup
+
+#+begin_src emacs-lisp
+(defmacro my:set-formatter (major-mode lang-name formatter)
+  (let ((hook (intern (concat (symbol-name major-mode) "-hook"))))
+  `(add-hook ',hook (lambda ()
+     (setq-local format-all-formatters '((,lang-name ,formatter)))))))
+#+end_src
+
+** Code actions
+
+Code actions are provided by ~lsp-mode~ and ~lsp-ltex-plus~ via
+different commands, this bridges the gap between them.
+
+#+begin_src emacs-lisp
+(setq my:point-action-sources
+   '((:name "English (ltex-ls-plus)"
+      :action lsp-ltex-plus-actions
+      :check lsp-ltex-plus--actions-here)
+     (:name "Code actions (lsp-mode)"
+      :action lsp-ui-sideline-apply-code-actions
+      :check (lambda () lsp-ui-sideline--code-actions))))
+
+(defun my:--action-source-p (src)
+ (let ((inhibit-message t))
+   (not (null (ignore-errors (funcall (plist-get src :check)))))))
+
+(defun my:choose-point-action ()
+  (interactive)
+  (let (( sources (seq-filter #'my:--action-source-p my:point-action-sources)))
+    (if sources
+      (if (= 1 (length sources))
+        (call-interactively (plist-get (car sources) :action))
+        (let (( choice (completing-read "Action source: "
+                          (seq-map (lambda (src) (plist-get src :name)) sources))))
+          (dolist (src sources)
+            (if (string-equal choice (plist-get src :name))
+              (call-interactively (plist-get src :action)))))))))
+#+end_src
+
+** Color manipulation
+
+#+begin_src emacs-lisp
+(defun my:color-blend-hex (color1 color2 factor)
+  (kurecolor-rgb-to-hex
+    (color-blend (kurecolor-hex-to-rgb color1)
+                 (kurecolor-hex-to-rgb color2)
+                 factor)))
+#+end_src
+
 * Theme
 
 #+begin_src emacs-lisp
@@ -355,11 +614,22 @@ Enable window dividers
                     :background (catppuccin-get-color 'surface2))
 
 (set-face-attribute 'show-paren-match nil
-                    :background (catppuccin-get-color 'pink)
-                    :foreground "black")
+                    :weight 'bold
+                    :foreground (catppuccin-get-color 'pink)
+                    :background (my:color-blend-hex (catppuccin-get-color 'pink)
+                                                    (catppuccin-get-color 'base)
+                                                    0.15)
+                    :underline `(:color ,(catppuccin-get-color 'pink)
+                                 :position t))
+
 (set-face-attribute 'show-paren-mismatch nil
-                    :background (catppuccin-get-color 'yellow)
-                    :foreground "black")
+                    :weight 'bold
+                    :foreground (catppuccin-get-color 'yellow)
+                    :background (my:color-blend-hex (catppuccin-get-color 'yellow)
+                                                    (catppuccin-get-color 'base)
+                                                    0.15)
+                    :underline `(:color ,(catppuccin-get-color 'yellow)
+                                 :position t))
 #+end_src
 
 * Splash screen
@@ -682,265 +952,6 @@ Ripped off from kurecolor, obviously.
   "No human being deserves to get what's coming to them."
   "0.1 + 0.2 = 0.30000000000000004"
 ))
-#+end_src
-
-* My library
-
-*Notice*: Not all functions are defined in this section. There are
-some less general / more context-specific functions that are scattered
-around with no particular rhyme or reason.
-
-** Advice
-
-#+begin_src emacs-lisp
-(defun my:advice:be-quiet (orig-fun &rest args)
-  "Advice function: Suppress messages in ORIG-FUN.
-
-Example:
-
-(advice-add 'svg-tag-mode-on :around #'my:advice:be-quiet)"
-  (let ((inhibit-message t)
-        (message-log-max nil))
-    (apply orig-fun args)))
-#+end_src
-
-#+begin_src emacs-lisp
-(defun my:advice:nav-flash-show (&rest _)
-  "Advice function: Call `nav-flash-show' after a command.
-
-Example:
-
-(advice-add 'avy-goto-char :after #'my:advice:nav-flash-show)"
-  (nav-flash-show))
-#+end_src
-
-#+begin_src emacs-lisp
-(defun my:advice:always-force-save (&rest _)
-  (my:fix-whitespace)
-  (set-buffer-modified-p t))
-
-(advice-add 'save-buffer :before #'my:advice:always-force-save)
-#+end_src
-
-#+begin_src emacs-lisp
-(defun my:advice:save-after-code-actions (&rest _)
-  (save-buffer))
-
-(advice-add 'lsp-ui-sideline-apply-code-actions :after #'my:advice:save-after-code-actions)
-#+end_src
-
-#+begin_src emacs-lisp
-(defun my:advice:bufler-list-center-header (&rest _)
-  (with-current-buffer (get-buffer-create "*Bufler*")
-    (let (( n (max (/ (- (frame-width) sublimity-attractive-centering-width) 2) 0)))
-      (message "bufler-list called with args %s" n)
-      (setf header-line-format
-            (concat (make-string n (string-to-char " ")) header-line-format)))))
-
-(advice-add 'bufler-list :after #'my:advice:bufler-list-center-header)
-#+end_src
-
-#+begin_src emacs-lisp
-(defun my:advice:imenu-list-close-after-goto (&rest _)
-  (with-current-buffer (get-buffer-create "*Ilist*")
-    (kill-buffer-and-window)))
-
-(advice-add #'imenu-list--goto-entry :after 'my:advice:imenu-list-close-after-goto)
-#+end_src
-
-** Timing
-
-- TODO Add ~debounce-eval-immediately~
-
-#+begin_src emacs-lisp
-(setq my:debounce-timers (make-hash-table :test 'equal))
-(defun my:debounce (name secs form)
-  "Begin a timer for SECS seconds named NAME to delay the evaluation
-of FORM, typically to prevent something expensive from running
-too frequently. If a pending debounce timer exists with the same
-NAME it is cancelled and replaced.
-
-Example:
-
-(my:debounce \"print-it\" 0.5 '(print \"it\"))"
-  (if-let ((old-timer (map-elt my:debounce-timers name)))
-          (cancel-timer old-timer))
-  (let* ((new-timer-fn `(progn
-          (setq my:debounce-timers (map-delete my:debounce-timers ,name))
-          (eval ,form)))
-         (new-timer (run-with-timer secs nil 'eval new-timer-fn)))
-        (map-put! my:debounce-timers name new-timer)))
-#+end_src
-
-** Windows
-
-This function was adapted from [[https://stackoverflow.com/questions/1832597][a Stack Overflow answer]] by [[https://stackoverflow.com/users/1762276/zhro][Zhro]].
-
-#+begin_src emacs-lisp
-(defun my:delete-window-maybe-kill-buffer (&optional window)
-  "Delete the window.
-If WINDOW is nil, delete the current window.
-If no other window shows its buffer, kill the buffer too."
-  (interactive)
-  (let ((buf (window-buffer window)))
-    (if (> (length (window-list)) 1)
-        (delete-window window)
-      (unless (get-buffer-window buf 'visible) (kill-buffer buf))
-      (kill-buffer buf))))
-#+end_src
-
-Switch to new window after split.
-
-#+begin_src emacs-lisp
-(defun my:split-window-right ()
-  (interactive)
-  (split-window-right)
-  (other-window 1))
-
-(defun my:split-window-below ()
-  (interactive)
-  (split-window-below)
-  (other-window 1))
-#+end_src
-
-It's irritating to need to switch to a temporary window to close
-it. These functions are used to make closing temporary windows more
-convenient.
-
-#+begin_src emacs-lisp
-(defun my:temporary-window-p (&optional window)
-  "Decide if the window is temporary.
-If WINDOW is nil, use the current window."
-  (let ((buffer (window-buffer window)))
-    (with-current-buffer buffer
-      (not (or (buffer-file-name buffer)
-               (-contains? my:not-temporary-major-modes major-mode)
-               (--some (-contains? my:not-temporary-minor-modes it)
-                       local-minor-modes))))))
-
-(defun my:delete-window (window)
-  "Delete WINDOW or abort if WINDOW is a minibuffer."
-  (if (window-minibuffer-p window)
-      (abort-recursive-edit)
-      (my:delete-window-maybe-kill-buffer window)))
-
-(defun my:next-temporary-window ()
-  "Attempt to find a minibuffer first. If no minibuffer is found,
-then starting at the current window, find the next temporary
-window."
-  (interactive)
-  (if-let ((minibuffer (active-minibuffer-window)))
-    minibuffer
-    (-first #'my:temporary-window-p (window-list))))
-
-(defun my:delete-next-temporary-window ()
-  "Starting at the current window, find the next temporary window
-and delete it."
-  (interactive)
-  (if-let ((window (my:next-temporary-window)))
-    (my:delete-window window)))
-
-(defun my:delete-next-temporary-window-or-kb-quit ()
-  "Starting at the current window, find the next temporary window
-and delete it. If there is none, send keyboard-quit instead."
-  (interactive)
-  (if-let ((window (my:next-temporary-window)))
-    (my:delete-window window)
-    (keyboard-quit)))
-#+end_src
-
-When a window's major or minor mode matches any in these lists, that
-window will never be considered temporary.
-
-#+begin_src emacs-lisp
-(setq my:not-temporary-major-modes
-  '(fr33splash-mode
-    messages-buffer-mode
-    backtrace-mode
-    debugger-mode
-    lisp-interaction-mode
-    eat-mode))
-
-(setq my:not-temporary-minor-modes
-  '(org-src-mode))
-#+end_src
-
-** Buffers
-
-Working on a project with a lot of files can get annoying.
-
-#+begin_src emacs-lisp
-(defun my:kill-all-buffers ()
-  (interactive)
-  (mapc 'kill-buffer (buffer-list)))
-#+end_src
-
-** Errors
-
-#+begin_src emacs-lisp
-(defun my:fix-next-error ()
-  "Jump to the next error and open code actions"
-  (interactive)
-  (next-error)
-  (call-interactively 'my:choose-point-action)
-  (save-buffer))
-
-(defun my:fix-previous-error ()
-  "Jump to the previous error and open code actions"
-  (interactive)
-  (previous-error)
-  (call-interactively 'my:choose-point-action)
-  (save-buffer))
-#+end_src
-
-** Major-mode setup
-
-#+begin_src emacs-lisp
-(defmacro my:set-formatter (major-mode lang-name formatter)
-  (let ((hook (intern (concat (symbol-name major-mode) "-hook"))))
-  `(add-hook ',hook (lambda ()
-     (setq-local format-all-formatters '((,lang-name ,formatter)))))))
-#+end_src
-
-** Code actions
-
-Code actions are provided by ~lsp-mode~ and ~lsp-ltex-plus~ via
-different commands, this bridges the gap between them.
-
-#+begin_src emacs-lisp
-(setq my:point-action-sources
-   '((:name "English (ltex-ls-plus)"
-      :action lsp-ltex-plus-actions
-      :check lsp-ltex-plus--actions-here)
-     (:name "Code actions (lsp-mode)"
-      :action lsp-ui-sideline-apply-code-actions
-      :check (lambda () lsp-ui-sideline--code-actions))))
-
-(defun my:--action-source-p (src)
- (let ((inhibit-message t))
-   (not (null (ignore-errors (funcall (plist-get src :check)))))))
-
-(defun my:choose-point-action ()
-  (interactive)
-  (let (( sources (seq-filter #'my:--action-source-p my:point-action-sources)))
-    (if sources
-      (if (= 1 (length sources))
-        (call-interactively (plist-get (car sources) :action))
-        (let (( choice (completing-read "Action source: "
-                          (seq-map (lambda (src) (plist-get src :name)) sources))))
-          (dolist (src sources)
-            (if (string-equal choice (plist-get src :name))
-              (call-interactively (plist-get src :action)))))))))
-#+end_src
-
-** Color manipulation
-
-#+begin_src emacs-lisp
-(defun my:color-blend-hex (color1 color2 factor)
-  (kurecolor-rgb-to-hex
-    (color-blend (kurecolor-hex-to-rgb color1)
-                 (kurecolor-hex-to-rgb color2)
-                 factor)))
 #+end_src
 
 * Backups
@@ -1923,7 +1934,16 @@ tree-sitter major modes.
   :config
   (set-face-attribute 'rainbow-delimiters-mismatched-face nil
                       :background (catppuccin-get-color 'peach)
-                      :foreground "black"))
+                      :foreground "black")
+
+  (set-face-attribute 'rainbow-delimiters-unmatched-face nil
+                      :weight 'bold
+                      :foreground (catppuccin-get-color 'peach)
+                      :background (my:color-blend-hex (catppuccin-get-color 'peach)
+                                                      (catppuccin-get-color 'base)
+                                                      0.15)
+                      :underline `(:color ,(catppuccin-get-color 'peach)
+                                   :position t)))
 #+end_src
 
 ** TODO Dimmer
@@ -2048,8 +2068,6 @@ Here's the actual configuration.
   (my:vhl:color 'evil-delete          'red    t)
 ) ; </config>
 #+end_src
-
-
 
 * Languages
 ** English (LTEX+)
@@ -2205,21 +2223,28 @@ Change the ~HTML~ export preamble and postamble.
 
 *** Hydra
 
+*Test*
+
 #+begin_src emacs-lisp
 (defun my:org-toggle-emphasis-markers ()
   "Toggle emphasis markers [*/_=~+]"
   (interactive)
-  (setq org-hide-emphasis-markers (not org-hide-emphasis-markers)))
+  (setq org-hide-emphasis-markers (not org-hide-emphasis-markers))
+  (font-lock-fontify-buffer))
 
 (major-mode-hydra-define org-mode
   (:exit t :idle 0.25 :quit-key "<escape>")
   ("Toggle"
-   (("l" org-toggle-link-display        "Link display")
-    ("E" my:org-toggle-emphasis-markers "Emphasis markers")
+   (("l" org-toggle-link-display        "Link display"
+                                        :toggle org-link-descriptive)
+    ("E" my:org-toggle-emphasis-markers "Emphasis markers"
+                                        :toggle (not org-hide-emphasis-markers))
+    ("n" org-toggle-narrow-to-subtree   "Narrow to subtree"
+                                        :toggle (buffer-narrowed-p))
+    ("p" org-toggle-pretty-entities     "Pretty entities"
+                                        :toggle org-pretty-entities)
     ("c" org-toggle-checkbox            "Checkbox")
-    ("i" org-toggle-inline-images       "Inline images")
-    ("n" org-toggle-narrow-to-subtree   "Narrow to subtree")
-    ("p" org-toggle-pretty-entities     "Pretty entities" :toggle org-pretty-entities))
+    ("i" org-toggle-inline-images       "Inline images"))
    "Insert"
    (("L" org-insert-link             "Link")
     ("s" org-store-link              "(Store link to here)")

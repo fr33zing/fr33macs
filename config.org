@@ -213,6 +213,16 @@ Remove secondary selection with mouse.
 (global-unset-key (kbd "<M-mouse-3>"))        ; was mouse-secondary-save-then-kill
 #+end_src
 
+Enable ANSI colors in compilation mode.
+
+#+begin_src emacs-lisp
+(require 'xterm-color)
+(setq compilation-environment '("TERM=xterm-256color"))
+(defun my:advice:compilation-filter (f proc string)
+  (funcall f proc (xterm-color-filter string)))
+(advice-add 'compilation-filter :around #'my:advice:compilation-filter)
+#+end_src
+
 ** MELPA
 
 #+begin_src emacs-lisp

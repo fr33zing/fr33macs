@@ -2017,7 +2017,7 @@ color support.
   (vhl/animation-style 'static)
   (vhl/highlight-zero-width-ranges nil)
   :config
-  (volatile-highlights-mode 1
+  (volatile-highlights-mode 1)
 
   (defun my:vhl:reset (&rest _)
     (when my:vhl-default-face-attrs
@@ -2059,8 +2059,7 @@ color support.
   (my:vhl:color 'evil-redo            'peach  t)
   (my:vhl:color 'evil-move            'blue   t)
   (my:vhl:color 'evil-change          'red    t)
-  (my:vhl:color 'evil-delete          'red    t)
-) ; </config>
+  (my:vhl:color 'evil-delete          'red    t))
 #+end_src
 
 * Languages
@@ -2107,6 +2106,8 @@ color support.
 
 TODO if no buffer file name, send the actual buffer
 maybe save it to a tmp file?
+
+use post command hook to detect point move
 
 #+begin_src emacs-lisp
 (setq my:sexp-depth-vis-overlays '())

@@ -2103,6 +2103,80 @@ color support.
 (add-hook 'paredit-mode-hook #'my:enable-evil-move-beyond-eol)
 #+end_src
 
+*** Scope highlighter
+
+TODO if no buffer file name, send the actual buffer
+maybe save it to a tmp file?
+
+#+begin_src emacs-lisp
+(setq my:sexp-depth-vis-overlays '())
+
+(defun my:clear-sexp-depth-vis ()
+  (interactive)
+  (message "----- %S" (plist-get (text-properties-at (point)) 'face))
+  (dolist (overlay my:sexp-depth-vis-overlays)
+    (delete-overlay overlay))
+  (setq my:sexp-depth-vis-overlays '()))
+
+(defun my:count-faces (p)
+  (let ((faces (plist-get (text-properties-at i) 'face)))
+    (if faces
+      (if (listp faces)
+        (length faces)
+        1)
+      0)))
+
+(defun my:call-sexp-depth-vis ()
+  (interactive)
+  (let* ((program "/home/dylan/code/sexp-depth-vis/target/release/sexp-depth-vis")
+         (args (list (int-to-string (point))
+                     (symbol-name major-mode)
+                     (buffer-file-name)))
+         (output-str (apply #'process-lines program args))
+         (output (read (car output-str)))
+         (offset (plist-get output :offset))
+         (len (plist-get output :len))
+         (faces (plist-get output :faces))
+         (spans (plist-get output :spans))
+         (commented-face (plist-get output :commented-face))
+         (commented-ranges (plist-get output :commented-ranges))
+         (overlay-priority -1))
+    (my:clear-sexp-depth-vis)
+
+    (seq-do (lambda (span)
+      (let* ((beg (+ 1 (nth 0 span)))
+             (end (+ 2 (nth 1 span)))
+             (face-idx (nth 2 span))
+             (overlay (mak-overlay beg end)))
+        (overlay-put overlay 'face (nth face-idx faces))
+        (overlay-put overlay 'priority overlay-priority)
+        (push overlay my:sexp-depth-vis-overlays)))
+      spans)
+
+    (let ((i offset))
+      (while (< i (+ offset len))
+        (let* ((faces (plist-get (text-properties-at i) 'face)))
+          (when (and (listp faces) (> (length faces) 1))
+            (let ((len-faces (length faces))
+                  (beg i))
+              (while (= len-faces (my:count-faces i))
+                (setq i (1+ i)))
+              (let ((overlay (make-overlay beg i)))
+                (overlay-put overlay 'face '(:weight bold))
+                (overlay-put overlay 'priority (1- overlay-priority))
+                (push overlay my:sexp-depth-vis-overlays)))))
+        (setq i (1+ i))))
+
+    (seq-do (lambda (range)
+      (let* ((beg (+ 1 (nth 0 range)))
+             (end (+ 2 (nth 1 range)))
+             (overlay (make-overlay beg end)))
+        (overlay-put overlay 'face commented-face)
+        (overlay-put overlay 'priority overlay-priority)
+        (push overlay my:sexp-depth-vis-overlays)))
+      commented-ranges)))
+#+end_src
+
 *** Hydra
 
 #+begin_src emacs-lisp

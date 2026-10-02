@@ -2103,102 +2103,147 @@ color support.
 
 - TODO This file demonstrates how to capture mouse movement:
   https://github.com/huangfeiyu/eldoc-mouse/blob/main/eldoc-mouse.el#L193
+- TODO maybe defvar-local?
 
 #+begin_src emacs-lisp
-  (require 'sexpdepthvis (getnix "sexpdepthvis"))
+;;(require 'sexpdepthvis (getnix "sexpdepthvis"))
+(require 'sexpdepthvis (concat (getenv "HOME") "/code/sexp-depth-vis/target/release/libsexpdepthvis.so") t)
 
-  (setq sexpdepthvis--overlays '())
-  (setq sexpdepthvis--last-point 0)
+(defvar-local sexpdepthvis--overlays '())
+(defvar-local sexpdepthvis--last-point 0)
+(defvar-local sexpdepthvis--orig-track-mouse nil)
 
-  (defgroup sexpdepthvis nil
-    "TODO"
-    :group 'applications
-    :prefix "sexpdepthvis-")
+(defcustom sexpdepthvis-mouse-pointer 'arrow
+  "When not nil, override mouse text hover pointer with this value.")
 
-  (define-minor-mode sexpdepthvis-mode
-    "Toggle sexpdepthvis-mode."
-    :group 'sexpdepthvis
-    :lighter " SexpDepthVis"
-    (if sexpdepthvis-mode
-      (sexpdepthvis--enable)
-      (sexpdepthvis--disable)))
+(defgroup sexpdepthvis nil
+  ""
+  :group 'applications
+  :prefix "sexpdepthvis-")
 
-  (defun sexpdepthvis--enable ()
-    (add-hook 'post-command-hook 'sexpdepthvis--detect-point-moved nil t)
-    (sexpdepthvis-make-overlays))
+(defvar sexpdepthvis-mouse-mode-map
+  (let ((map (make-sparse-keymap)))
+    ;; Suppress undefined key bells when hovering over UI elements
+    (define-key map [tab-bar mouse-movement] #'ignore)
+    (define-key map [tool-bar mouse-movement] #'ignore)
+    (define-key map [mode-line mouse-movement] #'ignore)
+    (define-key map [header-line mouse-movement] #'ignore)
+    (define-key map [left-fringe mouse-movement] #'ignore)
+    (define-key map [right-fringe mouse-movement] #'ignore)
+    (define-key map [mouse-movement] #'sexpdepthvis--handle-mouse-movement)
+    map)
+  "Keymap for `sexpdepthvis-mouse-mode'.")
 
-  (defun sexpdepthvis--disable ()
-    (remove-hook 'post-command-hook 'sexpdepthvis--detect-point-moved t)
-    (sexpdepthvis-clear-overlays))
+(define-minor-mode sexpdepthvis-mode
+  "Toggle sexpdepthvis-mode."
+  :group 'sexpdepthvis
+  :lighter " SexpDepthVis"
+  (if sexpdepthvis-mode
+    (sexpdepthvis-mode--enable)
+    (sexpdepthvis-mode--disable)))
 
-  (defun sexpdepthvis--detect-point-moved ()
-    (when (not (= (point) sexpdepthvis--last-point))
-       (setq sexpdepthvis--last-point (point))
-       (ignore-errors (sexpdepthvis-make-overlays))))
+(defun sexpdepthvis-mode--enable ()
+  (add-hook 'post-command-hook 'sexpdepthvis--detect-point-moved nil t)
+  (sexpdepthvis))
 
-  (defun sexpdepthvis-clear-overlays ()
-    (interactive)
-    (dolist (overlay sexpdepthvis--overlays)
-      (delete-overlay overlay))
-    (setq sexpdepthvis--overlays '()))
+(defun sexpdepthvis-mode--disable ()
+  (remove-hook 'post-command-hook 'sexpdepthvis--detect-point-moved t)
+  (sexpdepthvis-clear-overlays))
 
-  (defun sexpdepthvis--count-char-faces (p)
-    (let ((faces (plist-get (text-properties-at p) 'face)))
-      (if faces
-        (if (listp faces)
-          (length faces)
-          1)
-        0)))
+(define-minor-mode sexpdepthvis-mouse-mode
+  "Toggle sexpdepthvis-mouse-mode."
+  :group 'sexpdepthvis
+  (if sexpdepthvis-mouse-mode
+    (sexpdepthvis-mouse-mode--enable)
+    (sexpdepthvis-mouse-mode--disable)))
 
-  (defun sexpdepthvis-make-overlays ()
-    (interactive)
+(defun sexpdepthvis-mouse-mode--enable ()
+  (setq sexpdepthvis--orig-track-mouse (buffer-local-value 'track-mouse (current-buffer)))
+  (setq-local track-mouse t))
 
-    (sexpdepthvis-clear-overlays)
-    (when-let* ((beg (point-min))
-                (end (point-max))
-                (contents (buffer-substring-no-properties beg end))
-                (mode (symbol-name major-mode))
-                (output-str (sexpdepthvis-generate (point) beg mode contents))
-                (output (read output-str))
-                (offset (plist-get output :offset))
-                (len (plist-get output :len))
-                (faces (plist-get output :faces))
-                (spans (plist-get output :spans))
-                (commented-face (plist-get output :commented-face))
-                (commented-ranges (plist-get output :commented-ranges))
-                (overlay-priority -1))
+(defun sexpdepthvis-mouse-mode--disable ()
+  (setq-local track-mouse sexpdepthvis--orig-track-mouse)
+  (sexpdepthvis-clear-overlays))
 
-      (seq-do (lambda (span)
-        (let* ((beg (nth 0 span))
-               (end (+ 1 (nth 1 span)))
-               (face-idx (nth 2 span))
-               (overlay (make-overlay beg end)))
-          (overlay-put overlay 'face (aref faces face-idx))
-          (push overlay sexpdepthvis--overlays)))
-        spans)
+(defun sexpdepthvis--handle-mouse-movement (event)
+  (interactive "e")
+  (let ((pos (posn-point (event-start event))))
+    (sexpdepthvis pos)))
 
-      (let* ((beg (nth 0 (aref spans 0)))
-             (i beg))
-        (while (< i (+ beg len))
-          (let* ((faces (plist-get (text-properties-at i) 'face)))
-            (when (and (listp faces) (> (length faces) 1))
-              (let ((len-faces (length faces))
-                    (beg i))
-                (while (= len-faces (sexpdepthvis--count-char-faces i))
-                  (setq i (1+ i)))
-                (let ((overlay (make-overlay beg i)))
-                  (overlay-put overlay 'face '(:weight bold))
-                  (push overlay sexpdepthvis--overlays)))))
-          (setq i (1+ i))))
+(defun sexpdepthvis--detect-point-moved ()
+  (when (not (= (point) sexpdepthvis--last-point))
+     (setq sexpdepthvis--last-point (point))
+     (ignore-errors (sexpdepthvis))))
 
-      (seq-do (lambda (range)
-        (let* ((beg (nth 0 range))
-               (end (1+ (nth 1 range)))
-               (overlay (make-overlay beg end)))
-          (overlay-put overlay 'face commented-face)
-          (push overlay sexpdepthvis--overlays)))
-        commented-ranges)))
+(defun sexpdepthvis-clear-overlays ()
+  (interactive)
+  (dolist (overlay sexpdepthvis--overlays)
+    (delete-overlay overlay))
+  (setq sexpdepthvis--overlays '()))
 
+(defun sexpdepthvis--count-char-faces (p)
+  (let ((faces (plist-get (text-properties-at p) 'face)))
+    (if faces
+      (if (listp faces)
+        (length faces)
+        1)
+      0)))
+
+(defun sexpdepthvis--make-overlay (beg end)
+  (let ((overlay (make-overlay beg end)))
+    (when sexpdepthvis-mouse-pointer
+      (overlay-put overlay 'pointer sexpdepthvis-mouse-pointer)
+    overlay)))
+
+(defun sexpdepthvis (&optional pos)
+  (interactive) ;; use "d" here?
+
+  (sexpdepthvis-clear-overlays)
+  (when-let* ((beg (point-min))
+              (end (point-max))
+              (contents (buffer-substring-no-properties beg end))
+              (mode (symbol-name major-mode))
+              (pos (or pos (point)))
+              (output-str (sexpdepthvis-generate pos beg mode contents))
+              (output (read output-str))
+              (offset (plist-get output :offset))
+              (faces (plist-get output :faces))
+              (spans (plist-get output :spans))
+              (commented-face (plist-get output :commented-face))
+              (commented-ranges (plist-get output :commented-ranges))
+              (span0 (aref spans 0))
+              (len (- (nth 1 span0) (nth 0 span0))))
+
+    (seq-do (lambda (span)
+      (let* ((beg (nth 0 span))
+             (end (+ 1 (nth 1 span)))
+             (face-idx (nth 2 span))
+             (overlay (sexpdepthvis--make-overlay beg end)))
+        (overlay-put overlay 'face (aref faces face-idx))
+        (push overlay sexpdepthvis--overlays)))
+      spans)
+
+    (let* ((beg (nth 0 span0))
+           (i beg))
+      (while (< i (+ beg len))
+        (let* ((faces (plist-get (text-properties-at i) 'face)))
+          (when (and (listp faces) (> (length faces) 1))
+            (let ((len-faces (length faces))
+                  (beg i))
+              (while (= len-faces (sexpdepthvis--count-char-faces i))
+                (setq i (1+ i)))
+              (let ((overlay (sexpdepthvis--make-overlay beg i)))
+                (overlay-put overlay 'face '(:weight bold))
+                (push overlay sexpdepthvis--overlays)))))
+        (setq i (1+ i))))
+
+    (seq-do (lambda (range)
+      (let* ((beg (nth 0 range))
+             (end (1+ (nth 1 range)))
+             (overlay (sexpdepthvis--make-overlay beg end)))
+        (overlay-put overlay 'face commented-face)
+        (push overlay sexpdepthvis--overlays)))
+      commented-ranges)))
 #+end_src
 
 *** Hydra

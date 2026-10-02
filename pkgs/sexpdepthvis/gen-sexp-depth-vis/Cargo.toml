@@ -1,0 +1,8 @@
+[package]
+name = "gen-sexp-depth-vis"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+sexpdepthvis = { path = "../sexpdepthvis" }
+anyhow = "1.0.104"

@@ -2,10 +2,17 @@
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
     emacs-overlay.url = "github:nix-community/emacs-overlay";
+    cargo2nix.url = "github:cargo2nix/cargo2nix/release-0.12";
     cargoMakedocs = {
       url = "github:Bunogi/cargo-makedocs";
       flake = false;
     };
+  };
+
+  nixConfig = {
+    extraOptions = ''
+      keep-outputs = true
+    '';
   };
 
   outputs =
@@ -29,9 +36,22 @@
       let
         pkgs = import nixpkgs {
           inherit system;
-          overlays = [ inputs.emacs-overlay.overlays.default ];
+          overlays = [
+            inputs.emacs-overlay.overlays.default
+            inputs.cargo2nix.overlays.default
+          ];
         };
         inherit (pkgs) lib stdenv;
+
+        localPkgs = {
+          sexp-depth-vis = (pkgs.callPackage ./pkgs/sexpdepthvis { });
+          # sexp-depth-vis = (
+          #   (pkgs.rustBuilder.makePackageSet {
+          #     rustChannel = "stable";
+          #     packageFun = import ./packages/sexp-depth-vis/Cargo.nix;
+          #   }).workspaceMembers.sexpdepthvis
+          # );
+        };
 
         #
         # Utility functions
@@ -89,57 +109,59 @@
         #
 
         emacsPackage = pkgs.emacs-pgtk;
-        envPackages = with pkgs; [
-          # Common
-          pkg-config
-          gcc
-          gdb
+        envPackages =
+          (builtins.attrValues localPkgs)
+          ++ (with pkgs; [
+            # Common
+            pkg-config
+            gcc
+            gdb
 
-          # SVGs
-          librsvg
+            # SVGs
+            librsvg
 
-          # Shell
-          shellcheck
-          shfmt
-          bash-language-server
+            # Shell
+            shellcheck
+            shfmt
+            bash-language-server
 
-          # Nix
-          nixfmt
+            # Nix
+            nixfmt
 
-          # Python
-          ty
-          ruff
-          python3
+            # Python
+            ty
+            ruff
+            python3
 
-          # Rust
-          rustc # Compiler
-          rust-analyzer # LSP
-          rustfmt # Formatting
-          clippy # Linting
-          cargo # Project management
-          cargo-edit # Dependency management
-          cargo-expand # Macro expansion
-          pandoc # Documentation
-          inputs.cargoMakedocs
-          ripgrep
-          fd
+            # Rust
+            rustc # Compiler
+            rust-analyzer # LSP
+            rustfmt # Formatting
+            clippy # Linting
+            cargo # Project management
+            cargo-edit # Dependency management
+            cargo-expand # Macro expansion
+            pandoc # Documentation
+            inputs.cargoMakedocs
+            ripgrep
+            fd
 
-          # Web
-          deno
-          prettier
-          djlint
-          vscode-langservers-extracted
-          emmet-ls
+            # Web
+            deno
+            prettier
+            djlint
+            vscode-langservers-extracted
+            emmet-ls
 
-          # Java
-          jdk17
+            # Java
+            jdk17
 
-          # LaTeX
-          texliveFull
+            # LaTeX
+            texliveFull
 
-          # English
-          ltex-ls-plus
-        ];
+            # English
+            ltex-ls-plus
+          ]);
 
         config = rec {
           file = ./config.org;
@@ -154,6 +176,8 @@
             fontSize = 12;
             font = "${fontFamily}-${toString fontSize}";
             exportCSS = toCSS ./export.scss;
+
+            sexpdepthvis = "${localPkgs.sexp-depth-vis}/lib/libsexpdepthvis.so";
           };
           output = substitute vars (tangle file);
         };
@@ -184,7 +208,7 @@
               });
               config = config.output;
               defaultInitFile = true;
-              extraEmacsPackages = epkgs: (customEmacsPackages epkgs);
+              extraEmacsPackages = epkgs: [ epkgs.use-package ] ++ (customEmacsPackages epkgs);
             }).overrideAttrs
               (_: {
                 meta.mainProgram = "emacs";

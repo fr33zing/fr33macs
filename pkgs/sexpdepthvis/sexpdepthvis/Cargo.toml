@@ -1,0 +1,15 @@
+[package]
+name = "sexpdepthvis"
+version = "0.1.0"
+edition = "2024"
+
+[lib]
+crate-type = ["cdylib", "lib"]
+
+[dependencies]
+anyhow = "1.0.104"
+catppuccin = "2.8.0"
+color-gradient = "0.1.3"
+emacs = "0.21.0"
+iterate-text = "0.0.1"
+lazy_static = "1.5.0"

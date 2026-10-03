@@ -34,8 +34,6 @@ impl Input {
         let OffsetContents { offset, contents } = if major_mode != "org-mode" {
             OffsetContents { offset, contents }
         } else {
-            println!("{}", 123123);
-            println!("{}", contents);
             Self::org_src_block_contents_from_string(point, offset, contents)?
         };
 

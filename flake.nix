@@ -45,12 +45,6 @@
 
         localPkgs = {
           sexp-depth-vis = (pkgs.callPackage ./pkgs/sexpdepthvis { });
-          # sexp-depth-vis = (
-          #   (pkgs.rustBuilder.makePackageSet {
-          #     rustChannel = "stable";
-          #     packageFun = import ./packages/sexp-depth-vis/Cargo.nix;
-          #   }).workspaceMembers.sexpdepthvis
-          # );
         };
 
         #

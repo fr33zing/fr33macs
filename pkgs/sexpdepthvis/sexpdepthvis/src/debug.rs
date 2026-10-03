@@ -1,7 +1,6 @@
-use crate::{
-    color::*,
-    parse::{ParseResult, Span},
-};
+use std::ops::Range;
+
+use crate::{color::*, parse::ParseResult};
 
 pub fn debug_spans(contents: &str, result: &ParseResult) -> anyhow::Result<()> {
     eprint!("\n----- SPAN DEBUG START ------\n");
@@ -9,17 +8,17 @@ pub fn debug_spans(contents: &str, result: &ParseResult) -> anyhow::Result<()> {
     let max_depth = result.max_depth();
 
     for (i, c) in contents.chars().enumerate() {
-        let mut enclosing_span = None::<&Span>;
+        let mut enclosing_span = None::<&Range<usize>>;
         for span in &result.spans {
-            if span.range.contains(&i) {
+            if span.contains(&i) {
                 enclosing_span = Some(span);
             }
         }
 
         let color = if c == '\n' {
             RESET
-        } else if let Some(span) = enclosing_span {
-            &span_color_term(span.depth, max_depth, false)
+        } else if enclosing_span.is_some() {
+            &span_color_term(i, max_depth, false)
         } else {
             RESET
         };

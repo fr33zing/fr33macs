@@ -5,13 +5,15 @@ pub mod parse;
 
 use std::{fmt::Write, ops::Range};
 
-use color::span_color_hex;
 use emacs::{defun, Env, Result, Value};
-use parse::{ParseResult, Span};
 
-use crate::{input::Input, parse::parse};
+use crate::{
+    color::span_color_hex,
+    input::Input,
+    parse::{parse, ParseResult},
+};
 
-emacs::plugin_is_GPL_compatible!(); // :)
+emacs::plugin_is_GPL_compatible!();
 
 #[emacs::module]
 fn init(env: &Env) -> Result<Value<'_>> {
@@ -29,18 +31,19 @@ fn generate(
     let input = Input::new(point, offset, &major_mode, contents)?;
     let mut result = parse(&input)?;
     result.apply_offset(input.offset);
-    let output = print_output(&result, input.contents.len(), input.offset)?;
+    let output = output(&result, input.offset)?;
 
     Ok(output)
 }
 
-fn print_output(result: &ParseResult, len: usize, offset: usize) -> Result<String> {
+pub fn output(result: &ParseResult, offset: usize) -> Result<String> {
     let mut s = String::new();
 
     // LIST OPEN
     write!(&mut s, "(")?;
 
-    write!(&mut s, ":offset {offset} :len {len}")?;
+    // OFFSET
+    write!(&mut s, ":offset {offset}")?;
 
     // FACES
     write!(&mut s, " :faces [")?;
@@ -57,20 +60,15 @@ fn print_output(result: &ParseResult, len: usize, offset: usize) -> Result<Strin
 
     // SPANS
     write!(&mut s, " :spans [")?;
-    for Span { range, depth } in &result.spans {
-        let Range { start, end } = range;
-        write!(&mut s, "({start} {end} {depth})")?;
+    for Range { start, end } in &result.spans {
+        write!(&mut s, "({start} . {end})")?;
     }
     write!(&mut s, "]")?;
 
     // COMMENT RANGES
-    write!(
-        &mut s,
-        " :commented-face (:inherit font-lock-comment-face :slant normal :weight normal)"
-    )?;
-    write!(&mut s, " :commented-ranges [")?;
-    for Range { start, end } in &result.commented_ranges {
-        write!(&mut s, "({start} {end})")?;
+    write!(&mut s, " :comments [")?;
+    for Range { start, end } in &result.comments {
+        write!(&mut s, "({start} . {end})")?;
     }
     write!(&mut s, "]")?;
 

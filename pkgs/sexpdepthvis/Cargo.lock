@@ -131,14 +131,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "3f9eec918d3f24069decb9af1554cad7c880e2da24a9afd88aca000531ab82c1"
 
 [[package]]
-name = "gen-sexp-depth-vis"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "sexpdepthvis",
-]
-
-[[package]]
 name = "ident_case"
 version = "1.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -191,6 +183,17 @@ name = "memchr"
 version = "2.8.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "cf8baf1c55e62ffcace7a9f06f4bd9cd3f0c4beb022d3b367256b91b87513d98"
+
+[[package]]
+name = "no-panic"
+version = "0.1.37"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "fc80370b4544f28ffa317e3c3474ee3ecbfe269196c01ae657d9f837a7d944a1"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn 3.0.6",
+]
 
 [[package]]
 name = "once_cell"
@@ -303,6 +306,15 @@ dependencies = [
  "emacs",
  "iterate-text",
  "lazy_static",
+ "no-panic",
+]
+
+[[package]]
+name = "sexpdepthvis-cli"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "sexpdepthvis",
 ]
 
 [[package]]

@@ -2099,11 +2099,7 @@ color support.
 (add-hook 'paredit-mode-hook #'my:enable-evil-move-beyond-eol)
 #+end_src
 
-*** Scope highlighter
-
-- TODO This file demonstrates how to capture mouse movement:
-  https://github.com/huangfeiyu/eldoc-mouse/blob/main/eldoc-mouse.el#L193
-- TODO maybe defvar-local?
+*** SexpDepthVis
 
 #+begin_src emacs-lisp
 (require 'sexpdepthvis (getnix "sexpdepthvis"))
@@ -2124,14 +2120,19 @@ color support.
 (defcustom sexpdepthvis-mouse-pointer 'arrow
   "When not nil, override mouse text hover pointer with this value.")
 
-(defface sexpdepthvis-comment
+(defcustom sexpdepthvis-emphasize-face-face-prefixes
+  ["font-lock" "highlight-quoted"]
+  "Emphasize characters in the overlay if they have a face with any of
+these prefixes.")
+
+(defface sexpdepthvis-comment-face
   '((t . (:inherit font-lock-comment-face
           :slant normal
           :weight normal)))
   "Face for comments within the sexpdepthvis overlay."
   :group 'sexpdepthvis)
 
-(defface sexpdepthvis-emphasize
+(defface sexpdepthvis-emphasize-face
   '((t . (:weight bold)))
   "Face for keywords, function names, etc. within the sexpdepthvis overlay."
   :group 'sexpdepthvis)
@@ -2197,13 +2198,15 @@ color support.
     (delete-overlay overlay))
   (setq sexpdepthvis--overlays '()))
 
-(defun sexpdepthvis--count-char-faces (p)
+(defun sexpdepthvis--emphasize-char-p (p)
   (let ((faces (plist-get (text-properties-at p) 'face)))
-    (if faces
-      (if (listp faces)
-        (length faces)
-        1)
-      0)))
+    (seq-find
+      (lambda (prefix)
+        (seq-find
+          (lambda (face)
+            (string-prefix-p prefix (symbol-name face)))
+          faces))
+        sexpdepthvis-emphasize-face-face-prefixes)))
 
 (defun sexpdepthvis--make-overlay (range face)
   (let ((overlay (make-overlay (car range) (cdr range))))
@@ -2228,30 +2231,30 @@ color support.
               (comments (plist-get output :comments))
               (span0 (aref spans 0))
               (len (- (car span0) (cdr span0))))
-
     ;; Apply colorful depth overlays
     (let ((i 0))
-      (seq-do (lambda (span)
-        (let ((overlay (sexpdepthvis--make-overlay span (aref faces i))))
-          (when (and (= i 0) sexpdepthvis-mouse-pointer)
-            (overlay-put overlay 'pointer sexpdepthvis-mouse-pointer))
-          (setq i (1+ i))))
+      (seq-do
+        (lambda (span)
+          (let ((overlay (sexpdepthvis--make-overlay span (aref faces i))))
+            (when (and (= i 0) sexpdepthvis-mouse-pointer)
+              (overlay-put overlay 'pointer sexpdepthvis-mouse-pointer))
+            (setq i (1+ i))))
         spans))
     ;; Emphasize text fontified by font-lock
     (let* ((i (car span0))
            (end (cdr span0)))
       (while (< i end)
-        (let ((len-faces (sexpdepthvis--count-char-faces i)))
-          (when (> len-faces 1)
-            (let ((beg i))
-              (setq i (1+ i))
-              (while (= len-faces (sexpdepthvis--count-char-faces i))
-                (setq i (1+ i)))
-              (sexpdepthvis--make-overlay (cons beg i) 'sexpdepthvis-emphasize))))
+        (when (sexpdepthvis--emphasize-char-p i)
+          (let ((beg i))
+            (setq i (1+ i))
+            (while (sexpdepthvis--emphasize-char-p i)
+              (setq i (1+ i)))
+            (sexpdepthvis--make-overlay (cons beg i) 'sexpdepthvis-emphasize-face)))
         (setq i (1+ i))))
     ;; Make comments look like comments again
-    (seq-do (lambda (range)
-        (sexpdepthvis--make-overlay range 'sexpdepthvis-comment))
+    (seq-do
+      (lambda (range)
+        (sexpdepthvis--make-overlay range 'sexpdepthvis-comment-face))
       comments)))
 #+end_src
 

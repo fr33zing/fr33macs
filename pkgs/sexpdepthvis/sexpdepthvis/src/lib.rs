@@ -1,60 +1,73 @@
 pub mod color;
+pub mod config;
 pub mod debug;
 pub mod input;
 pub mod parse;
 
 use std::{fmt::Write, ops::Range};
 
-use emacs::{defun, Env, Result, Value};
+use emacs::{defun, Env, Result};
 
 use crate::{
     color::span_color_hex,
+    config::Config,
+    config::OverlayStyle,
     input::Input,
     parse::{parse, ParseResult},
 };
 
 emacs::plugin_is_GPL_compatible!();
 
-#[emacs::module]
-fn init(env: &Env) -> Result<Value<'_>> {
-    env.message("Loaded sexpdepthvis.")
+#[emacs::module(separator = "--")]
+fn init(_: &Env) -> Result<()> {
+    Ok(())
 }
 
 #[defun]
 fn generate(
-    _env: &Env,
+    configuration: &Config,
     point: usize,
     offset: usize,
     major_mode: String,
     contents: String,
 ) -> Result<String> {
+    //env.call("sexpdepthvis--init", &[])?;
+
     let input = Input::new(point, offset, &major_mode, contents)?;
     let mut result = parse(&input)?;
     result.apply_offset(input.offset);
-    let output = output(&result, input.offset)?;
+    let output = output(&configuration, &input, &result)?;
 
     Ok(output)
 }
 
-pub fn output(result: &ParseResult, offset: usize) -> Result<String> {
+pub fn output(configuration: &Config, input: &Input, result: &ParseResult) -> Result<String> {
     let mut s = String::new();
 
     // LIST OPEN
     write!(&mut s, "(")?;
 
     // OFFSET
-    write!(&mut s, ":offset {offset}")?;
+    write!(&mut s, ":offset {}", input.offset)?;
 
     // FACES
     write!(&mut s, " :faces [")?;
     let max_depth = result.max_depth();
     for i in 0..=max_depth {
-        let fg_color = span_color_hex(i, max_depth, false);
-        let bg_color = span_color_hex(i, max_depth, true);
-        write!(
-            &mut s,
-            r#"(:foreground "{fg_color}" :background "{bg_color}" :extend t)"#
-        )?;
+        let fg = span_color_hex(i, max_depth, &configuration.foreground_colors);
+        let bg = span_color_hex(i, max_depth, &configuration.background_colors);
+        match configuration.overlay_style {
+            OverlayStyle::Both => {
+                write!(&mut s, r#"(:foreground "{fg}" :background "{bg}" "#)?;
+            }
+            OverlayStyle::Foreground => {
+                write!(&mut s, r#"(:foreground "{fg}" "#)?;
+            }
+            OverlayStyle::Background => {
+                write!(&mut s, r#"(:background "{bg}" "#)?;
+            }
+        };
+        write!(&mut s, ":extend t)")?;
     }
     write!(&mut s, "]")?;
 

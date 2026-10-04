@@ -42,6 +42,7 @@ pub fn parse(input: &Input) -> Result<ParseResult> {
         point,
         offset,
         contents,
+        ..
     } = input;
 
     let point = point - offset;

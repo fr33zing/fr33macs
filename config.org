@@ -11,8 +11,6 @@ Read this document in this repository's github.io page or in Emacs for the best 
 
 * TODO ASAP
 
-** https://crates.io/crates/emacs
-
 - SUBLIMITY MODE NEEDS TO GO
   Replace with something from here:
   https://stackoverflow.com/questions/24955253/centre-emacs-buffer-within-window
@@ -2101,29 +2099,38 @@ color support.
 
 *** SexpDepthVis
 
-#+begin_src emacs-lisp
-(require 'sexpdepthvis (getnix "sexpdepthvis"))
-;;(require 'sexpdepthvis (concat (getenv "HOME") "/code/sexpdepthvis/target/release/libsexpdepthvis.so") t)
+- TODO Add per-face remapping in emphasize faces (alist)
 
+#+begin_src emacs-lisp
 (defgroup sexpdepthvis nil
   "Tool for visualizing S-expression depth at point or mouse position."
   :group 'applications
   :prefix "sexpdepthvis-")
 
+(defvar-local sexpdepthvis--configuration nil)
 (defvar-local sexpdepthvis--overlays '())
 (defvar-local sexpdepthvis--last-point 0)
 (defvar-local sexpdepthvis--orig-track-mouse nil)
 
-(defcustom sexpdepthvis-overlay-priority -25
-  "Overlay priority.")
-
 (defcustom sexpdepthvis-mouse-pointer 'arrow
   "When not nil, override mouse text hover pointer with this value.")
 
-(defcustom sexpdepthvis-emphasize-face-face-prefixes
+(defcustom sexpdepthvis-emphasize-faces
   ["font-lock" "highlight-quoted"]
   "Emphasize characters in the overlay if they have a face with any of
 these prefixes.")
+
+(defcustom sexpdepthvis-overlay-priority -25
+  "Overlay priority.")
+
+(defcustom sexpdepthvis-overlay-style 'both
+  "What style of overlay should be applied.
+
+Options: both (default), foreground, background")
+
+(defcustom sexpdepthvis-overlay-background-opacity 0.15
+  "Background opacity. Don't set this to 0 as a way to disable the
+background, use `sexpdepthvis-overlay-style'.")
 
 (defface sexpdepthvis-comment-face
   '((t . (:inherit font-lock-comment-face
@@ -2157,6 +2164,24 @@ these prefixes.")
   (if sexpdepthvis-mode
     (sexpdepthvis-mode--enable)
     (sexpdepthvis-mode--disable)))
+
+(defun sexpdepthvis-reconfigure ()
+  "Reload the configuration for the current buffer.
+
+Call this after modifying configuration variables if the changes aren't
+immediately reflected."
+  (interactive)
+  (sexpdepthvis-clear-overlays)
+  (sexpdepthvis--init))
+
+(defun sexpdepthvis--sync-configuration ()
+  (let* ((buffer-bg-face (if (eq major-mode 'org-mode) 'org-block 'default))
+         (buffer-bg (face-attribute buffer-bg-face :background)))
+    (setq sexpdepthvis--configuration
+      (sexpdepthvis--configure
+        sexpdepthvis-overlay-style
+        buffer-bg
+        sexpdepthvis-overlay-background-opacity))))
 
 (defun sexpdepthvis-mode--enable ()
   (add-hook 'post-command-hook 'sexpdepthvis--detect-point-moved nil t)
@@ -2206,7 +2231,7 @@ these prefixes.")
           (lambda (face)
             (string-prefix-p prefix (symbol-name face)))
           faces))
-        sexpdepthvis-emphasize-face-face-prefixes)))
+        sexpdepthvis-emphasize-faces)))
 
 (defun sexpdepthvis--make-overlay (range face)
   (let ((overlay (make-overlay (car range) (cdr range))))
@@ -2216,14 +2241,19 @@ these prefixes.")
     (push overlay sexpdepthvis--overlays)
     overlay))
 
-(defun sexpdepthvis (pos)
-  (interactive "d")
-  (sexpdepthvis-clear-overlays)
+(defun sexpdepthvis--here (pos)
   (when-let* ((beg (point-min))
               (end (point-max))
               (contents (buffer-substring-no-properties beg end))
-              (mode (symbol-name major-mode))
-              (output-str (sexpdepthvis-generate pos beg mode contents))
+              (mode (symbol-name major-mode)))
+    (unless sexpdepthvis--configuration
+      (sexpdepthvis--sync-configuration))
+    (sexpdepthvis--generate sexpdepthvis--configuration pos beg mode contents)))
+
+(defun sexpdepthvis (pos)
+  (interactive "d")
+  (sexpdepthvis-clear-overlays)
+  (when-let* ((output-str (sexpdepthvis--here pos))
               (output (read output-str))
               (offset (plist-get output :offset))
               (faces (plist-get output :faces))
@@ -2256,6 +2286,10 @@ these prefixes.")
       (lambda (range)
         (sexpdepthvis--make-overlay range 'sexpdepthvis-comment-face))
       comments)))
+
+;;(require 'sexpdepthvis (getnix "sexpdepthvis"))
+(require 'sexpdepthvis (concat (getenv "HOME") "/code/sexpdepthvis/target/release/libsexpdepthvis.so") t)
+;;(eval-after-load 'sexpdepthvis (sexpdepthvis--init))
 #+end_src
 
 *** Hydra

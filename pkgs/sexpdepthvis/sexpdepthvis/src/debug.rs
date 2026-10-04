@@ -1,8 +1,12 @@
 use std::ops::Range;
 
-use crate::{color::*, parse::ParseResult};
+use crate::{color::*, config::Config, parse::ParseResult};
 
-pub fn debug_spans(contents: &str, result: &ParseResult) -> anyhow::Result<()> {
+pub fn debug_spans(
+    configuration: &Config,
+    contents: &str,
+    result: &ParseResult,
+) -> anyhow::Result<()> {
     eprint!("\n----- SPAN DEBUG START ------\n");
 
     let max_depth = result.max_depth();
@@ -18,7 +22,7 @@ pub fn debug_spans(contents: &str, result: &ParseResult) -> anyhow::Result<()> {
         let color = if c == '\n' {
             RESET
         } else if enclosing_span.is_some() {
-            &span_color_term(i, max_depth, false)
+            &span_color_term(i, max_depth, &configuration.foreground_colors)
         } else {
             RESET
         };

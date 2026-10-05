@@ -9,7 +9,6 @@ use std::{fmt::Write, ops::Range};
 use emacs::{defun, Env, Result};
 
 use crate::{
-    color::span_color_hex,
     config::Config,
     config::OverlayStyle,
     input::Input,
@@ -31,8 +30,6 @@ fn generate(
     major_mode: String,
     contents: String,
 ) -> Result<String> {
-    //env.call("sexpdepthvis--init", &[])?;
-
     let input = Input::new(point, offset, &major_mode, contents)?;
     let mut result = parse(&input)?;
     result.apply_offset(input.offset);
@@ -54,8 +51,8 @@ pub fn output(configuration: &Config, input: &Input, result: &ParseResult) -> Re
     write!(&mut s, " :faces [")?;
     let max_depth = result.max_depth();
     for i in 0..=max_depth {
-        let fg = span_color_hex(i, max_depth, &configuration.foreground_colors);
-        let bg = span_color_hex(i, max_depth, &configuration.background_colors);
+        let fg = configuration.foreground_colors.for_span_hex(i, max_depth);
+        let bg = configuration.background_colors.for_span_hex(i, max_depth);
         match configuration.overlay_style {
             OverlayStyle::Both => {
                 write!(&mut s, r#"(:foreground "{fg}" :background "{bg}" "#)?;

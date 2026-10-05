@@ -1,6 +1,6 @@
-use emacs::{defun, FromLisp, Result, Value};
+use emacs::{defun, FromLisp, Result, Value, Vector};
 
-use crate::color::{ColorConfig, FG_COLORS};
+use crate::color::{interpolate_colors, Color, ColorSet};
 
 emacs::use_symbols! {
     foreground background
@@ -33,24 +33,28 @@ impl<'e> FromLisp<'e> for OverlayStyle {
 
 #[derive(Debug)]
 pub struct Config {
-    pub foreground_colors: ColorConfig,
-    pub background_colors: ColorConfig,
+    pub foreground_colors: ColorSet,
+    pub background_colors: ColorSet,
     pub overlay_style: OverlayStyle,
 }
 
 #[defun(mod_in_name = false, user_ptr)]
 fn configure(
-    overlay_style: Value<'_>,
-    buffer_background: String,
-    background_opacity: Value<'_>,
+    overlay_colors: Vector,
+    buffer_background_color: Color,
+    background_opacity: f64,
+    cycle_colors: Value<'_>,
+    overlay_style: OverlayStyle,
 ) -> Result<Config> {
-    let background_opacity: f64 = background_opacity.into_rust()?;
-    let foreground_colors = ColorConfig::new(FG_COLORS.to_vec(), None)?;
-    let background_colors = ColorConfig::new(
-        FG_COLORS.to_vec(),
-        Some((buffer_background, background_opacity)),
-    )?;
-    let overlay_style: OverlayStyle = overlay_style.into_rust()?;
+    let mut colors = overlay_colors
+        .into_iter()
+        .map(|val| val.into_rust().unwrap_or_default())
+        .collect::<Vec<Color>>();
+
+    let cycle_colors = cycle_colors.is_not_nil();
+    let foreground_colors = ColorSet::new(colors.clone(), cycle_colors)?;
+    interpolate_colors(&mut colors, buffer_background_color, background_opacity);
+    let background_colors = ColorSet::new(colors, cycle_colors)?;
 
     let config = Config {
         foreground_colors,

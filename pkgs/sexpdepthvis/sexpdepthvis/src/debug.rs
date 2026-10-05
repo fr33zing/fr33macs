@@ -22,7 +22,7 @@ pub fn debug_spans(
         let color = if c == '\n' {
             RESET
         } else if enclosing_span.is_some() {
-            &span_color_term(i, max_depth, &configuration.foreground_colors)
+            &configuration.foreground_colors.for_span_ansi(i, max_depth)
         } else {
             RESET
         };

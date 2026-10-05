@@ -11,6 +11,8 @@ Read this document in this repository's github.io page or in Emacs for the best 
 
 * TODO ASAP
 
+- Add widen bind
+- Make shift+K scroll doc window on repeat
 - SUBLIMITY MODE NEEDS TO GO
   Replace with something from here:
   https://stackoverflow.com/questions/24955253/centre-emacs-buffer-within-window
@@ -2123,10 +2125,17 @@ these prefixes.")
 (defcustom sexpdepthvis-overlay-priority -25
   "Overlay priority.")
 
+(defcustom sexpdepthvis-overlay-colors
+  ["#ed8796" "#f5a97f" "#eed49f" "#a6da95" "#7dc4e4" "#c6a0f6" "#f5bde6"]
+  "Set of colors to use for overlay coloration.")
+
 (defcustom sexpdepthvis-overlay-style 'both
   "What style of overlay should be applied.
 
 Options: both (default), foreground, background")
+
+(defcustom sexpdepthvis-overlay-cycle-colors nil
+  "If non-nil, cycle colors instead of interpolating when very deep.")
 
 (defcustom sexpdepthvis-overlay-background-opacity 0.15
   "Background opacity. Don't set this to 0 as a way to disable the
@@ -2172,20 +2181,27 @@ Call this after modifying configuration variables if the changes aren't
 immediately reflected."
   (interactive)
   (sexpdepthvis-clear-overlays)
-  (sexpdepthvis--init))
+  (sexpdepthvis--update-configuration))
 
-(defun sexpdepthvis--sync-configuration ()
-  (let* ((buffer-bg-face (if (eq major-mode 'org-mode) 'org-block 'default))
-         (buffer-bg (face-attribute buffer-bg-face :background)))
+(defun sexpdepthvis--default-face-background-color ()
+  (let* ((face (if (eq major-mode 'org-mode) 'org-block 'default))
+         (background (face-attribute face :background)))
+    (color-values background)))
+
+(defun sexpdepthvis--update-configuration ()
+  (let* ((overlay-colors (cl-map 'vector #'color-values sexpdepthvis-overlay-colors))
+         (buffer-background-color (sexpdepthvis--default-face-background-color)))
     (setq sexpdepthvis--configuration
       (sexpdepthvis--configure
-        sexpdepthvis-overlay-style
-        buffer-bg
-        sexpdepthvis-overlay-background-opacity))))
+        overlay-colors
+        buffer-background-color
+        sexpdepthvis-overlay-background-opacity
+        sexpdepthvis-overlay-cycle-colors
+        sexpdepthvis-overlay-style))))
 
 (defun sexpdepthvis-mode--enable ()
   (add-hook 'post-command-hook 'sexpdepthvis--detect-point-moved nil t)
-  (sexpdepthvis (point)))
+  (ignore-errors (sexpdepthvis (point))))
 
 (defun sexpdepthvis-mode--disable ()
   (remove-hook 'post-command-hook 'sexpdepthvis--detect-point-moved t)
@@ -2217,12 +2233,6 @@ immediately reflected."
        (setq sexpdepthvis--last-point pos)
        (ignore-errors (sexpdepthvis pos)))))
 
-(defun sexpdepthvis-clear-overlays ()
-  (interactive)
-  (dolist (overlay sexpdepthvis--overlays)
-    (delete-overlay overlay))
-  (setq sexpdepthvis--overlays '()))
-
 (defun sexpdepthvis--emphasize-char-p (p)
   (let ((faces (plist-get (text-properties-at p) 'face)))
     (seq-find
@@ -2247,7 +2257,7 @@ immediately reflected."
               (contents (buffer-substring-no-properties beg end))
               (mode (symbol-name major-mode)))
     (unless sexpdepthvis--configuration
-      (sexpdepthvis--sync-configuration))
+      (sexpdepthvis--update-configuration))
     (sexpdepthvis--generate sexpdepthvis--configuration pos beg mode contents)))
 
 (defun sexpdepthvis (pos)
@@ -2287,9 +2297,14 @@ immediately reflected."
         (sexpdepthvis--make-overlay range 'sexpdepthvis-comment-face))
       comments)))
 
-;;(require 'sexpdepthvis (getnix "sexpdepthvis"))
-(require 'sexpdepthvis (concat (getenv "HOME") "/code/sexpdepthvis/target/release/libsexpdepthvis.so") t)
-;;(eval-after-load 'sexpdepthvis (sexpdepthvis--init))
+(defun sexpdepthvis-clear-overlays ()
+  (interactive)
+  (dolist (overlay sexpdepthvis--overlays)
+    (delete-overlay overlay))
+  (setq sexpdepthvis--overlays '()))
+
+(require 'sexpdepthvis (getnix "sexpdepthvis"))
+;;(require 'sexpdepthvis (concat (getenv "HOME") "/code/sexpdepthvis/target/release/libsexpdepthvis.so") t)
 #+end_src
 
 *** Hydra

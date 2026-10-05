@@ -6,3 +6,4 @@ edition = "2024"
 [dependencies]
 sexpdepthvis = { path = "../sexpdepthvis" }
 anyhow = "1.0.104"
+catppuccin = "2.8.0"
